@@ -32,14 +32,14 @@ export function LoginForm() {
     }
   };
 
-  const handleDemoLogin = async (role: "ADMIN" | "PM" | "MEMBER") => {
+  const handleDemoLogin = async (role: "ADMIN" | "PROJECT_MANAGER" | "MEMBER") => {
     setDemoLoading(true);
     setError("");
     
     // Mapping demo roles to preset emails
     const demoEmails = {
       ADMIN: "admin@demo.com",
-      PM: "pm@demo.com",
+      PROJECT_MANAGER: "pm@demo.com",
       MEMBER: "member@demo.com"
     };
 
@@ -113,7 +113,7 @@ export function LoginForm() {
           Demo Admin
         </button>
         <button 
-          onClick={() => handleDemoLogin("PM")}
+          onClick={() => handleDemoLogin("PROJECT_MANAGER")}
           disabled={loading || demoLoading}
           className="btn btn-outline w-full"
         >

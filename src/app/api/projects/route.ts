@@ -7,71 +7,107 @@ import { projectSchema } from "@/lib/validations";
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
+
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
 
     const where: any = {};
+
     if (search) {
-      where.name = { contains: search, mode: "insensitive" };
+      where.name = {
+        contains: search,
+        mode: "insensitive",
+      };
     }
+
     if (status) {
       where.status = status;
     }
-
-    // Role-based filtering
-    // ADMIN sees all projects
-    // PM sees projects they manage
-    // MEMBER sees projects where they have tasks assigned? Or maybe everyone sees all projects but can't edit.
-    // Let's assume everyone can view projects, but we'll include task counts.
 
     const projects = await prisma.project.findMany({
       where,
       include: {
         manager: {
-          select: { name: true, email: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
         _count: {
-          select: { tasks: true },
+          select: {
+            tasks: true,
+            members: true,
+          },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    return NextResponse.json(projects);
+    return NextResponse.json({
+      success: true,
+      data: projects,
+    });
   } catch (error) {
     console.error("GET Projects Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    if (session.user.role !== "ADMIN" && session.user.role !== "PM") {
-      return NextResponse.json({ message: "Forbidden: Not enough permissions" }, { status: 403 });
+    // ✅ FIXED ROLE CHECK (NO HARD CODE BUG)
+    const role = session.user.role;
+
+    if (role !== "ADMIN" && role !== "PROJECT_MANAGER") {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
-    const validatedData = projectSchema.safeParse(body);
 
-    if (!validatedData.success) {
+    const validated = projectSchema.safeParse(body);
+
+    if (!validated.success) {
       return NextResponse.json(
-        { message: "Invalid data", errors: validatedData.error.issues },
+        {
+          success: false,
+          message: "Validation failed",
+          errors: validated.error.issues,
+        },
         { status: 400 }
       );
     }
 
-    const { name, description, deadline, status } = validatedData.data;
+    const { name, description, deadline, status } = validated.data;
 
+    // ✅ CREATE PROJECT
     const project = await prisma.project.create({
       data: {
         name,
@@ -82,26 +118,39 @@ export async function POST(request: Request) {
       },
     });
 
-    // Create ProjectMember linking manager as PROJECT_MANAGER
+    // ✅ ADD AS PROJECT MEMBER (MANAGER ROLE)
     await prisma.projectMember.create({
       data: {
         userId: session.user.id,
         projectId: project.id,
-        role: 'PROJECT_MANAGER',
+        role: "PROJECT_MANAGER",
       },
     });
 
-    // Log Activity
+    // ✅ ACTIVITY LOG (FULL FIXED)
     await prisma.activityLog.create({
       data: {
         action: "PROJECT_CREATED",
-        details: `Project "${project.name}" was created.`,
+        details: `Project "${project.name}" created by ${session.user.name}`,
+        userId: session.user.id,
+        projectId: project.id,
       },
     });
 
-    return NextResponse.json(project, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Project created successfully",
+        data: project,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("POST Project Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

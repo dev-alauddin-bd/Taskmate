@@ -98,7 +98,7 @@ export function SignupForm() {
             onChange={(e) => setRole(e.target.value)}
           >
             <option value="MEMBER">Team Member</option>
-            <option value="PM">Project Manager</option>
+            <option value="PROJECT_MANAGER">Project Manager</option>
             <option value="ADMIN">Admin</option>
           </select>
         </div>

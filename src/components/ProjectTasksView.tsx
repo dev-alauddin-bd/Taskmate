@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { TaskForm } from "@/components/TaskForm";
+import { Modal } from "@/components/Modal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -37,7 +38,7 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
     <div className="mt-8 space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-[var(--foreground)]">Tasks</h2>
-        {(role === "ADMIN" || role === "PM") && (
+        {(role === "ADMIN" || role === "PROJECT_MANAGER") && (
           <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
             + Add Task
           </button>
@@ -100,7 +101,7 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
                       {task.assignee?.name || "Unassigned"}
                     </td>
                     <td className="p-4 text-right space-x-2">
-                      {(role === "ADMIN" || role === "PM") && (
+                      {(role === "ADMIN" || role === "PROJECT_MANAGER") && (
                         <button onClick={() => handleDeleteTask(task.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">
                           Delete
                         </button>
@@ -114,21 +115,9 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
         </div>
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[var(--surface)] w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-slide-up">
-            <div className="p-4 border-b border-[var(--border)] flex justify-between items-center">
-              <h3 className="font-semibold text-lg text-[var(--foreground)]">Create New Task</h3>
-              <button onClick={() => setShowModal(false)} className="text-[var(--text-muted)] hover:text-[var(--foreground)]">
-                ✕
-              </button>
-            </div>
-            <div className="p-6">
-              <TaskForm projectId={projectId} onCancel={() => setShowModal(false)} />
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create New Task">
+        <TaskForm projectId={projectId} onCancel={() => setShowModal(false)} />
+      </Modal>
     </div>
   );
 }

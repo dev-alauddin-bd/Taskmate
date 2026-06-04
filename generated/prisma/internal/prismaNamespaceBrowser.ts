@@ -179,9 +179,9 @@ export const ActivityLogScalarFieldEnum = {
   id: 'id',
   action: 'action',
   details: 'details',
-  entityType: 'entityType',
-  entityId: 'entityId',
   userId: 'userId',
+  projectId: 'projectId',
+  taskId: 'taskId',
   createdAt: 'createdAt'
 } as const
 

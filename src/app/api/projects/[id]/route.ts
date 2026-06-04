@@ -4,123 +4,235 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { projectSchema } from "@/lib/validations";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+// ========================
+// GET SINGLE PROJECT
+// ========================
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
 
-    const { id } = params;
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
-        manager: { select: { id: true, name: true, email: true } },
+        manager: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         tasks: {
           include: {
-            assignee: { select: { id: true, name: true, email: true } }
+            assignee: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
-          orderBy: { dueDate: "asc" }
-        }
-      }
+          orderBy: {
+            dueDate: "asc",
+          },
+        },
+        members: true,
+        _count: {
+          select: {
+            tasks: true,
+            members: true,
+          },
+        },
+      },
     });
 
     if (!project) {
-      return NextResponse.json({ message: "Project not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Project not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(project);
+    return NextResponse.json({
+      success: true,
+      data: project,
+    });
   } catch (error) {
     console.error("GET Project Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// ========================
+// UPDATE PROJECT
+// ========================
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
 
-    if (session.user.role !== "ADMIN" && session.user.role !== "PM") {
-      return NextResponse.json({ message: "Forbidden: Not enough permissions" }, { status: 403 });
-    }
-
-    const { id } = params;
-    const body = await request.json();
-    const validatedData = projectSchema.partial().safeParse(body);
-
-    if (!validatedData.success) {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { message: "Invalid data", errors: validatedData.error.issues },
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const role = session.user.role;
+
+    if (role !== "ADMIN" && role !== "PROJECT_MANAGER") {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const validated = projectSchema.partial().safeParse(body);
+
+    if (!validated.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Validation failed",
+          errors: validated.error.issues,
+        },
         { status: 400 }
       );
     }
 
-    const project = await prisma.project.findUnique({ where: { id } });
-    if (!project) {
-      return NextResponse.json({ message: "Project not found" }, { status: 404 });
+    const existing = await prisma.project.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false,
+          message: "Project not found" },
+        { status: 404 }
+      );
     }
 
-    const { name, description, deadline, status } = validatedData.data;
-
-    const updatedProject = await prisma.project.update({
+    const updated = await prisma.project.update({
       where: { id },
       data: {
-        ...(name && { name }),
-        ...(description !== undefined && { description }),
-        ...(deadline && { deadline: new Date(deadline) }),
-        ...(status && { status }),
+        ...(validated.data.name && { name: validated.data.name }),
+        ...(validated.data.description !== undefined && {
+          description: validated.data.description,
+        }),
+        ...(validated.data.deadline && {
+          deadline: new Date(validated.data.deadline),
+        }),
+        ...(validated.data.status && {
+          status: validated.data.status,
+        }),
       },
     });
 
+    // ✅ FIXED ACTIVITY LOG
     await prisma.activityLog.create({
       data: {
         action: "PROJECT_UPDATED",
-        details: `Project "${updatedProject.name}" was updated.`,
+        details: `Project "${updated.name}" updated by ${session.user.name}`,
+        userId: session.user.id,
+        projectId: updated.id,
       },
     });
 
-    return NextResponse.json(updatedProject);
+    return NextResponse.json({
+      success: true,
+      data: updated,
+    });
   } catch (error) {
     console.error("PUT Project Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+// ========================
+// DELETE PROJECT
+// ========================
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    if (session.user.role !== "ADMIN" && session.user.role !== "PM") {
-      return NextResponse.json({ message: "Forbidden: Not enough permissions" }, { status: 403 });
+    const role = session.user.role;
+
+    if (role !== "ADMIN" && role !== "PROJECT_MANAGER") {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
     }
 
-    const { id } = params;
-    const project = await prisma.project.findUnique({ where: { id } });
+    const project = await prisma.project.findUnique({
+      where: { id },
+    });
+
     if (!project) {
-      return NextResponse.json({ message: "Project not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: "Project not found" },
+        { status: 404 }
+      );
     }
 
     await prisma.project.delete({
       where: { id },
     });
 
+    // ✅ FIXED ACTIVITY LOG
     await prisma.activityLog.create({
       data: {
         action: "PROJECT_DELETED",
-        details: `Project "${project.name}" was deleted.`,
+        details: `Project "${project.name}" deleted by ${session.user.name}`,
+        userId: session.user.id,
+        projectId: project.id,
       },
     });
 
-    return NextResponse.json({ message: "Project deleted successfully" });
+    return NextResponse.json({
+      success: true,
+      message: "Project deleted successfully",
+    });
   } catch (error) {
     console.error("DELETE Project Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+
+    return NextResponse.json(
+      { success: false,
+        message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

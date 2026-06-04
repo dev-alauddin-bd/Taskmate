@@ -21,7 +21,7 @@ export const taskSchema = z.object({
     const inputDate = new Date(date);
     return inputDate >= today;
   }, {
-    message: "Please select a valid deadline (cannot be in the past).",
+    message: "Please select a valid deadline.",
   }),
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
   status: z.enum(["TODO", "IN_PROGRESS", "COMPLETED"]).default("TODO"),

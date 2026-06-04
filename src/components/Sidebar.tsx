@@ -15,7 +15,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] hidden md:flex flex-col shadow-sm z-10">
+    <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] hidden md:flex flex-col shadow-sm z-10 sticky top-0 h-screen">
       <div className="h-16 flex items-center px-6 border-b border-[var(--border)] shrink-0">
         <h2 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
           <CheckSquare className="w-6 h-6" />

@@ -26,21 +26,21 @@ export type AggregateActivityLog = {
 
 export type ActivityLogMinAggregateOutputType = {
   id: string | null
-  action: string | null
+  action: $Enums.ActivityAction | null
   details: string | null
-  entityType: string | null
-  entityId: string | null
   userId: string | null
+  projectId: string | null
+  taskId: string | null
   createdAt: Date | null
 }
 
 export type ActivityLogMaxAggregateOutputType = {
   id: string | null
-  action: string | null
+  action: $Enums.ActivityAction | null
   details: string | null
-  entityType: string | null
-  entityId: string | null
   userId: string | null
+  projectId: string | null
+  taskId: string | null
   createdAt: Date | null
 }
 
@@ -48,9 +48,9 @@ export type ActivityLogCountAggregateOutputType = {
   id: number
   action: number
   details: number
-  entityType: number
-  entityId: number
   userId: number
+  projectId: number
+  taskId: number
   createdAt: number
   _all: number
 }
@@ -60,9 +60,9 @@ export type ActivityLogMinAggregateInputType = {
   id?: true
   action?: true
   details?: true
-  entityType?: true
-  entityId?: true
   userId?: true
+  projectId?: true
+  taskId?: true
   createdAt?: true
 }
 
@@ -70,9 +70,9 @@ export type ActivityLogMaxAggregateInputType = {
   id?: true
   action?: true
   details?: true
-  entityType?: true
-  entityId?: true
   userId?: true
+  projectId?: true
+  taskId?: true
   createdAt?: true
 }
 
@@ -80,9 +80,9 @@ export type ActivityLogCountAggregateInputType = {
   id?: true
   action?: true
   details?: true
-  entityType?: true
-  entityId?: true
   userId?: true
+  projectId?: true
+  taskId?: true
   createdAt?: true
   _all?: true
 }
@@ -161,11 +161,11 @@ export type ActivityLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type ActivityLogGroupByOutputType = {
   id: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType: string | null
-  entityId: string | null
   userId: string | null
+  projectId: string | null
+  taskId: string | null
   createdAt: Date
   _count: ActivityLogCountAggregateOutputType | null
   _min: ActivityLogMinAggregateOutputType | null
@@ -192,24 +192,28 @@ export type ActivityLogWhereInput = {
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  action?: Prisma.StringFilter<"ActivityLog"> | string
+  action?: Prisma.EnumActivityActionFilter<"ActivityLog"> | $Enums.ActivityAction
   details?: Prisma.StringFilter<"ActivityLog"> | string
-  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  projectId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  taskId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
+  task?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
 }
 
 export type ActivityLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
-  entityType?: Prisma.SortOrderInput | Prisma.SortOrder
-  entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  taskId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  project?: Prisma.ProjectOrderByWithRelationInput
+  task?: Prisma.TaskOrderByWithRelationInput
 }
 
 export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
@@ -217,22 +221,24 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   OR?: Prisma.ActivityLogWhereInput[]
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
-  action?: Prisma.StringFilter<"ActivityLog"> | string
+  action?: Prisma.EnumActivityActionFilter<"ActivityLog"> | $Enums.ActivityAction
   details?: Prisma.StringFilter<"ActivityLog"> | string
-  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  projectId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  taskId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  project?: Prisma.XOR<Prisma.ProjectNullableScalarRelationFilter, Prisma.ProjectWhereInput> | null
+  task?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
 }, "id">
 
 export type ActivityLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
-  entityType?: Prisma.SortOrderInput | Prisma.SortOrder
-  entityId?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
+  projectId?: Prisma.SortOrderInput | Prisma.SortOrder
+  taskId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ActivityLogCountOrderByAggregateInput
   _max?: Prisma.ActivityLogMaxOrderByAggregateInput
@@ -244,80 +250,78 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   OR?: Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ActivityLogScalarWhereWithAggregatesInput | Prisma.ActivityLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
-  action?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  action?: Prisma.EnumActivityActionWithAggregatesFilter<"ActivityLog"> | $Enums.ActivityAction
   details?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
-  entityType?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
-  entityId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   userId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  projectId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  taskId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
 }
 
 export type ActivityLogCreateInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
   createdAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutActivitiesInput
+  project?: Prisma.ProjectCreateNestedOneWithoutActivityLogsInput
+  task?: Prisma.TaskCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
   userId?: string | null
+  projectId?: string | null
+  taskId?: string | null
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutActivitiesNestedInput
+  project?: Prisma.ProjectUpdateOneWithoutActivityLogsNestedInput
+  task?: Prisma.TaskUpdateOneWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogCreateManyInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
   userId?: string | null
+  projectId?: string | null
+  taskId?: string | null
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -335,9 +339,9 @@ export type ActivityLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
-  entityType?: Prisma.SortOrder
-  entityId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -345,9 +349,9 @@ export type ActivityLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
-  entityType?: Prisma.SortOrder
-  entityId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -355,9 +359,9 @@ export type ActivityLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
-  entityType?: Prisma.SortOrder
-  entityId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  projectId?: Prisma.SortOrder
+  taskId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -403,21 +407,109 @@ export type ActivityLogUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
 }
 
+export type ActivityLogCreateNestedManyWithoutProjectInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput> | Prisma.ActivityLogCreateWithoutProjectInput[] | Prisma.ActivityLogUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutProjectInput | Prisma.ActivityLogCreateOrConnectWithoutProjectInput[]
+  createMany?: Prisma.ActivityLogCreateManyProjectInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUncheckedCreateNestedManyWithoutProjectInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput> | Prisma.ActivityLogCreateWithoutProjectInput[] | Prisma.ActivityLogUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutProjectInput | Prisma.ActivityLogCreateOrConnectWithoutProjectInput[]
+  createMany?: Prisma.ActivityLogCreateManyProjectInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUpdateManyWithoutProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput> | Prisma.ActivityLogCreateWithoutProjectInput[] | Prisma.ActivityLogUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutProjectInput | Prisma.ActivityLogCreateOrConnectWithoutProjectInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutProjectInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutProjectInput[]
+  createMany?: Prisma.ActivityLogCreateManyProjectInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutProjectInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutProjectInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutProjectInput | Prisma.ActivityLogUpdateManyWithWhereWithoutProjectInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutProjectNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput> | Prisma.ActivityLogCreateWithoutProjectInput[] | Prisma.ActivityLogUncheckedCreateWithoutProjectInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutProjectInput | Prisma.ActivityLogCreateOrConnectWithoutProjectInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutProjectInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutProjectInput[]
+  createMany?: Prisma.ActivityLogCreateManyProjectInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutProjectInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutProjectInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutProjectInput | Prisma.ActivityLogUpdateManyWithWhereWithoutProjectInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type ActivityLogCreateNestedManyWithoutTaskInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput> | Prisma.ActivityLogCreateWithoutTaskInput[] | Prisma.ActivityLogUncheckedCreateWithoutTaskInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutTaskInput | Prisma.ActivityLogCreateOrConnectWithoutTaskInput[]
+  createMany?: Prisma.ActivityLogCreateManyTaskInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUncheckedCreateNestedManyWithoutTaskInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput> | Prisma.ActivityLogCreateWithoutTaskInput[] | Prisma.ActivityLogUncheckedCreateWithoutTaskInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutTaskInput | Prisma.ActivityLogCreateOrConnectWithoutTaskInput[]
+  createMany?: Prisma.ActivityLogCreateManyTaskInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUpdateManyWithoutTaskNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput> | Prisma.ActivityLogCreateWithoutTaskInput[] | Prisma.ActivityLogUncheckedCreateWithoutTaskInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutTaskInput | Prisma.ActivityLogCreateOrConnectWithoutTaskInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutTaskInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutTaskInput[]
+  createMany?: Prisma.ActivityLogCreateManyTaskInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutTaskInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutTaskInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutTaskInput | Prisma.ActivityLogUpdateManyWithWhereWithoutTaskInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutTaskNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput> | Prisma.ActivityLogCreateWithoutTaskInput[] | Prisma.ActivityLogUncheckedCreateWithoutTaskInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutTaskInput | Prisma.ActivityLogCreateOrConnectWithoutTaskInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutTaskInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutTaskInput[]
+  createMany?: Prisma.ActivityLogCreateManyTaskInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutTaskInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutTaskInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutTaskInput | Prisma.ActivityLogUpdateManyWithWhereWithoutTaskInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type EnumActivityActionFieldUpdateOperationsInput = {
+  set?: $Enums.ActivityAction
+}
+
 export type ActivityLogCreateWithoutUserInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
   createdAt?: Date | string
+  project?: Prisma.ProjectCreateNestedOneWithoutActivityLogsInput
+  task?: Prisma.TaskCreateNestedOneWithoutActivityLogsInput
 }
 
 export type ActivityLogUncheckedCreateWithoutUserInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
+  projectId?: string | null
+  taskId?: string | null
   createdAt?: Date | string
 }
 
@@ -452,47 +544,207 @@ export type ActivityLogScalarWhereInput = {
   OR?: Prisma.ActivityLogScalarWhereInput[]
   NOT?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
   id?: Prisma.StringFilter<"ActivityLog"> | string
-  action?: Prisma.StringFilter<"ActivityLog"> | string
+  action?: Prisma.EnumActivityActionFilter<"ActivityLog"> | $Enums.ActivityAction
   details?: Prisma.StringFilter<"ActivityLog"> | string
-  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
-  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  projectId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  taskId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
+}
+
+export type ActivityLogCreateWithoutProjectInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  createdAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutActivitiesInput
+  task?: Prisma.TaskCreateNestedOneWithoutActivityLogsInput
+}
+
+export type ActivityLogUncheckedCreateWithoutProjectInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  userId?: string | null
+  taskId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogCreateOrConnectWithoutProjectInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput>
+}
+
+export type ActivityLogCreateManyProjectInputEnvelope = {
+  data: Prisma.ActivityLogCreateManyProjectInput | Prisma.ActivityLogCreateManyProjectInput[]
+  skipDuplicates?: boolean
+}
+
+export type ActivityLogUpsertWithWhereUniqueWithoutProjectInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  update: Prisma.XOR<Prisma.ActivityLogUpdateWithoutProjectInput, Prisma.ActivityLogUncheckedUpdateWithoutProjectInput>
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutProjectInput, Prisma.ActivityLogUncheckedCreateWithoutProjectInput>
+}
+
+export type ActivityLogUpdateWithWhereUniqueWithoutProjectInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateWithoutProjectInput, Prisma.ActivityLogUncheckedUpdateWithoutProjectInput>
+}
+
+export type ActivityLogUpdateManyWithWhereWithoutProjectInput = {
+  where: Prisma.ActivityLogScalarWhereInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateManyMutationInput, Prisma.ActivityLogUncheckedUpdateManyWithoutProjectInput>
+}
+
+export type ActivityLogCreateWithoutTaskInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  createdAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutActivitiesInput
+  project?: Prisma.ProjectCreateNestedOneWithoutActivityLogsInput
+}
+
+export type ActivityLogUncheckedCreateWithoutTaskInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  userId?: string | null
+  projectId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogCreateOrConnectWithoutTaskInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput>
+}
+
+export type ActivityLogCreateManyTaskInputEnvelope = {
+  data: Prisma.ActivityLogCreateManyTaskInput | Prisma.ActivityLogCreateManyTaskInput[]
+  skipDuplicates?: boolean
+}
+
+export type ActivityLogUpsertWithWhereUniqueWithoutTaskInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  update: Prisma.XOR<Prisma.ActivityLogUpdateWithoutTaskInput, Prisma.ActivityLogUncheckedUpdateWithoutTaskInput>
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutTaskInput, Prisma.ActivityLogUncheckedCreateWithoutTaskInput>
+}
+
+export type ActivityLogUpdateWithWhereUniqueWithoutTaskInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateWithoutTaskInput, Prisma.ActivityLogUncheckedUpdateWithoutTaskInput>
+}
+
+export type ActivityLogUpdateManyWithWhereWithoutTaskInput = {
+  where: Prisma.ActivityLogScalarWhereInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateManyMutationInput, Prisma.ActivityLogUncheckedUpdateManyWithoutTaskInput>
 }
 
 export type ActivityLogCreateManyUserInput = {
   id?: string
-  action: string
+  action: $Enums.ActivityAction
   details: string
-  entityType?: string | null
-  entityId?: string | null
+  projectId?: string | null
+  taskId?: string | null
   createdAt?: Date | string
 }
 
 export type ActivityLogUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneWithoutActivityLogsNestedInput
+  task?: Prisma.TaskUpdateOneWithoutActivityLogsNestedInput
 }
 
 export type ActivityLogUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  action?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
   details?: Prisma.StringFieldUpdateOperationsInput | string
-  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogCreateManyProjectInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  userId?: string | null
+  taskId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogUpdateWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutActivitiesNestedInput
+  task?: Prisma.TaskUpdateOneWithoutActivityLogsNestedInput
+}
+
+export type ActivityLogUncheckedUpdateWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutProjectInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  taskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogCreateManyTaskInput = {
+  id?: string
+  action: $Enums.ActivityAction
+  details: string
+  userId?: string | null
+  projectId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogUpdateWithoutTaskInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutActivitiesNestedInput
+  project?: Prisma.ProjectUpdateOneWithoutActivityLogsNestedInput
+}
+
+export type ActivityLogUncheckedUpdateWithoutTaskInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutTaskInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.EnumActivityActionFieldUpdateOperationsInput | $Enums.ActivityAction
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  projectId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -502,68 +754,82 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   action?: boolean
   details?: boolean
-  entityType?: boolean
-  entityId?: boolean
   userId?: boolean
+  projectId?: boolean
+  taskId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   action?: boolean
   details?: boolean
-  entityType?: boolean
-  entityId?: boolean
   userId?: boolean
+  projectId?: boolean
+  taskId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   action?: boolean
   details?: boolean
-  entityType?: boolean
-  entityId?: boolean
   userId?: boolean
+  projectId?: boolean
+  taskId?: boolean
   createdAt?: boolean
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectScalar = {
   id?: boolean
   action?: boolean
   details?: boolean
-  entityType?: boolean
-  entityId?: boolean
   userId?: boolean
+  projectId?: boolean
+  taskId?: boolean
   createdAt?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "action" | "details" | "entityType" | "entityId" | "userId" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "action" | "details" | "userId" | "projectId" | "taskId" | "createdAt", ExtArgs["result"]["activityLog"]>
 export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }
 export type ActivityLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }
 export type ActivityLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+  project?: boolean | Prisma.ActivityLog$projectArgs<ExtArgs>
+  task?: boolean | Prisma.ActivityLog$taskArgs<ExtArgs>
 }
 
 export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ActivityLog"
   objects: {
     user: Prisma.$UserPayload<ExtArgs> | null
+    project: Prisma.$ProjectPayload<ExtArgs> | null
+    task: Prisma.$TaskPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    action: string
+    action: $Enums.ActivityAction
     details: string
-    entityType: string | null
-    entityId: string | null
     userId: string | null
+    projectId: string | null
+    taskId: string | null
     createdAt: Date
   }, ExtArgs["result"]["activityLog"]>
   composites: {}
@@ -960,6 +1226,8 @@ readonly fields: ActivityLogFieldRefs;
 export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.ActivityLog$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ActivityLog$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  project<T extends Prisma.ActivityLog$projectArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ActivityLog$projectArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  task<T extends Prisma.ActivityLog$taskArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ActivityLog$taskArgs<ExtArgs>>): Prisma.Prisma__TaskClient<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -990,11 +1258,11 @@ export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runt
  */
 export interface ActivityLogFieldRefs {
   readonly id: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly action: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly action: Prisma.FieldRef<"ActivityLog", 'ActivityAction'>
   readonly details: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly entityType: Prisma.FieldRef<"ActivityLog", 'String'>
-  readonly entityId: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly userId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly projectId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly taskId: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
 }
     
@@ -1413,6 +1681,44 @@ export type ActivityLog$userArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * ActivityLog.project
+ */
+export type ActivityLog$projectArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Project
+   */
+  select?: Prisma.ProjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Project
+   */
+  omit?: Prisma.ProjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProjectInclude<ExtArgs> | null
+  where?: Prisma.ProjectWhereInput
+}
+
+/**
+ * ActivityLog.task
+ */
+export type ActivityLog$taskArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Task
+   */
+  select?: Prisma.TaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Task
+   */
+  omit?: Prisma.TaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TaskInclude<ExtArgs> | null
+  where?: Prisma.TaskWhereInput
 }
 
 /**

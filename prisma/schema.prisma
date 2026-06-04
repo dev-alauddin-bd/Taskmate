@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -11,8 +6,6 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
-
 
 //////////////////////
 // ENUMS
@@ -42,28 +35,40 @@ enum TaskPriority {
   LOW
 }
 
+enum ActivityAction {
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_DELETED
+
+  TASK_COMPLETED
+
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_DELETED
+}
+
 //////////////////////
 // USER
 //////////////////////
 
 model User {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  password    String
-  role        Role     @default(MEMBER)
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(MEMBER)
 
   avatar      String?
   bio         String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean   @default(true)
   lastLoginAt DateTime?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relations
-  managedProjects Project[] @relation("ProjectManager")
-  assignedTasks   Task[]    @relation("TaskAssignee")
+  managedProjects Project[]       @relation("ProjectManager")
+  assignedTasks   Task[]          @relation("TaskAssignee")
   comments        Comment[]
   notifications   Notification[]
   activities      ActivityLog[]
@@ -82,38 +87,41 @@ model Project {
   status      ProjectStatus @default(ACTIVE)
   progress    Int           @default(0)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // manager
-  managerId   String
-  manager     User @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Cascade)
+  managerId String
+  manager   User @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Cascade)
 
   // relations
-  tasks       Task[]
-  members     ProjectMember[]
+  tasks        Task[]
+  members      ProjectMember[]
+  activityLogs ActivityLog[]
+
+  @@index([managerId])
 }
 
 //////////////////////
-// PROJECT MEMBER (MANY TO MANY)
+// PROJECT MEMBER
 //////////////////////
 
 model ProjectMember {
-  id        String @id @default(cuid())
+  id String @id @default(cuid())
 
   userId    String
   projectId String
 
-  role      Role   @default(MEMBER)
+  role Role @default(MEMBER)
 
-  joinedAt  DateTime @default(now())
+  joinedAt DateTime @default(now())
 
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, projectId]) // prevent duplicate member in same project
-  @@index([projectId])
+  @@unique([userId, projectId])
   @@index([userId])
+  @@index([projectId])
 }
 
 //////////////////////
@@ -121,14 +129,14 @@ model ProjectMember {
 //////////////////////
 
 model Task {
-  id          String @id @default(cuid())
+  id String @id @default(cuid())
 
   title       String
   description String?
 
-  dueDate     DateTime
-  priority    TaskPriority @default(MEDIUM)
-  status      TaskStatus    @default(TODO)
+  dueDate  DateTime
+  priority TaskPriority @default(MEDIUM)
+  status   TaskStatus   @default(TODO)
 
   estimatedHours Int?
   actualHours    Int?
@@ -145,15 +153,14 @@ model Task {
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   assigneeId String?
-  assignee   User? @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
 
-  comments   Comment[]
-  attachments Attachment[]
+  comments     Comment[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
 
-  // IMPORTANT: prevent duplicate task title in same project
   @@unique([title, projectId])
 
-  // indexes for performance
   @@index([projectId])
   @@index([assigneeId])
   @@index([status])
@@ -165,8 +172,8 @@ model Task {
 //////////////////////
 
 model Comment {
-  id        String @id @default(cuid())
-  content   String
+  id      String @id @default(cuid())
+  content String
 
   createdAt DateTime @default(now())
 
@@ -185,11 +192,11 @@ model Comment {
 //////////////////////
 
 model Attachment {
-  id        String @id @default(cuid())
+  id String @id @default(cuid())
 
-  fileName  String
-  fileUrl   String
-  fileType  String?
+  fileName String
+  fileUrl  String
+  fileType String?
 
   uploadedAt DateTime @default(now())
 
@@ -204,15 +211,14 @@ model Attachment {
 //////////////////////
 
 model Notification {
-  id      String @id @default(cuid())
+  id String @id @default(cuid())
 
   title   String
   message String
-
   isRead  Boolean @default(false)
 
-  userId  String
-  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -220,23 +226,28 @@ model Notification {
 }
 
 //////////////////////
-// ACTIVITY LOG
+// ACTIVITY LOG (FINAL FIXED)
 //////////////////////
 
 model ActivityLog {
-  id        String @id @default(cuid())
+  id String @id @default(cuid())
 
-  action    String
-  details   String
+  action  ActivityAction
+  details String
 
-  entityType String?
-  entityId   String?
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  userId    String?
-  user      User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  taskId String?
+  task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
   @@index([userId])
-  @@index([entityType])
+  @@index([projectId])
+  @@index([taskId])
+  @@index([createdAt])
 }

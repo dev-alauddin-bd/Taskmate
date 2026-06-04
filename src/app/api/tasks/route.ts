@@ -4,14 +4,22 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { taskSchema } from "@/lib/validations";
 
+// =====================
+// GET TASKS (FILTERED)
+// =====================
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
+
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
     const priority = searchParams.get("priority") || "";
@@ -19,24 +27,28 @@ export async function GET(request: Request) {
     const assigneeId = searchParams.get("assigneeId") || "";
 
     const where: any = {};
+
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
       ];
     }
-    if (status) {
-      where.status = status;
-    }
-    if (priority) {
-      where.priority = priority;
-    }
-    if (projectId) {
-      where.projectId = projectId;
-    }
-    if (assigneeId) {
-      where.assigneeId = assigneeId;
-    }
+
+    if (status) where.status = status;
+    if (priority) where.priority = priority;
+    if (projectId) where.projectId = projectId;
+    if (assigneeId) where.assigneeId = assigneeId;
 
     const tasks = await prisma.task.findMany({
       where,
@@ -49,32 +61,56 @@ export async function GET(request: Request) {
 
     return NextResponse.json(tasks);
   } catch (error) {
-    console.error("GET Tasks Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error("GET TASK ERROR:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
+// =====================
+// POST TASK (CREATE)
+// =====================
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
-    const validatedData = taskSchema.safeParse(body);
+    const parsed = taskSchema.safeParse(body);
 
-    if (!validatedData.success) {
+    if (!parsed.success) {
+      const firstErrorMessage = parsed.error.issues[0]?.message || "Invalid data";
       return NextResponse.json(
-        { message: "Invalid data", errors: validatedData.error.issues },
+        {
+          message: firstErrorMessage,
+          errors: parsed.error.issues,
+        },
         { status: 400 }
       );
     }
 
-    const { title, description, dueDate, priority, status, projectId, assigneeId } = validatedData.data;
+    const {
+      title,
+      description,
+      dueDate,
+      priority,
+      status,
+      projectId,
+      assigneeId,
+    } = parsed.data;
 
-    // Rule 1: Prevent duplicate task titles inside the same project
-    const existingTask = await prisma.task.findUnique({
+    // =========================
+    // DUPLICATE TASK CHECK
+    // =========================
+    const existing = await prisma.task.findUnique({
       where: {
         title_projectId: {
           title,
@@ -83,22 +119,18 @@ export async function POST(request: Request) {
       },
     });
 
-    if (existingTask) {
+    if (existing) {
       return NextResponse.json(
-        { message: "This task already exists in the project." },
+        {
+          message: "This task already exists in the project.",
+        },
         { status: 409 }
       );
     }
 
-    // Rule 3: Prevent assigning completed tasks (though on create it's rarely completed, but good to check if status is COMPLETED and assigneeId is set, or if they are setting it as completed on creation)
-    if (status === "COMPLETED" && assigneeId) {
-       // Requirement says: "Prevent assigning completed tasks" -> wait, does it mean changing assignment of a completed task, or assigning a task that is completed? 
-       // Usually it means: if task is completed, you cannot change assignee. If creating new, let's just enforce it too.
-       // Actually, the requirements are: "While creating/updating tasks: Prevent assigning completed tasks"
-       // "Completed tasks cannot be reassigned."
-       // So we don't need to block creation unless they create it as COMPLETED and assign someone in same request, which is weird but possible.
-    }
-
+    // =========================
+    // CREATE TASK
+    // =========================
     const task = await prisma.task.create({
       data: {
         title,
@@ -111,20 +143,28 @@ export async function POST(request: Request) {
       },
       include: {
         project: { select: { name: true } },
-      }
+      },
     });
 
-    // Log Activity
+    // =========================
+    // ACTIVITY LOG (FIXED)
+    // =========================
     await prisma.activityLog.create({
       data: {
         action: "TASK_CREATED",
-        details: `Task "${task.title}" was created in "${task.project.name}".`,
+        details: `Task "${task.title}" created in project "${task.project.name}"`,
+        taskId: task.id,
+        projectId: task.projectId,
+        userId: session.user.id,
       },
     });
 
     return NextResponse.json(task, { status: 201 });
   } catch (error) {
-    console.error("POST Task Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error("POST TASK ERROR:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

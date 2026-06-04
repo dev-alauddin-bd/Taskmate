@@ -1144,9 +1144,9 @@ export const ActivityLogScalarFieldEnum = {
   id: 'id',
   action: 'action',
   details: 'details',
-  entityType: 'entityType',
-  entityId: 'entityId',
   userId: 'userId',
+  projectId: 'projectId',
+  taskId: 'taskId',
   createdAt: 'createdAt'
 } as const
 
@@ -1285,6 +1285,20 @@ export type EnumTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'TaskStatus[]'
  */
 export type ListEnumTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ActivityAction'
+ */
+export type EnumActivityActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityAction'>
+    
+
+
+/**
+ * Reference to a field of type 'ActivityAction[]'
+ */
+export type ListEnumActivityActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ActivityAction[]'>
     
 
 

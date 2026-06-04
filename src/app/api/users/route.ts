@@ -6,38 +6,89 @@ import { authOptions } from "@/lib/auth";
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
+
     const search = searchParams.get("search") || "";
+    const role = searchParams.get("role") || "";
+    const page = Number(searchParams.get("page") || 1);
+    const limit = Number(searchParams.get("limit") || 10);
 
-    const where: any = {};
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ];
-    }
+    const skip = (page - 1) * limit;
 
-    const users = await prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        _count: {
-          select: { assignedTasks: true } // for workload summary
-        }
+    // =====================
+    // SAFE WHERE BUILDING
+    // =====================
+    const where: any = {
+      ...(role && { role }),
+      ...(search && {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
+      }),
+    };
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatar: true,
+          isActive: true,
+
+          _count: {
+            select: {
+              assignedTasks: true,
+              managedProjects: true,
+            },
+          },
+        },
+        orderBy: {
+          name: "asc",
+        },
+      }),
+
+      prisma.user.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      data: users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { name: "asc" },
     });
-
-    return NextResponse.json(users);
   } catch (error) {
-    console.error("GET Users Error:", error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+    console.error("GET USERS ERROR:", error);
+
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

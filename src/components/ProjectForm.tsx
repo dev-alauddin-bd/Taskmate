@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function ProjectForm() {
+export function ProjectForm({ onCancel, onSuccess }: { onCancel?: () => void; onSuccess?: () => void }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -29,8 +29,12 @@ export function ProjectForm() {
         throw new Error(data.message || "Failed to create project");
       }
 
-      router.push("/projects");
-      router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/projects");
+        router.refresh();
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -102,7 +106,7 @@ export function ProjectForm() {
         <button 
           type="button" 
           className="btn btn-outline" 
-          onClick={() => router.push("/projects")}
+          onClick={onCancel || (() => router.push("/projects"))}
           disabled={loading}
         >
           Cancel
