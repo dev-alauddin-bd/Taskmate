@@ -12,9 +12,9 @@ export default async function TeamPage() {
       email: true,
       role: true,
       _count: {
-        select: { tasks: true }
+        select: { assignedTasks: true }
       },
-      tasks: {
+      assignedTasks: {
         where: { status: "COMPLETED" }
       }
     },
@@ -22,7 +22,7 @@ export default async function TeamPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-6 p-4">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
           Team Members
@@ -47,8 +47,8 @@ export default async function TeamPage() {
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
               {teamMembers.map((member) => {
-                const totalTasks = member._count.tasks;
-                const completedTasks = member.tasks.length;
+                const totalTasks = member._count.assignedTasks;
+                const completedTasks = member.assignedTasks.length;
                 const pendingTasks = totalTasks - completedTasks;
 
                 return (
@@ -62,7 +62,7 @@ export default async function TeamPage() {
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-md text-xs font-medium ${
                         member.role === "ADMIN" ? "bg-[var(--danger)]/10 text-[var(--danger)]" :
-                        member.role === "PM" ? "bg-[var(--primary-light)] text-[var(--primary)]" :
+                        member.role === "PROJECT_MANAGER" ? "bg-[var(--primary-light)] text-[var(--primary)]" :
                         "bg-[var(--success)]/10 text-[var(--success)]"
                       }`}>
                         {member.role}

@@ -3,7 +3,13 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-
+import TasksByPriorityChart from "@/components/dashboard/TasksByPriorityChart";
+import ProjectProgressChart from "@/components/dashboard/ProjectProgressChart";
+import TeamProductivityChart from "@/components/dashboard/TeamProductivityChart";
+import TaskStatusChart from "@/components/dashboard/TaskStatusChart";
+import UpcomingDeadlinesCard from "@/components/dashboard/UpcomingDeadlinesCard";
+import HighPriorityBadge from "@/components/dashboard/HighPriorityBadge";
+import axios from "axios";
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
@@ -24,9 +30,9 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
     take: 5,
   });
-
+  const { data: chartData } = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/dashboard/charts`);
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto space-y-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
           Dashboard
@@ -57,6 +63,16 @@ export default async function DashboardPage() {
           <h3 className="text-sm font-medium text-[var(--text-muted)]">Overdue Tasks</h3>
           <div className="text-3xl font-bold text-[var(--foreground)]">{overdueTasks}</div>
         </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <TasksByPriorityChart data={chartData.tasksByPriority} />
+        <ProjectProgressChart data={chartData.projectProgress} />
+        <TeamProductivityChart data={chartData.teamProductivity} />
+        <TaskStatusChart data={chartData.taskStatusDistribution} />
+        <UpcomingDeadlinesCard data={chartData.upcomingDeadlines} />
+        <HighPriorityBadge count={chartData.highPriorityCount} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

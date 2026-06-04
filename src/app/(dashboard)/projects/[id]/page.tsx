@@ -12,7 +12,7 @@ export default async function ProjectDetailsPage({ params }: { params: { id?: st
     redirect("/login");
   }
 
-  const id = params?.id ?? "";
+  const { id } = await params;
   if (!id) {
     notFound();
     return null;

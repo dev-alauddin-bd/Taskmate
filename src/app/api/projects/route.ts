@@ -82,6 +82,15 @@ export async function POST(request: Request) {
       },
     });
 
+    // Create ProjectMember linking manager as PROJECT_MANAGER
+    await prisma.projectMember.create({
+      data: {
+        userId: session.user.id,
+        projectId: project.id,
+        role: 'PROJECT_MANAGER',
+      },
+    });
+
     // Log Activity
     await prisma.activityLog.create({
       data: {

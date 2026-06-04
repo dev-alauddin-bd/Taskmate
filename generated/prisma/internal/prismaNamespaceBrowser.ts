@@ -53,8 +53,11 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Project: 'Project',
+  ProjectMember: 'ProjectMember',
   Task: 'Task',
   Comment: 'Comment',
+  Attachment: 'Attachment',
+  Notification: 'Notification',
   ActivityLog: 'ActivityLog'
 } as const
 
@@ -80,6 +83,10 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   role: 'role',
+  avatar: 'avatar',
+  bio: 'bio',
+  isActive: 'isActive',
+  lastLoginAt: 'lastLoginAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -93,12 +100,24 @@ export const ProjectScalarFieldEnum = {
   description: 'description',
   deadline: 'deadline',
   status: 'status',
+  progress: 'progress',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   managerId: 'managerId'
 } as const
 
 export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
+
+
+export const ProjectMemberScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  projectId: 'projectId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type ProjectMemberScalarFieldEnum = (typeof ProjectMemberScalarFieldEnum)[keyof typeof ProjectMemberScalarFieldEnum]
 
 
 export const TaskScalarFieldEnum = {
@@ -108,6 +127,10 @@ export const TaskScalarFieldEnum = {
   dueDate: 'dueDate',
   priority: 'priority',
   status: 'status',
+  estimatedHours: 'estimatedHours',
+  actualHours: 'actualHours',
+  completedAt: 'completedAt',
+  attachmentUrl: 'attachmentUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   projectId: 'projectId',
@@ -128,10 +151,37 @@ export const CommentScalarFieldEnum = {
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
 
 
+export const AttachmentScalarFieldEnum = {
+  id: 'id',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileType: 'fileType',
+  uploadedAt: 'uploadedAt',
+  taskId: 'taskId'
+} as const
+
+export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  message: 'message',
+  isRead: 'isRead',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
 export const ActivityLogScalarFieldEnum = {
   id: 'id',
   action: 'action',
   details: 'details',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  userId: 'userId',
   createdAt: 'createdAt'
 } as const
 

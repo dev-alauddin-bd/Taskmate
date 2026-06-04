@@ -14,71 +14,229 @@ datasource db {
 
 
 
+//////////////////////
+// ENUMS
+//////////////////////
 
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("MEMBER") // ADMIN, PM, MEMBER
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  projects  Project[] @relation("ProjectManager")
-  tasks     Task[]    @relation("TaskAssignee")
-  comments  Comment[]
+enum Role {
+  ADMIN
+  PROJECT_MANAGER
+  MEMBER
 }
 
-model Project {
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+//////////////////////
+// USER
+//////////////////////
+
+model User {
   id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(MEMBER)
+
+  avatar      String?
+  bio         String?
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // relations
+  managedProjects Project[] @relation("ProjectManager")
+  assignedTasks   Task[]    @relation("TaskAssignee")
+  comments        Comment[]
+  notifications   Notification[]
+  activities      ActivityLog[]
+  memberships     ProjectMember[]
+}
+
+//////////////////////
+// PROJECT
+//////////////////////
+
+model Project {
+  id          String        @id @default(cuid())
   name        String
   description String?
   deadline    DateTime
-  status      String   @default("ACTIVE") // ACTIVE, COMPLETED, ON_HOLD
+  status      ProjectStatus @default(ACTIVE)
+  progress    Int           @default(0)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
+  // manager
   managerId   String
-  manager     User     @relation("ProjectManager", fields: [managerId], references: [id])
+  manager     User @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Cascade)
+
+  // relations
   tasks       Task[]
+  members     ProjectMember[]
 }
+
+//////////////////////
+// PROJECT MEMBER (MANY TO MANY)
+//////////////////////
+
+model ProjectMember {
+  id        String @id @default(cuid())
+
+  userId    String
+  projectId String
+
+  role      Role   @default(MEMBER)
+
+  joinedAt  DateTime @default(now())
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId]) // prevent duplicate member in same project
+  @@index([projectId])
+  @@index([userId])
+}
+
+//////////////////////
+// TASK
+//////////////////////
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String @id @default(cuid())
+
   title       String
   description String?
-  dueDate     DateTime
-  priority    String   @default("MEDIUM") // HIGH, MEDIUM, LOW
-  status      String   @default("TODO") // TODO, IN_PROGRESS, COMPLETED
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
-  assigneeId  String?
-  assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  
-  comments    Comment[]
-  
+  dueDate     DateTime
+  priority    TaskPriority @default(MEDIUM)
+  status      TaskStatus    @default(TODO)
+
+  estimatedHours Int?
+  actualHours    Int?
+
+  completedAt DateTime?
+
+  attachmentUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  assigneeId String?
+  assignee   User? @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  comments   Comment[]
+  attachments Attachment[]
+
+  // IMPORTANT: prevent duplicate task title in same project
   @@unique([title, projectId])
+
+  // indexes for performance
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([dueDate])
 }
+
+//////////////////////
+// COMMENT
+//////////////////////
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String @id @default(cuid())
   content   String
+
   createdAt DateTime @default(now())
-  
-  taskId    String
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  taskId String
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@index([userId])
 }
 
+//////////////////////
+// ATTACHMENT
+//////////////////////
+
+model Attachment {
+  id        String @id @default(cuid())
+
+  fileName  String
+  fileUrl   String
+  fileType  String?
+
+  uploadedAt DateTime @default(now())
+
+  taskId String
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+}
+
+//////////////////////
+// NOTIFICATION
+//////////////////////
+
+model Notification {
+  id      String @id @default(cuid())
+
+  title   String
+  message String
+
+  isRead  Boolean @default(false)
+
+  userId  String
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+//////////////////////
+// ACTIVITY LOG
+//////////////////////
+
 model ActivityLog {
-  id        String   @id @default(cuid())
+  id        String @id @default(cuid())
+
   action    String
   details   String
+
+  entityType String?
+  entityId   String?
+
+  userId    String?
+  user      User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType])
 }

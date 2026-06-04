@@ -28,6 +28,9 @@ export type ActivityLogMinAggregateOutputType = {
   id: string | null
   action: string | null
   details: string | null
+  entityType: string | null
+  entityId: string | null
+  userId: string | null
   createdAt: Date | null
 }
 
@@ -35,6 +38,9 @@ export type ActivityLogMaxAggregateOutputType = {
   id: string | null
   action: string | null
   details: string | null
+  entityType: string | null
+  entityId: string | null
+  userId: string | null
   createdAt: Date | null
 }
 
@@ -42,6 +48,9 @@ export type ActivityLogCountAggregateOutputType = {
   id: number
   action: number
   details: number
+  entityType: number
+  entityId: number
+  userId: number
   createdAt: number
   _all: number
 }
@@ -51,6 +60,9 @@ export type ActivityLogMinAggregateInputType = {
   id?: true
   action?: true
   details?: true
+  entityType?: true
+  entityId?: true
+  userId?: true
   createdAt?: true
 }
 
@@ -58,6 +70,9 @@ export type ActivityLogMaxAggregateInputType = {
   id?: true
   action?: true
   details?: true
+  entityType?: true
+  entityId?: true
+  userId?: true
   createdAt?: true
 }
 
@@ -65,6 +80,9 @@ export type ActivityLogCountAggregateInputType = {
   id?: true
   action?: true
   details?: true
+  entityType?: true
+  entityId?: true
+  userId?: true
   createdAt?: true
   _all?: true
 }
@@ -145,6 +163,9 @@ export type ActivityLogGroupByOutputType = {
   id: string
   action: string
   details: string
+  entityType: string | null
+  entityId: string | null
+  userId: string | null
   createdAt: Date
   _count: ActivityLogCountAggregateOutputType | null
   _min: ActivityLogMinAggregateOutputType | null
@@ -173,14 +194,22 @@ export type ActivityLogWhereInput = {
   id?: Prisma.StringFilter<"ActivityLog"> | string
   action?: Prisma.StringFilter<"ActivityLog"> | string
   details?: Prisma.StringFilter<"ActivityLog"> | string
+  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type ActivityLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  entityType?: Prisma.SortOrderInput | Prisma.SortOrder
+  entityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
@@ -190,13 +219,20 @@ export type ActivityLogWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ActivityLogWhereInput | Prisma.ActivityLogWhereInput[]
   action?: Prisma.StringFilter<"ActivityLog"> | string
   details?: Prisma.StringFilter<"ActivityLog"> | string
+  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type ActivityLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  entityType?: Prisma.SortOrderInput | Prisma.SortOrder
+  entityId?: Prisma.SortOrderInput | Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ActivityLogCountOrderByAggregateInput
   _max?: Prisma.ActivityLogMaxOrderByAggregateInput
@@ -210,6 +246,9 @@ export type ActivityLogScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   action?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
   details?: Prisma.StringWithAggregatesFilter<"ActivityLog"> | string
+  entityType?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  entityId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
+  userId?: Prisma.StringNullableWithAggregatesFilter<"ActivityLog"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ActivityLog"> | Date | string
 }
 
@@ -217,13 +256,19 @@ export type ActivityLogCreateInput = {
   id?: string
   action: string
   details: string
+  entityType?: string | null
+  entityId?: string | null
   createdAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutActivitiesInput
 }
 
 export type ActivityLogUncheckedCreateInput = {
   id?: string
   action: string
   details: string
+  entityType?: string | null
+  entityId?: string | null
+  userId?: string | null
   createdAt?: Date | string
 }
 
@@ -231,13 +276,19 @@ export type ActivityLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutActivitiesNestedInput
 }
 
 export type ActivityLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -245,6 +296,9 @@ export type ActivityLogCreateManyInput = {
   id?: string
   action: string
   details: string
+  entityType?: string | null
+  entityId?: string | null
+  userId?: string | null
   createdAt?: Date | string
 }
 
@@ -252,6 +306,8 @@ export type ActivityLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -259,13 +315,29 @@ export type ActivityLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   action?: Prisma.StringFieldUpdateOperationsInput | string
   details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogListRelationFilter = {
+  every?: Prisma.ActivityLogWhereInput
+  some?: Prisma.ActivityLogWhereInput
+  none?: Prisma.ActivityLogWhereInput
+}
+
+export type ActivityLogOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ActivityLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  entityType?: Prisma.SortOrder
+  entityId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -273,6 +345,9 @@ export type ActivityLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  entityType?: Prisma.SortOrder
+  entityId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -280,7 +355,145 @@ export type ActivityLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   action?: Prisma.SortOrder
   details?: Prisma.SortOrder
+  entityType?: Prisma.SortOrder
+  entityId?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+}
+
+export type ActivityLogCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput> | Prisma.ActivityLogCreateWithoutUserInput[] | Prisma.ActivityLogUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutUserInput | Prisma.ActivityLogCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.ActivityLogCreateManyUserInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUncheckedCreateNestedManyWithoutUserInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput> | Prisma.ActivityLogCreateWithoutUserInput[] | Prisma.ActivityLogUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutUserInput | Prisma.ActivityLogCreateOrConnectWithoutUserInput[]
+  createMany?: Prisma.ActivityLogCreateManyUserInputEnvelope
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+}
+
+export type ActivityLogUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput> | Prisma.ActivityLogCreateWithoutUserInput[] | Prisma.ActivityLogUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutUserInput | Prisma.ActivityLogCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutUserInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.ActivityLogCreateManyUserInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutUserInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutUserInput | Prisma.ActivityLogUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutUserNestedInput = {
+  create?: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput> | Prisma.ActivityLogCreateWithoutUserInput[] | Prisma.ActivityLogUncheckedCreateWithoutUserInput[]
+  connectOrCreate?: Prisma.ActivityLogCreateOrConnectWithoutUserInput | Prisma.ActivityLogCreateOrConnectWithoutUserInput[]
+  upsert?: Prisma.ActivityLogUpsertWithWhereUniqueWithoutUserInput | Prisma.ActivityLogUpsertWithWhereUniqueWithoutUserInput[]
+  createMany?: Prisma.ActivityLogCreateManyUserInputEnvelope
+  set?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  disconnect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  delete?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  connect?: Prisma.ActivityLogWhereUniqueInput | Prisma.ActivityLogWhereUniqueInput[]
+  update?: Prisma.ActivityLogUpdateWithWhereUniqueWithoutUserInput | Prisma.ActivityLogUpdateWithWhereUniqueWithoutUserInput[]
+  updateMany?: Prisma.ActivityLogUpdateManyWithWhereWithoutUserInput | Prisma.ActivityLogUpdateManyWithWhereWithoutUserInput[]
+  deleteMany?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+}
+
+export type ActivityLogCreateWithoutUserInput = {
+  id?: string
+  action: string
+  details: string
+  entityType?: string | null
+  entityId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogUncheckedCreateWithoutUserInput = {
+  id?: string
+  action: string
+  details: string
+  entityType?: string | null
+  entityId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogCreateOrConnectWithoutUserInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput>
+}
+
+export type ActivityLogCreateManyUserInputEnvelope = {
+  data: Prisma.ActivityLogCreateManyUserInput | Prisma.ActivityLogCreateManyUserInput[]
+  skipDuplicates?: boolean
+}
+
+export type ActivityLogUpsertWithWhereUniqueWithoutUserInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  update: Prisma.XOR<Prisma.ActivityLogUpdateWithoutUserInput, Prisma.ActivityLogUncheckedUpdateWithoutUserInput>
+  create: Prisma.XOR<Prisma.ActivityLogCreateWithoutUserInput, Prisma.ActivityLogUncheckedCreateWithoutUserInput>
+}
+
+export type ActivityLogUpdateWithWhereUniqueWithoutUserInput = {
+  where: Prisma.ActivityLogWhereUniqueInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateWithoutUserInput, Prisma.ActivityLogUncheckedUpdateWithoutUserInput>
+}
+
+export type ActivityLogUpdateManyWithWhereWithoutUserInput = {
+  where: Prisma.ActivityLogScalarWhereInput
+  data: Prisma.XOR<Prisma.ActivityLogUpdateManyMutationInput, Prisma.ActivityLogUncheckedUpdateManyWithoutUserInput>
+}
+
+export type ActivityLogScalarWhereInput = {
+  AND?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+  OR?: Prisma.ActivityLogScalarWhereInput[]
+  NOT?: Prisma.ActivityLogScalarWhereInput | Prisma.ActivityLogScalarWhereInput[]
+  id?: Prisma.StringFilter<"ActivityLog"> | string
+  action?: Prisma.StringFilter<"ActivityLog"> | string
+  details?: Prisma.StringFilter<"ActivityLog"> | string
+  entityType?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  entityId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  userId?: Prisma.StringNullableFilter<"ActivityLog"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"ActivityLog"> | Date | string
+}
+
+export type ActivityLogCreateManyUserInput = {
+  id?: string
+  action: string
+  details: string
+  entityType?: string | null
+  entityId?: string | null
+  createdAt?: Date | string
+}
+
+export type ActivityLogUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ActivityLogUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  action?: Prisma.StringFieldUpdateOperationsInput | string
+  details?: Prisma.StringFieldUpdateOperationsInput | string
+  entityType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  entityId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -289,39 +502,68 @@ export type ActivityLogSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   id?: boolean
   action?: boolean
   details?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  userId?: boolean
   createdAt?: boolean
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   action?: boolean
   details?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  userId?: boolean
   createdAt?: boolean
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   action?: boolean
   details?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  userId?: boolean
   createdAt?: boolean
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
 }, ExtArgs["result"]["activityLog"]>
 
 export type ActivityLogSelectScalar = {
   id?: boolean
   action?: boolean
   details?: boolean
+  entityType?: boolean
+  entityId?: boolean
+  userId?: boolean
   createdAt?: boolean
 }
 
-export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "action" | "details" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "action" | "details" | "entityType" | "entityId" | "userId" | "createdAt", ExtArgs["result"]["activityLog"]>
+export type ActivityLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+}
+export type ActivityLogIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+}
+export type ActivityLogIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  user?: boolean | Prisma.ActivityLog$userArgs<ExtArgs>
+}
 
 export type $ActivityLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ActivityLog"
-  objects: {}
+  objects: {
+    user: Prisma.$UserPayload<ExtArgs> | null
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     action: string
     details: string
+    entityType: string | null
+    entityId: string | null
+    userId: string | null
     createdAt: Date
   }, ExtArgs["result"]["activityLog"]>
   composites: {}
@@ -717,6 +959,7 @@ readonly fields: ActivityLogFieldRefs;
  */
 export interface Prisma__ActivityLogClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  user<T extends Prisma.ActivityLog$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ActivityLog$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -749,6 +992,9 @@ export interface ActivityLogFieldRefs {
   readonly id: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly action: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly details: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly entityType: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly entityId: Prisma.FieldRef<"ActivityLog", 'String'>
+  readonly userId: Prisma.FieldRef<"ActivityLog", 'String'>
   readonly createdAt: Prisma.FieldRef<"ActivityLog", 'DateTime'>
 }
     
@@ -766,6 +1012,10 @@ export type ActivityLogFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
   /**
    * Filter, which ActivityLog to fetch.
    */
@@ -785,6 +1035,10 @@ export type ActivityLogFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  /**
    * Filter, which ActivityLog to fetch.
    */
   where: Prisma.ActivityLogWhereUniqueInput
@@ -802,6 +1056,10 @@ export type ActivityLogFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
   /**
    * Filter, which ActivityLog to fetch.
    */
@@ -851,6 +1109,10 @@ export type ActivityLogFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  /**
    * Filter, which ActivityLog to fetch.
    */
   where?: Prisma.ActivityLogWhereInput
@@ -898,6 +1160,10 @@ export type ActivityLogFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
   /**
    * Filter, which ActivityLogs to fetch.
    */
@@ -947,6 +1213,10 @@ export type ActivityLogCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  /**
    * The data needed to create a ActivityLog.
    */
   data: Prisma.XOR<Prisma.ActivityLogCreateInput, Prisma.ActivityLogUncheckedCreateInput>
@@ -980,6 +1250,10 @@ export type ActivityLogCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.ActivityLogCreateManyInput | Prisma.ActivityLogCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -994,6 +1268,10 @@ export type ActivityLogUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
   /**
    * The data needed to update a ActivityLog.
    */
@@ -1046,6 +1324,10 @@ export type ActivityLogUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many ActivityLogs to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1060,6 +1342,10 @@ export type ActivityLogUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
   /**
    * The filter to search for the ActivityLog to update in case it exists.
    */
@@ -1087,6 +1373,10 @@ export type ActivityLogDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
+  /**
    * Filter which ActivityLog to delete.
    */
   where: Prisma.ActivityLogWhereUniqueInput
@@ -1107,6 +1397,25 @@ export type ActivityLogDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
+ * ActivityLog.user
+ */
+export type ActivityLog$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
  * ActivityLog without action
  */
 export type ActivityLogDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1118,4 +1427,8 @@ export type ActivityLogDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the ActivityLog
    */
   omit?: Prisma.ActivityLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ActivityLogInclude<ExtArgs> | null
 }

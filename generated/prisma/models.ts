@@ -10,7 +10,10 @@
  */
 export type * from './models/User'
 export type * from './models/Project'
+export type * from './models/ProjectMember'
 export type * from './models/Task'
 export type * from './models/Comment'
+export type * from './models/Attachment'
+export type * from './models/Notification'
 export type * from './models/ActivityLog'
 export type * from './commonInputTypes'
