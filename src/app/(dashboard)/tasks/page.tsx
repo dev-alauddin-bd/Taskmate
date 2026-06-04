@@ -3,9 +3,14 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
+import { redirect } from "next/navigation";
 
 export default async function TasksPage() {
   const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
 
   const tasks = await prisma.task.findMany({
     include: {

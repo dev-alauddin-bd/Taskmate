@@ -5,15 +5,21 @@ import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
 import { ProjectTasksView } from "@/components/ProjectTasksView";
 
-export default async function ProjectDetailsPage({ params }: { params: { projectId: string } }) {
+export default async function ProjectDetailsPage({ params }: { params: { id?: string } }) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
     redirect("/login");
   }
 
+  const id = params?.id ?? "";
+  if (!id) {
+    notFound();
+    return null;
+  }
+
   const project = await prisma.project.findUnique({
-    where: { id: params.projectId },
+    where: { id: String(id) },
     include: {
       manager: { select: { name: true } },
       tasks: {
@@ -27,6 +33,7 @@ export default async function ProjectDetailsPage({ params }: { params: { project
 
   if (!project) {
     notFound();
+    return null;
   }
 
   return (
