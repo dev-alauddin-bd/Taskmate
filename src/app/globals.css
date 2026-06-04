@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,15 +7,167 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root {
+  /* Premium Light Theme (Sleek SaaS Look) */
+  --background: #fafafb;
+  --surface: #ffffff;
+  --surface-hover: #f3f4f6;
+  --foreground: #111827;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+
+  /* Vibrant Brand Primary - Royal Violet/Indigo */
+  --primary: #6366f1;
+  --primary-light: #e0e7ff;
+  --primary-hover: #4f46e5;
+
+  /* Status Colors - Refined */
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+/* Dark theme variables – toggled via .dark-theme class */
+.dark-theme {
+  --background: #09090b;
+  --surface: #18181b;
+  --surface-hover: #27272a;
+  --foreground: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --border: #27272a;
+
+  /* Vibrant Brand Primary - Neon Violet */
+  --primary: #818cf8;
+  --primary-light: rgba(99, 102, 241, 0.15);
+  --primary-hover: #6366f1;
+
+  /* Status Colors - Refined for Dark */
+  --success: #34d399;
+  --danger: #f87171;
+  --warning: #fbbf24;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Premium Dark Theme (Linear-like deep dark) */
+    --background: #09090b;
+    --surface: #18181b;
+    --surface-hover: #27272a;
+    --foreground: #f4f4f5;
+    --text-muted: #a1a1aa;
+    --border: #27272a;
+
+    /* Vibrant Brand Primary - Neon Violet */
+    --primary: #818cf8;
+    --primary-light: rgba(99, 102, 241, 0.15);
+    --primary-hover: #6366f1;
+
+    /* Status Colors - Refined for Dark */
+    --success: #34d399;
+    --danger: #f87171;
+    --warning: #fbbf24;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Soft gradient background for a more dynamic feel */
+    background-image: radial-gradient(circle at top center, var(--surface-hover), transparent 80%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-xl font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95;
+  }
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-sm rounded-lg;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] text-white hover:shadow-lg hover:shadow-[var(--primary)]/20 focus:ring-[var(--primary)] border border-transparent;
+  }
+
+  .btn-outline {
+    @apply bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] hover:border-[var(--text-muted)] focus:ring-[var(--border)];
+  }
+
+  .input {
+    @apply w-full px-4 py-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/50 focus:border-[var(--primary)] transition-all duration-300 placeholder:text-[var(--text-muted)]/60 shadow-sm;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-[var(--foreground)] mb-1.5 tracking-tight;
+  }
+
+  .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--surface-hover);
+  transition: .4s;
+  border-radius: 34px;
+}
+.toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--primary);
+}
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+  .glass-panel {
+    @apply bg-[var(--surface)]/80 border border-[var(--border)]/50 backdrop-blur-xl shadow-lg shadow-black/5;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
