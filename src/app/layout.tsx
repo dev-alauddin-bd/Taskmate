@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Project & Task Collaboration",
-  description: "Manage your projects, tasks, and team.",
+  title: "Taskmate – Your Daily Task Companion",
+  description: "Manage your projects, tasks, and team with Taskmate.",
 };
 
 export default function RootLayout({

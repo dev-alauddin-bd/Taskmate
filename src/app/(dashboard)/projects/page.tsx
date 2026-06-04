@@ -10,8 +10,8 @@ import AddProjectButton from "@/components/dashboard/AddProjectButton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Projects – Teamora Dashboard",
-  description: "Manage your team's projects, view status, deadlines, and assign managers in the Teamora dashboard."
+  title: "Projects – Taskmate Dashboard",
+  description: "Manage your team's projects, view status, deadlines, and assign managers in the Taskmate dashboard."
 };
 
 export default async function ProjectsPage({
@@ -70,7 +70,7 @@ export default async function ProjectsPage({
   return (
     <div className="space-y-6">
       <DashboardHeader
-        title="Projects Management – Teamora Dashboard"
+        title="Projects Management – Taskmate Dashboard"
         subtitle="Manage all your team projects in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
       >
 
@@ -158,8 +158,8 @@ export default async function ProjectsPage({
           {
             header: "Status", accessor: (p: any) => (
               <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.status === "ACTIVE" ? "bg-[var(--primary-light)] text-[var(--primary)]" :
-                  p.status === "COMPLETED" ? "bg-[var(--success)]/10 text-[var(--success)]" :
-                    "bg-[var(--warning)]/10 text-[var(--warning)]"
+                p.status === "COMPLETED" ? "bg-[var(--success)]/10 text-[var(--success)]" :
+                  "bg-[var(--warning)]/10 text-[var(--warning)]"
                 }`}>
                 {p.status}
               </span>

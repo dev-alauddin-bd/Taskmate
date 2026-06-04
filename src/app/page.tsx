@@ -18,7 +18,7 @@ export default async function HomePage() {
       <header className="px-6 py-4 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <CheckSquare className="w-6 h-6 text-[var(--primary)]" />
-          <span className="text-xl font-bold tracking-tight">SmartTask</span>
+          <span className="text-xl font-bold tracking-tight">Taskmate</span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/login" className="text-sm font-medium hover:text-[var(--primary)] transition-colors">
@@ -89,7 +89,7 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t border-[var(--border)] py-8 text-center text-sm text-[var(--text-muted)]">
-        <p>&copy; {new Date().getFullYear()} SmartTask Collaboration System. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Taskmate – Your Daily Task Companion. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -98,7 +98,7 @@ export default async function TasksPage({
 
       {/* HEADER */}
       <DashboardHeader
-        title="Tasks Management – Teamora Dashboard"
+        title="Tasks Management – Taskmate Dashboard"
         subtitle="Track tasks, deadlines, priorities and assignments across all projects."
       />
 

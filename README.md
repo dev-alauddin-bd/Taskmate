@@ -1,12 +1,12 @@
-# Smart Project & Task Collaboration System (Teamora / SmartTask)
+# Smart Project & Task Collaboration System (Taskmate / SmartTask)
 
 Welcome to **SmartTask**, a modern, full-stack, enterprise-grade project and task collaboration platform. Built using Next.js 16, React 19, TailwindCSS, Prisma, and PostgreSQL, the application enables teams to manage projects, tasks, workloads, and real-time activities under role-based access control.
 
 ---
 
 ## 🚀 Live Demo & Repository
-- **GitHub Repository**: [GitHub Link](https://github.com/your-username/teamora-smarttask)
-- **Live Application URL**: [Vercel Deployment Link](https://teamora-smarttask.vercel.app)
+- **GitHub Repository**: [GitHub Link](https://github.com/your-username/Taskmate-)
+- **Live Application URL**: [Vercel Deployment Link](https://Taskmate-smarttask.vercel.app)
 
 ---
 
@@ -102,8 +102,8 @@ NODE_ENV="development"
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/teamora-smarttask.git
-   cd teamora-smarttask
+   git clone https://github.com/your-username/Taskmate-smarttask.git
+   cd Taskmate-smarttask
    ```
 
 2. **Install dependencies**:

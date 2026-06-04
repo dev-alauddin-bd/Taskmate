@@ -19,7 +19,7 @@ export function Sidebar() {
       <div className="h-16 flex items-center px-6 border-b border-[var(--border)] shrink-0">
         <h2 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
           <CheckSquare className="w-6 h-6" />
-          SmartTask
+          Taskmate
         </h2>
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">

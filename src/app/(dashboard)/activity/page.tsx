@@ -22,7 +22,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ActivityChart from "@/components/dashboard/ActivityChart";
 
 export const metadata: Metadata = {
-  title: "Activity Feed & Analytics – Teamora",
+  title: "Activity Feed & Analytics – Taskmate",
   description: "Monitor and analyze recent actions across the platform with detailed timeline visualizations.",
 };
 
@@ -126,9 +126,9 @@ export default async function ActivityPage() {
     activities.length === 0
       ? "No recent activities recorded."
       : `Latest updates showcase ${activities
-          .slice(0, 4)
-          .map((a) => a.details)
-          .join(", and ")}.`;
+        .slice(0, 4)
+        .map((a) => a.details)
+        .join(", and ")}.`;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 p-4 md:p-6 lg:p-8 animate-fade-in">
