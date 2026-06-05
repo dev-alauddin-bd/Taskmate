@@ -10,19 +10,24 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
   const [status, setStatus] = useState("TODO");
-  const [assigneeId, setAssigneeId] = useState("");
+  const [userId, setUserId] = useState("");
   const [users, setUsers] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Fetch users for assignment
-    fetch("/api/users")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) setUsers(data);
-      })
-      .catch((err) => console.error(err));
+    fetch("/api/users", { credentials: "include" })
+        .then((res) => res.json())
+        .then((data) => {
+          // The users endpoint returns { success, data, pagination }
+          // Use the nested data array if present, otherwise fallback to raw array.
+          const usersArray = data?.data ?? data;
+          if (Array.isArray(usersArray)) setUsers(usersArray);
+        })
+        .catch((err) => {
+          console.warn("Failed to load users – check auth session", err);
+        });
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,6 +36,17 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
     setError("");
 
     try {
+      // Simple client‑side validation
+      if (!title.trim()) {
+        setError("Task title is required");
+        setLoading(false);
+        return;
+      }
+      if (!dueDate) {
+        setError("Due date is required");
+        setLoading(false);
+        return;
+      }
       const res = await fetch("/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,7 +57,7 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
           priority, 
           status, 
           projectId, 
-          assigneeId: assigneeId || undefined 
+          userId: userId || undefined 
         }),
       });
 
@@ -58,6 +74,10 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
       setLoading(false);
     }
   };
+
+
+  console.log("users", users);
+  
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -105,12 +125,12 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
         </div>
 
         <div>
-          <label className="label" htmlFor="assigneeId">Assign To</label>
+          <label className="label" htmlFor="userId">Assign To</label>
           <select
-            id="assigneeId"
+            id="userId"
             className="input"
-            value={assigneeId}
-            onChange={(e) => setAssigneeId(e.target.value)}
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
           >
             <option value="">Unassigned</option>
             {users.map((user) => (

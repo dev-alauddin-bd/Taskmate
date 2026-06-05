@@ -8,7 +8,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ title, subtitle, children }: DashboardHeaderProps) {
   return (
-    <section className="flex items-center justify-between py-8">
+    <section className="flex items-center justify-between p-8 border border-[var(--border)] rounded-2xl">
       <div>
         <h1 className="text-3xl font-bold text-[var(--foreground)]">{title}</h1>
         {subtitle && (

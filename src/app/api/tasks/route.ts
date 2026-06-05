@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const status = searchParams.get("status") || "";
     const priority = searchParams.get("priority") || "";
     const projectId = searchParams.get("projectId") || "";
-    const assigneeId = searchParams.get("assigneeId") || "";
+    const userId = searchParams.get("userId") || "";
 
     const where: any = {};
 
@@ -48,13 +48,13 @@ export async function GET(request: Request) {
     if (status) where.status = status;
     if (priority) where.priority = priority;
     if (projectId) where.projectId = projectId;
-    if (assigneeId) where.assigneeId = assigneeId;
+    if (userId) where.userId = userId;
 
     const tasks = await prisma.task.findMany({
       where,
       include: {
         project: { select: { name: true } },
-        assignee: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true } },
       },
       orderBy: { dueDate: "asc" },
     });
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
       priority,
       status,
       projectId,
-      assigneeId,
+      userId,
     } = parsed.data;
 
     // =========================
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
         priority,
         status,
         projectId,
-        assigneeId: assigneeId || null,
+        userId: userId || null,
       },
       include: {
         project: { select: { name: true } },

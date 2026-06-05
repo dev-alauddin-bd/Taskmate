@@ -26,7 +26,7 @@ export const taskSchema = z.object({
   priority: z.enum(["HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
   status: z.enum(["TODO", "IN_PROGRESS", "COMPLETED"]).default("TODO"),
   projectId: z.string().cuid("Invalid project ID"),
-  assigneeId: z.string().cuid("Invalid assignee ID").optional().nullable(),
+  userId: z.string().cuid("Invalid user ID").optional().nullable(),
 });
 
 export const taskUpdateSchema = taskSchema.partial();

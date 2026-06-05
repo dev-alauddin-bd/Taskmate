@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     // =====================
-    // SAFE WHERE BUILDING
+    // WHERE FILTER
     // =====================
     const where: any = {
       ...(role && { role }),
@@ -56,12 +56,12 @@ export async function GET(request: Request) {
           name: true,
           email: true,
           role: true,
-          avatar: true,
+          avatar: true,   
           isActive: true,
 
           _count: {
             select: {
-              assignedTasks: true,
+              tasks: true,
               managedProjects: true,
             },
           },
@@ -75,6 +75,7 @@ export async function GET(request: Request) {
     ]);
 
     return NextResponse.json({
+      success: true,
       data: users,
       pagination: {
         total,
@@ -83,11 +84,12 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(total / limit),
       },
     });
+
   } catch (error) {
     console.error("GET USERS ERROR:", error);
 
     return NextResponse.json(
-      { message: "Internal server error" },
+      { success: false, message: "Internal server error" },
       { status: 500 }
     );
   }

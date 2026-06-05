@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, CheckSquare, Users, Activity } from "lucide-react";
+import { LayoutDashboard, FolderKanban, CheckSquare, Users, Activity, Settings } from "lucide-react";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -11,7 +11,8 @@ export function Sidebar() {
     { name: "Projects", href: "/projects", icon: FolderKanban },
     { name: "Tasks", href: "/tasks", icon: CheckSquare },
     { name: "Team", href: "/team", icon: Users },
-    { name: "Activity", href: "/activity", icon: Activity },
+    { name: "Settings", href: "/settings", icon: Settings },
+
   ];
 
   return (

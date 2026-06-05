@@ -70,7 +70,7 @@ export default async function ProjectsPage({
   return (
     <div className="space-y-6">
       <DashboardHeader
-        title="Projects Management – Taskmate Dashboard"
+        title="Projects Management"
         subtitle="Manage all your team projects in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
       >
 

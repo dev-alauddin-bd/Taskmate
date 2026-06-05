@@ -40,7 +40,7 @@ export async function GET() {
       select: {
         id: true,
         name: true,
-        assignedTasks: {
+        tasks: {
           where: {
             status: "COMPLETED",
           },
@@ -54,7 +54,7 @@ export async function GET() {
     const formattedTeam = teamProductivity.map((u) => ({
       id: u.id,
       name: u.name,
-      completedTasks: u.assignedTasks.length,
+      completedTasks: u.tasks.length,
     }));
 
     // 4. Task status distribution

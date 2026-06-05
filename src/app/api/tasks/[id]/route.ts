@@ -41,7 +41,7 @@ export async function PUT(
       );
     }
 
-    const { title, description, dueDate, priority, status, assigneeId } =
+    const { title, description, dueDate, priority, status, userId } =
       parsed.data;
 
     // Check duplicate title in same project
@@ -64,7 +64,7 @@ export async function PUT(
 
     // Check assigning completed task
     const targetStatus = status !== undefined ? status : existingTask.status;
-    const isAssigneeChanging = assigneeId !== undefined && assigneeId !== existingTask.assigneeId;
+    const isAssigneeChanging = userId !== undefined && userId !== existingTask.userId;
     if (isAssigneeChanging && targetStatus === "COMPLETED") {
       return NextResponse.json(
         { message: "Completed tasks cannot be reassigned." },
@@ -81,7 +81,7 @@ export async function PUT(
         dueDate: dueDate ? new Date(dueDate) : undefined,
         priority,
         status,
-        assigneeId,
+        userId,
       },
     });
 
@@ -103,8 +103,8 @@ export async function PUT(
 
     // reassignment log
     if (
-      assigneeId !== undefined &&
-      assigneeId !== existingTask.assigneeId
+      userId !== undefined &&
+      userId !== existingTask.userId
     ) {
       await prisma.activityLog.create({
         data: {

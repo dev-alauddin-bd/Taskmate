@@ -34,7 +34,7 @@ export async function GET(
         },
         tasks: {
           include: {
-            assignee: {
+            user: {
               select: {
                 id: true,
                 name: true,

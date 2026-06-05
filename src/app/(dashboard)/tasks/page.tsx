@@ -50,7 +50,7 @@ export default async function TasksPage({
 
   if (status) where.status = status;
   if (priority) where.priority = priority;
-  if (assigneeId) where.assigneeId = assigneeId;
+  if (assigneeId) where.userId = assigneeId;
 
   if (deadlineStatus === "OVERDUE") {
     where.status = { not: "COMPLETED" };
@@ -75,7 +75,7 @@ export default async function TasksPage({
       where,
       include: {
         project: { select: { name: true } },
-        assignee: { select: { name: true } },
+        user: { select: { name: true } },
       },
       orderBy,
       skip: (page - 1) * limit,
@@ -259,7 +259,7 @@ export default async function TasksPage({
             header: "Assignee",
             accessor: (t) => (
               <span>
-                {t.assignee?.name || "Unassigned"}
+                {t.user?.name || "Unassigned"}
               </span>
             ),
           },

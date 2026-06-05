@@ -76,7 +76,7 @@ async function main() {
       priority: "HIGH",
       status: "TODO",
       projectId: project.id,
-      assigneeId: pm.id,
+      userId: pm.id,
     },
   });
 
@@ -88,7 +88,7 @@ async function main() {
       priority: "MEDIUM",
       status: "IN_PROGRESS",
       projectId: project.id,
-      assigneeId: member.id,
+      userId: member.id,
     },
   });
 

@@ -29,7 +29,7 @@ export default async function ProjectDetailsPage({
       manager: { select: { name: true, email: true } },
       tasks: {
         include: {
-          assignee: { select: { name: true, email: true } },
+          user: { select: { name: true, email: true } },
         },
         orderBy: { dueDate: "asc" },
       },

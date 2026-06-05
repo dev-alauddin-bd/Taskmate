@@ -25,6 +25,7 @@
   --success: #10b981;
   --danger: #ef4444;
   --warning: #f59e0b;
+  --chart-line: var(--primary);
 }
 
 /* Dark theme variables – toggled via .dark-theme class */
@@ -40,6 +41,7 @@
   --primary: #818cf8;
   --primary-light: rgba(99, 102, 241, 0.15);
   --primary-hover: #6366f1;
+  --chart-line: var(--primary);
 
   /* Status Colors - Refined for Dark */
   --success: #34d399;

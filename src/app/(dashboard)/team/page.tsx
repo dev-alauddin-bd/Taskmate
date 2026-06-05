@@ -3,13 +3,13 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import DataTable from "@/components/dashboard/DataTable";
 import Link from "next/link";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
 export default async function TeamPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const session = await getServerSession(authOptions);
 
   const search = typeof searchParams?.search === "string" ? searchParams.search : "";
 
@@ -29,9 +29,9 @@ export default async function TeamPage({
       email: true,
       role: true,
       _count: {
-        select: { assignedTasks: true },
+        select: { tasks: true },
       },
-      assignedTasks: {
+      tasks: {
         where: { status: "COMPLETED" },
       },
     },
@@ -42,14 +42,12 @@ export default async function TeamPage({
     <div className="space-y-6 container mx-auto p-4">
 
       {/* HEADER */}
-      <div>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
-          Team Members
-        </h1>
-        <p className="text-[var(--text-muted)] font-medium mt-1">
-          View team workload and task completion status.
-        </p>
-      </div>
+
+      <DashboardHeader
+        title="Team Management"
+        subtitle="Manage all your team members in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
+      >
+      </DashboardHeader>
 
       {/* Search Bar */}
       <form method="GET" className="glass-panel p-4 rounded-xl flex gap-4 items-end shadow-sm">
@@ -100,13 +98,12 @@ export default async function TeamPage({
             header: "Role",
             accessor: (m) => (
               <span
-                className={`px-2 py-1 rounded-md text-xs font-medium ${
-                  m.role === "ADMIN"
+                className={`px-2 py-1 rounded-md text-xs font-medium ${m.role === "ADMIN"
                     ? "bg-[var(--danger)]/10 text-[var(--danger)]"
                     : m.role === "PROJECT_MANAGER"
-                    ? "bg-[var(--primary-light)] text-[var(--primary)]"
-                    : "bg-[var(--success)]/10 text-[var(--success)]"
-                }`}
+                      ? "bg-[var(--primary-light)] text-[var(--primary)]"
+                      : "bg-[var(--success)]/10 text-[var(--success)]"
+                  }`}
               >
                 {m.role}
               </span>
@@ -116,7 +113,7 @@ export default async function TeamPage({
             header: "Total Tasks",
             accessor: (m) => (
               <span className="font-semibold">
-                {m._count.assignedTasks}
+                {m._count.tasks}
               </span>
             ),
           },
@@ -124,7 +121,7 @@ export default async function TeamPage({
             header: "Completed Tasks",
             accessor: (m) => (
               <span className="text-[var(--success)] font-semibold">
-                {m.assignedTasks.length}
+                {m.tasks?.length ?? 0}
               </span>
             ),
           },
@@ -132,7 +129,7 @@ export default async function TeamPage({
             header: "Pending Tasks",
             accessor: (m) => {
               const pending =
-                m._count.assignedTasks - m.assignedTasks.length;
+                m._count.tasks - (m.tasks?.length ?? 0);
 
               return (
                 <span className="text-[var(--warning)] font-semibold">

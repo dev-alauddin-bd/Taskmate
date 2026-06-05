@@ -13,7 +13,7 @@ export default function AddProjectButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="btn btn-primary"
+        className="btn bg-var(--primary) text-[var(--background)] hover:bg-[var(--primary-hover)] transition-all cursor-pointer btn-primary"
       >
         + New Project
       </button>
