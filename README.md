@@ -5,7 +5,7 @@ Welcome to **SmartTask**, a modern, full-stack, enterprise-grade project and tas
 ---
 
 ## 🚀 Live Demo & Repository
-- **Live Application URL**: [Vercel Deployment Link](https://taskmate-pearl-seven.vercel.app/)
+- **Live Application URL**: https://taskmate-pearl-seven.vercel.app
 
 ---
 
