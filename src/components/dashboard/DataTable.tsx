@@ -1,40 +1,48 @@
+"use client";
+
 import React from "react";
 
-export interface Column<T> {
-  header: string;
-  accessor: keyof T | ((row: T) => React.ReactNode);
-  render?: (value: any, row: T) => React.ReactNode;
-}
-
-interface DataTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  loading?: boolean;
-}
-
-export default function DataTable<T extends object>({
-  columns,
-  data,
-  loading,
-}: DataTableProps<T>) {
-  if (loading) {
-    return (
-      <div className="p-4 text-[var(--text-muted)]">Loading...</div>
-    );
+/* ================= STATUS COLOR SYSTEM ================= */
+export const getStatusColor = (status: string) => {
+  switch (status) {
+    case "ACTIVE":
+      return "bg-green-50 text-green-700 border-green-200";
+    case "ON_HOLD":
+      return "bg-yellow-50 text-yellow-700 border-yellow-200";
+    case "COMPLETED":
+      return "bg-blue-50 text-blue-700 border-blue-200";
+    default:
+      return "bg-gray-50 text-gray-600 border-gray-200";
   }
+};
 
+interface Column {
+  header: string;
+  accessor: (row: any) => React.ReactNode;
+  center?: boolean;
+}
+
+interface DataTableProps {
+  data: any[];
+  columns: Column[];
+}
+
+export default function DataTable({ data, columns }: DataTableProps) {
   return (
-    <div className="glass-panel rounded-xl shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border border-[var(--border)] border-collapse">
+    <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-hidden">
 
-          {/* HEADER */}
-          <thead className="border-b border-[var(--border)]">
-            <tr>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+
+          {/* ================= HEADER ================= */}
+          <thead className="sticky top-0 z-10">
+            <tr className="bg-[var(--surface-hover)]/80 backdrop-blur border-b border-[var(--border)]">
               {columns.map((col, i) => (
                 <th
-                  key={`${col.header}-${i}`}
-                  className="p-4 text-sm font-semibold text-[var(--foreground)] border border-[var(--border)] text-center"
+                  key={i}
+                  className={`px-5 py-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]
+                    ${col.center ? "text-center" : "text-left"}
+                  `}
                 >
                   {col.header}
                 </th>
@@ -42,31 +50,41 @@ export default function DataTable<T extends object>({
             </tr>
           </thead>
 
-          {/* BODY */}
-          <tbody className="divide-y divide-[var(--border)]">
-            {data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className="hover:bg-[var(--surface-hover)] transition-colors"
-              >
-                {columns.map((col, colIndex) => {
-                  const value =
-                    typeof col.accessor === "function"
-                      ? col.accessor(row)
-                      : (row as any)[col.accessor];
-
-                  const cellContent = col.render
-                    ? col.render(value, row)
-                    : value;
-
-                  return (
-                    <td key={`${col.header}-${colIndex}`} className="p-4 border border-[var(--border)] text-center">
-                      {cellContent}
-                    </td>
-                  );
-                })}
+          {/* ================= BODY ================= */}
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-center py-12 text-[var(--text-muted)]"
+                >
+                  No data found
+                </td>
               </tr>
-            ))}
+            ) : (
+              data.map((row, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  className="
+                    border-b border-[var(--border)]
+                    bg-transparent
+                    hover:bg-[var(--surface-hover)]/50
+                    transition
+                  "
+                >
+                  {columns.map((col, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className={`px-5 py-4 text-[var(--foreground)]
+                        ${col.center ? "text-center" : "text-left"}
+                      `}
+                    >
+                      {col.accessor(row)}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
 
         </table>

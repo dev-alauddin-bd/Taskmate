@@ -41,6 +41,7 @@ export type ProjectMinAggregateOutputType = {
   deadline: Date | null
   status: $Enums.ProjectStatus | null
   progress: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   managerId: string | null
@@ -53,6 +54,7 @@ export type ProjectMaxAggregateOutputType = {
   deadline: Date | null
   status: $Enums.ProjectStatus | null
   progress: number | null
+  deletedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   managerId: string | null
@@ -65,6 +67,7 @@ export type ProjectCountAggregateOutputType = {
   deadline: number
   status: number
   progress: number
+  deletedAt: number
   createdAt: number
   updatedAt: number
   managerId: number
@@ -87,6 +90,7 @@ export type ProjectMinAggregateInputType = {
   deadline?: true
   status?: true
   progress?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   managerId?: true
@@ -99,6 +103,7 @@ export type ProjectMaxAggregateInputType = {
   deadline?: true
   status?: true
   progress?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   managerId?: true
@@ -111,6 +116,7 @@ export type ProjectCountAggregateInputType = {
   deadline?: true
   status?: true
   progress?: true
+  deletedAt?: true
   createdAt?: true
   updatedAt?: true
   managerId?: true
@@ -210,6 +216,7 @@ export type ProjectGroupByOutputType = {
   deadline: Date
   status: $Enums.ProjectStatus
   progress: number
+  deletedAt: Date | null
   createdAt: Date
   updatedAt: Date
   managerId: string
@@ -245,6 +252,7 @@ export type ProjectWhereInput = {
   deadline?: Prisma.DateTimeFilter<"Project"> | Date | string
   status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
   progress?: Prisma.IntFilter<"Project"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   managerId?: Prisma.StringFilter<"Project"> | string
@@ -261,6 +269,7 @@ export type ProjectOrderByWithRelationInput = {
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managerId?: Prisma.SortOrder
@@ -280,6 +289,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   deadline?: Prisma.DateTimeFilter<"Project"> | Date | string
   status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
   progress?: Prisma.IntFilter<"Project"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   managerId?: Prisma.StringFilter<"Project"> | string
@@ -296,6 +306,7 @@ export type ProjectOrderByWithAggregationInput = {
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managerId?: Prisma.SortOrder
@@ -316,6 +327,7 @@ export type ProjectScalarWhereWithAggregatesInput = {
   deadline?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   status?: Prisma.EnumProjectStatusWithAggregatesFilter<"Project"> | $Enums.ProjectStatus
   progress?: Prisma.IntWithAggregatesFilter<"Project"> | number
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Project"> | Date | string
   managerId?: Prisma.StringWithAggregatesFilter<"Project"> | string
@@ -328,6 +340,7 @@ export type ProjectCreateInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manager: Prisma.UserCreateNestedOneWithoutManagedProjectsInput
@@ -343,6 +356,7 @@ export type ProjectUncheckedCreateInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   managerId: string
@@ -358,6 +372,7 @@ export type ProjectUpdateInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manager?: Prisma.UserUpdateOneRequiredWithoutManagedProjectsNestedInput
@@ -373,6 +388,7 @@ export type ProjectUncheckedUpdateInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managerId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -388,6 +404,7 @@ export type ProjectCreateManyInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   managerId: string
@@ -400,6 +417,7 @@ export type ProjectUpdateManyMutationInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -411,6 +429,7 @@ export type ProjectUncheckedUpdateManyInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managerId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -433,6 +452,7 @@ export type ProjectCountOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managerId?: Prisma.SortOrder
@@ -449,6 +469,7 @@ export type ProjectMaxOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managerId?: Prisma.SortOrder
@@ -461,6 +482,7 @@ export type ProjectMinOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   progress?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   managerId?: Prisma.SortOrder
@@ -585,6 +607,7 @@ export type ProjectCreateWithoutManagerInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tasks?: Prisma.TaskCreateNestedManyWithoutProjectInput
@@ -599,6 +622,7 @@ export type ProjectUncheckedCreateWithoutManagerInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutProjectInput
@@ -642,6 +666,7 @@ export type ProjectScalarWhereInput = {
   deadline?: Prisma.DateTimeFilter<"Project"> | Date | string
   status?: Prisma.EnumProjectStatusFilter<"Project"> | $Enums.ProjectStatus
   progress?: Prisma.IntFilter<"Project"> | number
+  deletedAt?: Prisma.DateTimeNullableFilter<"Project"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Project"> | Date | string
   managerId?: Prisma.StringFilter<"Project"> | string
@@ -654,6 +679,7 @@ export type ProjectCreateWithoutMembersInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manager: Prisma.UserCreateNestedOneWithoutManagedProjectsInput
@@ -668,6 +694,7 @@ export type ProjectUncheckedCreateWithoutMembersInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   managerId: string
@@ -698,6 +725,7 @@ export type ProjectUpdateWithoutMembersInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manager?: Prisma.UserUpdateOneRequiredWithoutManagedProjectsNestedInput
@@ -712,6 +740,7 @@ export type ProjectUncheckedUpdateWithoutMembersInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managerId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -726,6 +755,7 @@ export type ProjectCreateWithoutTasksInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manager: Prisma.UserCreateNestedOneWithoutManagedProjectsInput
@@ -740,6 +770,7 @@ export type ProjectUncheckedCreateWithoutTasksInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   managerId: string
@@ -770,6 +801,7 @@ export type ProjectUpdateWithoutTasksInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manager?: Prisma.UserUpdateOneRequiredWithoutManagedProjectsNestedInput
@@ -784,6 +816,7 @@ export type ProjectUncheckedUpdateWithoutTasksInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managerId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -798,6 +831,7 @@ export type ProjectCreateWithoutActivityLogsInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   manager: Prisma.UserCreateNestedOneWithoutManagedProjectsInput
@@ -812,6 +846,7 @@ export type ProjectUncheckedCreateWithoutActivityLogsInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   managerId: string
@@ -842,6 +877,7 @@ export type ProjectUpdateWithoutActivityLogsInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   manager?: Prisma.UserUpdateOneRequiredWithoutManagedProjectsNestedInput
@@ -856,6 +892,7 @@ export type ProjectUncheckedUpdateWithoutActivityLogsInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   managerId?: Prisma.StringFieldUpdateOperationsInput | string
@@ -870,6 +907,7 @@ export type ProjectCreateManyManagerInput = {
   deadline: Date | string
   status?: $Enums.ProjectStatus
   progress?: number
+  deletedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -881,6 +919,7 @@ export type ProjectUpdateWithoutManagerInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUpdateManyWithoutProjectNestedInput
@@ -895,6 +934,7 @@ export type ProjectUncheckedUpdateWithoutManagerInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutProjectNestedInput
@@ -909,6 +949,7 @@ export type ProjectUncheckedUpdateManyWithoutManagerInput = {
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumProjectStatusFieldUpdateOperationsInput | $Enums.ProjectStatus
   progress?: Prisma.IntFieldUpdateOperationsInput | number
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -969,6 +1010,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   deadline?: boolean
   status?: boolean
   progress?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managerId?: boolean
@@ -986,6 +1028,7 @@ export type ProjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   deadline?: boolean
   status?: boolean
   progress?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managerId?: boolean
@@ -999,6 +1042,7 @@ export type ProjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   deadline?: boolean
   status?: boolean
   progress?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managerId?: boolean
@@ -1012,12 +1056,13 @@ export type ProjectSelectScalar = {
   deadline?: boolean
   status?: boolean
   progress?: boolean
+  deletedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   managerId?: boolean
 }
 
-export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "deadline" | "status" | "progress" | "createdAt" | "updatedAt" | "managerId", ExtArgs["result"]["project"]>
+export type ProjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "deadline" | "status" | "progress" | "deletedAt" | "createdAt" | "updatedAt" | "managerId", ExtArgs["result"]["project"]>
 export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   manager?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   tasks?: boolean | Prisma.Project$tasksArgs<ExtArgs>
@@ -1047,6 +1092,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     deadline: Date
     status: $Enums.ProjectStatus
     progress: number
+    deletedAt: Date | null
     createdAt: Date
     updatedAt: Date
     managerId: string
@@ -1483,6 +1529,7 @@ export interface ProjectFieldRefs {
   readonly deadline: Prisma.FieldRef<"Project", 'DateTime'>
   readonly status: Prisma.FieldRef<"Project", 'ProjectStatus'>
   readonly progress: Prisma.FieldRef<"Project", 'Int'>
+  readonly deletedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Project", 'DateTime'>
   readonly managerId: Prisma.FieldRef<"Project", 'String'>

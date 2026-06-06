@@ -1,13 +1,15 @@
 "use client";
 
+
 import Link from "next/link";
 import { Activity, CheckSquare, FolderKanban, CheckCircle2, AlertTriangle, ArrowRight } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { JsonValue } from "@prisma/client/runtime/client";
 
 interface ActivityItem {
   id: string;
   action: string;
-  details: string;
+  details: JsonValue; // can be string or JSON object
   createdAt: string | Date;
 }
 
@@ -83,7 +85,7 @@ export default function RecentActivityCard({ recentActivities }: Props) {
                     </div>
 
                     <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                      {activity.details}
+                      {typeof activity.details === "string" ? activity.details : JSON.stringify(activity.details)}
                     </p>
                   </div>
                 </div>

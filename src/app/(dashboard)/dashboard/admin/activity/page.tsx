@@ -72,7 +72,7 @@ export default async function AdminActivityPage() {
                         {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
                       </span>
                     </div>
-                    <p className="text-sm text-[var(--text-muted)] mt-1">{log.details}</p>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">{typeof log.details === "string" ? log.details : JSON.stringify(log.details)}</p>
 
                     <div className="flex flex-wrap gap-4 mt-2 text-xs text-[var(--text-muted)] border-t border-[var(--border)]/30 pt-2">
                       {log.user && (

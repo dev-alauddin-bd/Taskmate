@@ -20,7 +20,8 @@ type NavItem = {
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const role = session?.user?.role;
+  // Determine user role, default to "GUEST" if not available
+  const role = session?.user?.role ?? "GUEST";
 
 
   let navItems: NavItem[] = [];
@@ -29,42 +30,42 @@ export function Sidebar() {
   const adminNavItems: NavItem[] = [
     {
       name: "Dashboard",
-      href: "/admin",
+      href: "/dashboard/admin",
       icon: LayoutDashboard,
     },
     {
       name: "Projects",
-      href: "/admin/projects",
+      href: "/dashboard/admin/projects",
       icon: FolderKanban,
     },
     {
       name: "Tasks",
-      href: "/admin/tasks",
+      href: "/dashboard/admin/tasks",
       icon: CheckSquare,
     },
     {
       name: "Team Members",
-      href: "/admin/members",
+      href: "/dashboard/admin/members",
       icon: Users,
     },
     {
       name: "Analytics",
-      href: "/admin/analytics",
+      href: "/dashboard/admin/analytics",
       icon: BarChart3,
     },
     {
       name: "Activity Logs",
-      href: "/admin/activity",
+      href: "/dashboard/admin/activity",
       icon: Activity,
     },
     {
       name: "Notifications",
-      href: "/admin/notifications",
+      href: "/dashboard/admin/notifications",
       icon: Bell,
     },
     {
       name: "Settings",
-      href: "/admin/settings",
+      href: "/dashboard/admin/settings",
       icon: Settings,
     },
   ];
@@ -72,37 +73,37 @@ export function Sidebar() {
   const managerNavItems: NavItem[] = [
     {
       name: "Dashboard",
-      href: "/manager",
+      href: "/dashboard/manager",
       icon: LayoutDashboard,
     },
     {
       name: "Manage Projects",
-      href: "/manager/projects",
+      href: "/dashboard/manager/projects",
       icon: FolderKanban,
     },
     {
       name: "Tasks",
-      href: "/manager/tasks",
+      href: "/dashboard/manager/tasks",
       icon: CheckSquare,
     },
     {
       name: "My Team",
-      href: "/manager/team",
+      href: "/dashboard/manager/team",
       icon: Users,
     },
     {
       name: "Analytics",
-      href: "/manager/analytics",
+      href: "/dashboard/manager/analytics",
       icon: BarChart3,
     },
     {
       name: "Activity Logs",
-      href: "/manager/activity",
+      href: "/dashboard/manager/activity",
       icon: Activity,
     },
     {
       name: "Notifications",
-      href: "/manager/notifications",
+      href: "/dashboard/manager/notifications",
       icon: Bell,
     },
   ];
@@ -110,23 +111,23 @@ export function Sidebar() {
   const memberNavItems: NavItem[] = [
     {
       name: "Dashboard",
-      href: "/member",
+      href: "/dashboard/member",
       icon: LayoutDashboard,
     },
     {
       name: "My Tasks",
-      href: "/member/tasks",
+      href: "/dashboard/member/tasks",
       icon: CheckSquare,
     },
 
     {
       name: "Notifications",
-      href: "/member/notifications",
+      href: "/dashboard/member/notifications",
       icon: Bell,
     },
     {
       name: "Profile",
-      href: "/member/profile",
+      href: "/dashboard/member/profile",
       icon: UserCircle,
     },
   ];
@@ -145,7 +146,8 @@ export function Sidebar() {
       navItems = memberNavItems;
       break;
     default:
-      navItems = [];
+      // Provide a minimal navigation for guests or unknown roles
+      navItems = [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
   }
 
 

@@ -55,6 +55,7 @@ export const ModelName = {
   Project: 'Project',
   ProjectMember: 'ProjectMember',
   Task: 'Task',
+  TaskAssignee: 'TaskAssignee',
   Comment: 'Comment',
   Attachment: 'Attachment',
   Notification: 'Notification',
@@ -101,6 +102,7 @@ export const ProjectScalarFieldEnum = {
   deadline: 'deadline',
   status: 'status',
   progress: 'progress',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   managerId: 'managerId'
@@ -131,13 +133,23 @@ export const TaskScalarFieldEnum = {
   actualHours: 'actualHours',
   completedAt: 'completedAt',
   attachmentUrl: 'attachmentUrl',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  projectId: 'projectId',
-  userId: 'userId'
+  projectId: 'projectId'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskAssigneeScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  userId: 'userId',
+  assignedAt: 'assignedAt'
+} as const
+
+export type TaskAssigneeScalarFieldEnum = (typeof TaskAssigneeScalarFieldEnum)[keyof typeof TaskAssigneeScalarFieldEnum]
 
 
 export const CommentScalarFieldEnum = {
@@ -156,6 +168,8 @@ export const AttachmentScalarFieldEnum = {
   fileName: 'fileName',
   fileUrl: 'fileUrl',
   fileType: 'fileType',
+  fileSize: 'fileSize',
+  mimeType: 'mimeType',
   uploadedAt: 'uploadedAt',
   taskId: 'taskId'
 } as const
@@ -168,6 +182,7 @@ export const NotificationScalarFieldEnum = {
   title: 'title',
   message: 'message',
   isRead: 'isRead',
+  type: 'type',
   userId: 'userId',
   createdAt: 'createdAt'
 } as const
@@ -196,6 +211,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -210,4 +233,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

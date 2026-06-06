@@ -17,14 +17,14 @@ export default function AddProjectButton() {
       >
         + New Project
       </button>
-      
+
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Create New Project">
-        <ProjectForm 
-          onCancel={() => setOpen(false)} 
+        <ProjectForm
+          onCancel={() => setOpen(false)}
           onSuccess={() => {
             setOpen(false);
             router.refresh();
-          }} 
+          }}
         />
       </Modal>
     </>

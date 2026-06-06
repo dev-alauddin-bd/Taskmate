@@ -84,7 +84,7 @@ export default async function MemberTasksPage({
       where,
       include: {
         project: { select: { name: true } },
-        user: { select: { name: true } },
+        assignees: { select: { user: { select: { name: true } } } },
       },
       orderBy,
       skip: (page - 1) * limit,

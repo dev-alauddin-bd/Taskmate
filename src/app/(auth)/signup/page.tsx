@@ -6,8 +6,15 @@ import { SignupForm } from "@/components/SignupForm";
 export default async function SignupPage() {
   const session = await getServerSession(authOptions);
 
-  if (session) {
-    redirect("/dashboard");
+  if (session?.user?.role) {
+    const role = session.user.role;
+    if (role === "ADMIN") {
+      redirect("/admin");
+    } else if (role === "PROJECT_MANAGER" || role === "MANAGER") {
+      redirect("/manager");
+    } else {
+      redirect("/member");
+    }
   }
 
   return (
@@ -17,7 +24,6 @@ export default async function SignupPage() {
           <h1 className="text-3xl font-bold text-[var(--foreground)] mb-2">Create Account</h1>
           <p className="text-[var(--text-muted)]">Join the project management system</p>
         </div>
-        
         <SignupForm />
       </div>
     </div>
