@@ -4,23 +4,25 @@ import prisma from "@/lib/prisma";
 import DataTable from "@/components/dashboard/DataTable";
 import Link from "next/link";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { redirect } from "next/navigation";
 
-export default async function TeamPage({
+export default async function AdminMembersPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
 
   const sp = await searchParams;
-  const pageStr = Array.isArray(sp?.page) ? sp.page[0] : sp.page ?? "1";
-  const limitStr = Array.isArray(sp?.limit) ? sp.limit[0] : sp.limit ?? "10";
   const search = typeof sp?.search === "string" ? sp.search : "";
-  const status = typeof sp?.status === "string" ? sp.status : "";
-  const priority = typeof sp?.priority === "string" ? sp.priority : "";
-  const assigneeId = typeof sp?.assigneeId === "string" ? sp.assigneeId : "";
-  const deadlineStatus = typeof sp?.deadlineStatus === "string" ? sp.deadlineStatus : "";
-  const sortBy = typeof sp?.sortBy === "string" ? sp.sortBy : "dueDate";
-  const sortOrder = typeof sp?.sortOrder === "string" ? sp.sortOrder : "asc";
 
   const where: any = {};
   if (search) {
@@ -48,15 +50,12 @@ export default async function TeamPage({
   });
 
   return (
-    <div className="space-y-6 container mx-auto p-4">
-
+    <div className="space-y-6 container mx-auto">
       {/* HEADER */}
-
       <DashboardHeader
-        title="Team Management"
-        subtitle="Manage all your team members in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
-      >
-      </DashboardHeader>
+        title="Admin Members Directory"
+        subtitle="View and manage all registered team members in the system."
+      />
 
       {/* Search Bar */}
       <form method="GET" className="glass-panel p-4 rounded-xl flex gap-4 items-end shadow-sm">
@@ -76,7 +75,7 @@ export default async function TeamPage({
             Search
           </button>
           {search && (
-            <Link href="/team" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
+            <Link href="/admin/members" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
               Reset
             </Link>
           )}

@@ -26,15 +26,15 @@ export default function DataTable<T extends object>({
   return (
     <div className="glass-panel rounded-xl shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full text-left border border-[var(--border)] border-collapse">
 
           {/* HEADER */}
-          <thead className="bg-[var(--surface-hover)] border-b border-[var(--border)]">
+          <thead className="border-b border-[var(--border)]">
             <tr>
               {columns.map((col, i) => (
                 <th
                   key={`${col.header}-${i}`}
-                  className="p-4 text-sm font-semibold text-[var(--foreground)]"
+                  className="p-4 text-sm font-semibold text-[var(--foreground)] border border-[var(--border)] text-center"
                 >
                   {col.header}
                 </th>
@@ -60,7 +60,7 @@ export default function DataTable<T extends object>({
                     : value;
 
                   return (
-                    <td key={`${col.header}-${colIndex}`} className="p-4">
+                    <td key={`${col.header}-${colIndex}`} className="p-4 border border-[var(--border)] text-center">
                       {cellContent}
                     </td>
                   );

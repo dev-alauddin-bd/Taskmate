@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import Pagination from "@/components/dashboard/Pagination";
@@ -10,16 +11,24 @@ import AddProjectButton from "@/components/dashboard/AddProjectButton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Projects – Taskmate Dashboard",
-  description: "Manage your team's projects, view status, deadlines, and assign managers in the Taskmate dashboard."
+  title: "Admin Projects – Taskmate Dashboard",
+  description: "Global admin panel to manage all projects."
 };
 
-export default async function ProjectsPage({
+export default async function AdminProjectsPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
 
   const pageStr = Array.isArray(searchParams?.page) ? searchParams.page[0] : searchParams.page ?? "1";
   const limitStr = Array.isArray(searchParams?.limit) ? searchParams.limit[0] : searchParams.limit ?? "10";
@@ -70,12 +79,10 @@ export default async function ProjectsPage({
   return (
     <div className="space-y-6">
       <DashboardHeader
-        title="Projects Management"
-        subtitle="Manage all your team projects in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
+        title="Admin Projects Management"
+        subtitle="Manage and oversee all projects across the system."
       >
-
         <AddProjectButton />
-
       </DashboardHeader>
 
       {/* Search & Filter Bar */}
@@ -135,7 +142,7 @@ export default async function ProjectsPage({
             Apply
           </button>
           {(search || status || sortBy !== "createdAt" || sortOrder !== "desc") && (
-            <Link href="/projects" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
+            <Link href="/admin/projects" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
               Reset
             </Link>
           )}
@@ -170,7 +177,7 @@ export default async function ProjectsPage({
           { header: "Tasks", accessor: (p: any) => p._count.tasks },
           {
             header: "Actions", accessor: (p: any) => (
-              <Link href={`/projects/${p.id}`} className="text-sm font-medium text-[var(--primary)] hover:underline">
+              <Link href={`/member/projects/${p.id}`} className="text-sm font-medium text-[var(--primary)] hover:underline">
                 View Details
               </Link>
             )
@@ -183,7 +190,7 @@ export default async function ProjectsPage({
         page={page}
         limit={limit}
         total={total}
-        basePath="/projects"
+        basePath="/admin/projects"
       />
     </div>
   );

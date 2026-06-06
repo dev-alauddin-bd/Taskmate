@@ -4,25 +4,43 @@ import prisma from "@/lib/prisma";
 import DataTable from "@/components/dashboard/DataTable";
 import Link from "next/link";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { redirect } from "next/navigation";
 
-export default async function TeamPage({
+export default async function ManagerTeamPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "PROJECT_MANAGER" && session.user.role !== "MANAGER") {
+    redirect("/dashboard");
+  }
+
+  // Find all projects managed by this manager
+  const managedProjects = await prisma.project.findMany({
+    where: { managerId: session.user.id },
+    select: { id: true },
+  });
+  const projectIds = managedProjects.map((p) => p.id);
+
+  // Find all project members in these projects
+  const pms = await prisma.projectMember.findMany({
+    where: { projectId: { in: projectIds } },
+    select: { userId: true },
+  });
+  const teamUserIds = Array.from(new Set(pms.map((pm) => pm.userId)));
 
   const sp = await searchParams;
-  const pageStr = Array.isArray(sp?.page) ? sp.page[0] : sp.page ?? "1";
-  const limitStr = Array.isArray(sp?.limit) ? sp.limit[0] : sp.limit ?? "10";
   const search = typeof sp?.search === "string" ? sp.search : "";
-  const status = typeof sp?.status === "string" ? sp.status : "";
-  const priority = typeof sp?.priority === "string" ? sp.priority : "";
-  const assigneeId = typeof sp?.assigneeId === "string" ? sp.assigneeId : "";
-  const deadlineStatus = typeof sp?.deadlineStatus === "string" ? sp.deadlineStatus : "";
-  const sortBy = typeof sp?.sortBy === "string" ? sp.sortBy : "dueDate";
-  const sortOrder = typeof sp?.sortOrder === "string" ? sp.sortOrder : "asc";
 
-  const where: any = {};
+  const where: any = {
+    id: { in: teamUserIds },
+  };
   if (search) {
     where.name = {
       contains: search,
@@ -38,25 +56,25 @@ export default async function TeamPage({
       email: true,
       role: true,
       _count: {
-        select: { tasks: true },
+        select: { tasks: { where: { projectId: { in: projectIds } } } },
       },
       tasks: {
-        where: { status: "COMPLETED" },
+        where: {
+          projectId: { in: projectIds },
+          status: "COMPLETED",
+        },
       },
     },
     orderBy: { name: "asc" },
   });
 
   return (
-    <div className="space-y-6 container mx-auto p-4">
-
+    <div className="space-y-6 container mx-auto">
       {/* HEADER */}
-
       <DashboardHeader
-        title="Team Management"
-        subtitle="Manage all your team members in one place. Track progress, deadlines, task counts, and assign project managers efficiently."
-      >
-      </DashboardHeader>
+        title="My Team Members"
+        subtitle="Manage and view the workload of team members assigned to your projects."
+      />
 
       {/* Search Bar */}
       <form method="GET" className="glass-panel p-4 rounded-xl flex gap-4 items-end shadow-sm">
@@ -76,7 +94,7 @@ export default async function TeamPage({
             Search
           </button>
           {search && (
-            <Link href="/team" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
+            <Link href="/manager/team" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
               Reset
             </Link>
           )}
@@ -119,7 +137,7 @@ export default async function TeamPage({
             ),
           },
           {
-            header: "Total Tasks",
+            header: "Total Tasks (Your Projects)",
             accessor: (m) => (
               <span className="font-semibold">
                 {m._count.tasks}

@@ -1,0 +1,9 @@
+{
+  "title": "কাজ ব্যবস্থাপক",
+  "addTask": "টাস্ক যোগ করুন",
+  "cancel": "বাতিল",
+  "save": "সংরক্ষণ",
+  "dashboard": "ড্যাশবোর্ড",
+  "taskTitleRequired": "টাস্কের শিরোনাম দরকার",
+  "dueDateRequired": "ডিউ ডেট দরকার"
+}

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,8 +29,16 @@ export function LoginForm() {
       setError(res.error);
       setLoading(false);
     } else {
-      router.push("/dashboard");
       router.refresh();
+      // Determine role from session after refresh
+      const role = session?.user?.role;
+      if (role === "ADMIN") {
+        router.push("/admin");
+      } else if (role === "PROJECT_MANAGER" || role === "MANAGER") {
+        router.push("/manager");
+      } else {
+        router.push("/member");
+      }
     }
   };
 
@@ -53,8 +63,15 @@ export function LoginForm() {
       setError(res.error);
       setDemoLoading(false);
     } else {
-      router.push("/dashboard");
       router.refresh();
+      const role = session?.user?.role;
+      if (role === "ADMIN") {
+        router.push("/admin");
+      } else if (role === "PROJECT_MANAGER" || role === "MANAGER") {
+        router.push("/manager");
+      } else {
+        router.push("/member");
+      }
     }
   };
 

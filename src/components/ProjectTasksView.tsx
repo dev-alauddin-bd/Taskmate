@@ -98,13 +98,18 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
                       {format(new Date(task.dueDate), "MMM d, yyyy")}
                     </td>
                     <td className="p-4 text-sm text-[var(--foreground)]">
-                      {task.assignee?.name || "Unassigned"}
+                      {task.user?.name || "Unassigned"}
                     </td>
                     <td className="p-4 text-right space-x-2">
                       {(role === "ADMIN" || role === "PROJECT_MANAGER") && (
-                        <button onClick={() => handleDeleteTask(task.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">
-                          Delete
-                        </button>
+                        <>
+                          <button onClick={() => handleDeleteTask(task.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">
+                            Delete
+                          </button>
+                          <Link href={`/dashboard/member/tasks/${task.id}/edit`} className="text-sm font-medium text-[var(--primary)] hover:underline ml-2">
+                            Edit
+                          </Link>
+                        </>
                       )}
                     </td>
                   </tr>
