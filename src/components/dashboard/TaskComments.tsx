@@ -1,13 +1,14 @@
 "use client";
-// src/components/dashboard/TaskComments.tsx
+
 import { useState } from "react";
 import { format } from "date-fns";
+import { MessageSquare, Send } from "lucide-react";
 
 export interface Comment {
   id: string;
   content: string;
-  createdAt: Date | string; // Prisma may return Date object; UI accepts both
-  user: { name: string } | null;
+  createdAt: Date | string;
+  user?: { name: string } | null;
 }
 
 interface Props {
@@ -15,72 +16,161 @@ interface Props {
   initialComments: Comment[];
 }
 
-export default function TaskComments({ taskId, initialComments }: Props) {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+export default function TaskComments({
+  taskId,
+  initialComments,
+}: Props) {
+  const [comments, setComments] =
+    useState<Comment[]>(initialComments);
+
   const [newContent, setNewContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  /* ================= SUBMIT COMMENT ================= */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!newContent.trim()) return;
+
     setSubmitting(true);
+
     try {
       const res = await fetch(`/api/tasks/${taskId}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newContent }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newContent,
+        }),
       });
-      if (res.ok) {
-        const created = await res.json();
-        // Ensure created.createdAt is a Date or string
-        setComments([created, ...comments]);
-        setNewContent("");
-      } else {
-        alert("Failed to add comment");
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to add comment");
       }
-    } catch (err) {
-      console.error(err);
+
+      // 🔥 ensure user exists in response
+      setComments((prev) => [
+        {
+          ...data,
+          user: data.user || { name: "System User" },
+        },
+        ...prev,
+      ]);
+
+      setNewContent("");
+    } catch (error) {
+      console.error(error);
       alert("Error adding comment");
     } finally {
       setSubmitting(false);
     }
   };
 
+  /* ================= FORMAT DATE ================= */
   const formatDate = (date: Date | string) => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return format(d, "PPP p");
+    return format(d, "MMM d, yyyy • h:mm a");
   };
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-2xl font-semibold text-[var(--foreground)] mb-2">Comments</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+    <section className="space-y-5">
+
+      {/* HEADER */}
+      <div className="flex items-center gap-2">
+        <MessageSquare className="w-5 h-5 text-[var(--primary)]" />
+        <h2 className="text-lg font-semibold text-[var(--foreground)]">
+          Comments
+        </h2>
+      </div>
+
+      {/* ADD COMMENT */}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 space-y-3"
+      >
         <textarea
-          className="p-2 border rounded bg-white/10 backdrop-blur-xl text-[var(--foreground)]"
-          placeholder="Write a comment..."
-          rows={3}
+          rows={4}
           value={newContent}
           onChange={(e) => setNewContent(e.target.value)}
+          placeholder="Write your comment..."
+          className="
+            w-full
+            rounded-lg
+            border border-[var(--border)]
+            bg-[var(--background)]
+            px-4 py-3
+            text-[var(--foreground)]
+            placeholder:text-[var(--text-muted)]
+            resize-none
+            focus:outline-none
+            focus:ring-2
+            focus:ring-[var(--primary)]
+          "
         />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="self-end btn btn-primary btn-sm"
-        >
-          {submitting ? "Posting..." : "Post Comment"}
-        </button>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="
+              inline-flex items-center gap-2
+              px-4 py-2
+              rounded-lg
+              bg-[var(--primary)]
+              text-white
+              hover:opacity-90
+              transition
+              disabled:opacity-50
+            "
+          >
+            <Send size={16} />
+            {submitting ? "Posting..." : "Post Comment"}
+          </button>
+        </div>
       </form>
-      <ul className="space-y-3">
-        {comments.map((c) => (
-          <li key={c.id} className="p-3 bg-white/5 rounded border border-white/20 backdrop-blur-xl">
-            <p className="text-[var(--foreground)] mb-1">{c.content}</p>
-            <div className="flex justify-between text-sm text-[var(--text-muted)]">
-              <span>{c.user?.name || "Anonymous"}</span>
-              <span>{formatDate(c.createdAt)}</span>
+
+      {/* COMMENTS LIST */}
+      <div className="space-y-3">
+
+        {comments.length === 0 ? (
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-6 text-center">
+            <p className="text-sm text-[var(--text-muted)]">
+              No comments yet
+            </p>
+          </div>
+        ) : (
+          comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="
+                bg-[var(--surface)]
+                border border-[var(--border)]
+                rounded-xl
+                p-4
+                shadow-sm
+              "
+            >
+              <p className="text-[var(--foreground)] leading-relaxed">
+                {comment.content}
+              </p>
+
+              <div className="mt-3 pt-3 border-t border-[var(--border)] flex items-center justify-between">
+                <span className="text-sm font-medium text-[var(--foreground)]">
+                  {comment.user?.name ?? "System User"}
+                </span>
+
+                <span className="text-xs text-[var(--text-muted)]">
+                  {formatDate(comment.createdAt)}
+                </span>
+              </div>
             </div>
-          </li>
-        ))}
-      </ul>
+          ))
+        )}
+
+      </div>
     </section>
   );
 }

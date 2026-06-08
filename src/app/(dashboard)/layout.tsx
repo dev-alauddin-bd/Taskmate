@@ -1,23 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
-import { useSession } from "next-auth/react";
-
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const { data: session } = useSession();
-  const role = session?.user?.role ?? "GUEST";
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-[var(--background)]">
-      <Sidebar />
-      <div className="flex flex-col flex-1">
-        <Navbar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8 ">
+    <div className="flex h-screen bg-[var(--background)] overflow-hidden">
+
+      {/* DESKTOP SIDEBAR */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+
+      {/* MOBILE SIDEBAR (drawer) */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          
+          {/* overlay */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* sidebar */}
+          <div className="relative w-64 bg-[var(--surface)] h-full shadow-xl">
+            <Sidebar />
+          </div>
+        </div>
+      )}
+
+      {/* MAIN */}
+      <div className="flex flex-col flex-1 h-screen overflow-hidden">
+        <Navbar onMenuClick={() => setOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {children}
         </main>
       </div>

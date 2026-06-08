@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Paperclip, Upload, FileText, Trash2 } from "lucide-react";
 
 export interface Attachment {
   id: string;
@@ -35,14 +36,17 @@ export default function TaskAttachments({
     try {
       setUploading(true);
 
-      const res = await fetch(`/api/tasks/${taskId}/attachments`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `/api/tasks/${taskId}/attachments`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data?.message || "Upload failed");
+      if (!res.ok) throw new Error("Upload failed");
 
       setAttachments((prev) => [data, ...prev]);
       setFile(null);
@@ -55,73 +59,141 @@ export default function TaskAttachments({
   };
 
   return (
-    <div className="w-full rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-lg space-y-5">
+    <section className="space-y-5">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white/80 tracking-wide">
-          Task Attachments
+      {/* HEADER */}
+      <div className="flex items-center gap-2">
+        <Paperclip className="w-5 h-5 text-[var(--primary)]" />
+
+        <h2 className="text-lg font-semibold text-[var(--foreground)]">
+          Attachments
         </h2>
 
-        <span className="text-xs text-white/40">
+        <span className="ml-auto text-xs text-[var(--text-muted)]">
           {attachments.length} files
         </span>
       </div>
 
-      {/* Upload Box */}
-      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center bg-white/5 border border-white/10 p-3 rounded-xl">
+      {/* UPLOAD BOX */}
+      <div className="bg-card border border-[var(--border)] rounded-xl p-4 space-y-3">
+
         <input
           type="file"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="text-xs text-white/70 file:mr-3 file:px-3 file:py-1 file:rounded-md file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+          onChange={(e) =>
+            setFile(e.target.files?.[0] || null)
+          }
+          className="
+            w-full
+            text-sm
+            text-[var(--text-muted)]
+            file:mr-4
+            file:px-4
+            file:py-2
+            file:rounded-lg
+            file:border-0
+            file:bg-[var(--primary)]
+            file:text-white
+            hover:file:opacity-90
+          "
         />
 
-        <button
-          onClick={handleUpload}
-          disabled={!file || uploading}
-          className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          {uploading ? "Uploading..." : "Upload File"}
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={handleUpload}
+            disabled={!file || uploading}
+            className="
+              inline-flex items-center gap-2
+              px-4 py-2
+              rounded-lg
+              bg-[var(--primary)]
+              text-white
+              text-sm
+              hover:opacity-90
+              transition
+              disabled:opacity-50
+              cursor-pointer
+              disabled:cursor-not-allowed
+            "
+          >
+            <Upload size={16} />
+            {uploading ? "Uploading..." : "Upload File"}
+          </button>
+        </div>
       </div>
 
-      {/* Empty State */}
+      {/* EMPTY STATE */}
       {attachments.length === 0 ? (
-        <div className="text-center py-8 text-white/40 text-sm border border-dashed border-white/10 rounded-xl">
-          No attachments yet. Upload your first file 🚀
+        <div className="bg-card border border-[var(--border)] rounded-xl p-6 text-center">
+          <p className="text-sm text-[var(--text-muted)]">
+            No attachments yet
+          </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
+
           {attachments.map((a) => (
             <div
               key={a.id}
-              className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition"
+              className="
+                flex items-center justify-between
+                bg-card
+                border border-[var(--border)]
+                rounded-xl
+                p-4
+                hover:bg-[var(--surface-hover)]
+                transition
+              "
             >
-              {/* File Info */}
-              <div className="flex flex-col">
-                <a
-                  href={a.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-400 hover:underline truncate max-w-[250px]"
-                >
-                  {a.fileName}
-                </a>
 
-                <span className="text-[11px] text-white/40">
-                  Uploaded:{" "}
-                  {new Date(a.uploadedAt).toLocaleDateString()}
-                </span>
+              {/* FILE INFO */}
+              <div className="flex items-center gap-3">
+
+                <FileText className="w-5 h-5 text-[var(--primary)]" />
+
+                <div className="flex flex-col">
+                  <a
+                    href={a.fileUrl}
+                    target="_blank"
+                    className="
+                      text-sm
+                      font-medium
+                      text-[var(--foreground)]
+                      hover:text-[var(--primary)]
+                      transition
+                    "
+                  >
+                    {a.fileName}
+                  </a>
+
+                  <span className="text-xs text-[var(--text-muted)]">
+                    {new Date(
+                      a.uploadedAt
+                    ).toLocaleDateString()}
+                  </span>
+                </div>
               </div>
 
-              {/* Action icon (optional future delete) */}
-              <div className="text-xs text-white/30">
-                📎
-              </div>
+              {/* ACTION (future delete) */}
+              <button
+                className="
+                cursor-pointer
+                  p-2
+                  rounded-lg
+                  hover:bg-[var(--surface-hover)]
+                  text-[var(--text-muted)]
+                  hover:text-[var(--danger)]
+                  transition
+                "
+              >
+                <Trash2 size={16} />
+              </button>
+
             </div>
           ))}
+
         </div>
       )}
-    </div>
+
+    </section>
   );
 }

@@ -2,12 +2,14 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Settings, UploadCloud, User } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
+  const router = useRouter();
 
   const [name, setName] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -21,26 +23,15 @@ export default function SettingsPage() {
     }
   }, [session]);
 
-  const displayAvatar =
+  const avatar =
     preview ||
     // @ts-ignore
     session?.user?.avatar ||
     null;
 
-  const joinedAt =
-    // @ts-ignore
-    session?.user?.joinedAt
-      ? new Date(
-          // @ts-ignore
-          session.user.joinedAt
-        ).toLocaleDateString()
-      : "Unknown";
-
-  const handleAvatarChange = async (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  /* ================= UPLOAD ================= */
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     try {
@@ -48,16 +39,9 @@ export default function SettingsPage() {
       setUploadProgress(0);
 
       const sigRes = await fetch("/api/cloudinary/signature");
-
-      if (!sigRes.ok) {
-        toast.error("Failed to get signature");
-        return;
-      }
-
       const sigData = await sigRes.json();
 
       const formData = new FormData();
-
       formData.append("file", file);
       formData.append("api_key", sigData.apiKey);
       formData.append("timestamp", String(sigData.timestamp));
@@ -66,21 +50,17 @@ export default function SettingsPage() {
 
       const xhr = new XMLHttpRequest();
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = Math.round(
-            (event.loaded / event.total) * 100
-          );
-
-          setUploadProgress(percent);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setUploadProgress(Math.round((e.loaded / e.total) * 100));
         }
       };
 
       xhr.onload = () => {
-        const response = JSON.parse(xhr.responseText);
+        const res = JSON.parse(xhr.responseText);
 
-        if (response.secure_url) {
-          setPreview(response.secure_url);
+        if (res.secure_url) {
+          setPreview(res.secure_url);
         }
 
         setUploading(false);
@@ -88,6 +68,7 @@ export default function SettingsPage() {
 
       xhr.onerror = () => {
         setUploading(false);
+        toast.error("Upload failed");
       };
 
       xhr.open(
@@ -96,44 +77,44 @@ export default function SettingsPage() {
       );
 
       xhr.send(formData);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed");
       setUploading(false);
     }
   };
 
+  /* ================= SAVE PROFILE ================= */
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     try {
       setSaving(true);
 
-      const payload = {
-        name,
-        avatar:
-          preview ||
-          // @ts-ignore
-          session?.user?.avatar ||
-          null,
-      };
-
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name,
+          avatar,
+        }),
       });
 
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Profile updated successfully!");
+        toast.success("Profile updated successfully");
+
+        // 🔥 IMPORTANT FIX: session + UI sync
+        await update();     // NextAuth session refresh
+        router.refresh();   // server components refresh
       } else {
         toast.error(data.message || "Update failed");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error("Something went wrong");
     } finally {
       setSaving(false);
@@ -141,60 +122,55 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
+
+      {/* HEADER */}
       <DashboardHeader
         title="Settings"
-        subtitle="Manage your profile & account preferences"
+        subtitle="Manage your profile & preferences"
       >
         <Settings className="w-6 h-6 text-[var(--primary)]" />
       </DashboardHeader>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 glass-panel p-6 rounded-2xl space-y-6">
+
+        {/* ================= FORM ================= */}
+        <section className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 space-y-6">
+
           <div className="flex items-center gap-2">
             <User className="w-5 h-5 text-[var(--primary)]" />
-            <h2 className="text-lg font-bold">
+            <h2 className="text-lg font-bold text-[var(--foreground)]">
               Profile Information
             </h2>
           </div>
 
-          <p className="text-sm text-[var(--text-muted)]">
-            Joined: {joinedAt}
-          </p>
+          <form onSubmit={handleSubmit} className="space-y-5">
 
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
-            <div className="space-y-2">
+            {/* NAME */}
+            <div>
               <label className="text-xs text-[var(--text-muted)]">
                 Full Name
               </label>
 
               <input
-                className="input w-full"
                 value={name}
-                onChange={(e) =>
-                  setName(e.target.value)
-                }
-                placeholder="Enter your name"
+                onChange={(e) => setName(e.target.value)}
+                className="w-full mt-1 px-4 py-2 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] focus:ring-2 focus:ring-[var(--primary)]"
               />
             </div>
 
-            <div className="space-y-2">
+            {/* UPLOAD */}
+            <div>
               <label className="text-xs text-[var(--text-muted)]">
-                Profile Picture
+                Profile Image
               </label>
 
-              <label className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-[var(--border)] p-6 cursor-pointer transition hover:bg-[var(--surface-hover)]/20">
-                <UploadCloud className="w-8 h-8 text-[var(--primary)] mb-3" />
+              <label className="mt-2 flex flex-col items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl p-6 cursor-pointer hover:bg-[var(--surface-hover)] transition">
 
-                <p className="text-sm text-center text-[var(--text-muted)]">
-                  Click to upload profile image
-                </p>
+                <UploadCloud className="w-8 h-8 text-[var(--primary)]" />
 
-                <p className="mt-1 text-xs text-[var(--text-muted)]">
-                  PNG, JPG, WEBP (Max 5MB)
+                <p className="text-sm text-[var(--text-muted)] mt-2">
+                  Click to upload image
                 </p>
 
                 <input
@@ -205,31 +181,28 @@ export default function SettingsPage() {
                 />
               </label>
 
+              {/* PROGRESS */}
               {uploading && (
-                <div className="mt-4 space-y-2">
+                <div className="mt-3">
                   <div className="flex justify-between text-xs text-[var(--text-muted)]">
-                    <span>Uploading Avatar...</span>
-                    <span className="font-semibold">
-                      {uploadProgress}%
-                    </span>
+                    <span>Uploading...</span>
+                    <span>{uploadProgress}%</span>
                   </div>
 
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--surface-hover)]">
+                  <div className="h-2 bg-[var(--surface-hover)] rounded-full mt-1 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-[var(--primary)] transition-all duration-300"
-                      style={{
-                        width: `${uploadProgress}%`,
-                      }}
+                      className="h-full bg-[var(--primary)] transition-all"
+                      style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
                 </div>
               )}
             </div>
 
+            {/* BUTTON */}
             <button
-              type="submit"
               disabled={uploading || saving}
-              className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50"
             >
               {uploading
                 ? `Uploading ${uploadProgress}%`
@@ -237,65 +210,57 @@ export default function SettingsPage() {
                 ? "Saving..."
                 : "Save Changes"}
             </button>
+
           </form>
         </section>
 
-        <aside className="glass-panel rounded-2xl p-6 flex flex-col items-center text-center space-y-4">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[var(--primary)]/20 bg-[var(--surface-hover)] flex items-center justify-center">
-              {displayAvatar ? (
-                <img
-                  src={displayAvatar}
-                  alt="avatar"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User className="w-12 h-12 text-[var(--text-muted)]" />
-              )}
-            </div>
+        {/* ================= SIDEBAR ================= */}
+        <aside className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-6 text-center space-y-5">
 
-            <span className="absolute bottom-2 right-2 h-4 w-4 rounded-full bg-green-500 border-2 border-white" />
+          <div className="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-[var(--primary)]/20 flex items-center justify-center bg-[var(--background)]">
+
+            {avatar ? (
+              <img
+                src={avatar}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-10 h-10 text-[var(--text-muted)]" />
+            )}
+
           </div>
 
           <div>
-            <h3 className="text-lg font-bold">
+            <h3 className="text-lg font-bold text-[var(--foreground)]">
               {name || "Your Name"}
             </h3>
-
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              Member since {joinedAt}
-            </p>
           </div>
 
-          <div className="w-full rounded-xl bg-[var(--surface-hover)]/10 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[var(--text-muted)]">
+          <div className="bg-[var(--surface-hover)]/10 p-4 rounded-xl">
+            <div className="flex justify-between text-xs mb-2">
+              <span className="text-[var(--text-muted)]">
                 Profile Completion
               </span>
 
-              <span className="text-xs font-semibold text-green-500">
-                {displayAvatar && name ? "100%" : "50%"}
+              <span className="text-green-500 font-semibold">
+                {avatar && name ? "100%" : "50%"}
               </span>
             </div>
 
-            <div className="h-2 w-full rounded-full overflow-hidden bg-[var(--surface-hover)]">
+            <div className="h-2 bg-[var(--surface-hover)] rounded-full overflow-hidden">
               <div
-                className="h-full bg-green-500"
+                className="h-full bg-green-500 transition-all"
                 style={{
-                  width:
-                    displayAvatar && name
-                      ? "100%"
-                      : "50%",
+                  width: avatar && name ? "100%" : "50%",
                 }}
               />
             </div>
           </div>
 
-          <div className="w-full rounded-xl bg-[var(--surface-hover)]/10 p-4 text-xs text-[var(--text-muted)]">
-            💡 Upload a professional profile picture so teammates can easily
-            recognize you.
-          </div>
+          <p className="text-xs text-[var(--text-muted)]">
+            💡 Add a clear profile picture for better recognition
+          </p>
+
         </aside>
       </div>
     </div>

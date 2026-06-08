@@ -1,13 +1,63 @@
 "use client";
 
 import { useState } from "react";
-import DataTable, { getStatusColor } from "@/components/dashboard/DataTable";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import DataTable from "@/components/dashboard/DataTable";
+import { Pencil, Trash2, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Modal } from "@/components/Modal";
 import { TaskForm } from "@/components/TaskForm";
+
+/* ================= STATUS ================= */
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "ACTIVE":
+      return "bg-green-500/10 text-green-600 border-green-500/20";
+    case "ON_HOLD":
+      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+    case "COMPLETED":
+      return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+    case "OVERDUE":
+      return "bg-red-500/10 text-red-600 border-red-500/20";
+    default:
+      return "bg-gray-500/10 text-gray-600 border-gray-500/20";
+  }
+};
+
+const StatusBadge = ({ status }: { status: string }) => (
+  <span
+    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+      status
+    )}`}
+  >
+    {status.replaceAll("_", " ")}
+  </span>
+);
+
+/* ================= PRIORITY ================= */
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case "HIGH":
+      return "bg-red-500/10 text-red-600 border-red-500/20";
+    case "MEDIUM":
+      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
+    case "LOW":
+      return "bg-green-500/10 text-green-600 border-green-500/20";
+    default:
+      return "bg-gray-500/10 text-gray-600 border-gray-500/20";
+  }
+};
+
+const PriorityBadge = ({ priority }: { priority: string }) => (
+  <span
+    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getPriorityColor(
+      priority
+    )}`}
+  >
+    {priority}
+  </span>
+);
 
 export default function TasksClient({
   tasks,
@@ -17,43 +67,25 @@ export default function TasksClient({
   users: { id: string; name: string }[];
 }) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [editingTask, setEditingTask] = useState<any>(null);
 
-  const { data: session } = useSession();
-
   const role = session?.user?.role;
-  const userId = session?.user?.id;
 
-  // ===============================
-  // ROLE CHECK
-  // ===============================
   const isAdmin = role === "ADMIN";
   const isManager = role === "PROJECT_MANAGER";
-  const isMember = role === "MEMBER";
 
-  // ===============================
-  // PERMISSIONS
-  // ===============================
   const canEdit = isAdmin || isManager;
   const canDelete = isAdmin;
 
-
-  // ===============================
-  // ROUTE BASE
-  // ===============================
   const baseRoute = isAdmin
-    ? "/admin/tasks"
+    ? "/dashboard/admin/tasks"
     : isManager
-      ? "/manager/tasks"
-      : "/member/tasks";
+    ? "/dashboard/manager/tasks"
+    : "/dashboard/member/tasks";
 
-  // ===============================
-  // HELPERS
-  // ===============================
   const isOverdue = (t: any) =>
     new Date(t.dueDate) < new Date() && t.status !== "COMPLETED";
-
-  const openEdit = (task: any) => setEditingTask(task);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this task permanently?")) return;
@@ -66,10 +98,7 @@ export default function TasksClient({
     else alert("Failed to delete task");
   };
 
-  // ===============================
-  // BASE COLUMNS
-  // ===============================
-  const baseColumns = [
+  const columns = [
     {
       header: "Task",
       accessor: (t: any) => (
@@ -78,6 +107,7 @@ export default function TasksClient({
         </span>
       ),
     },
+
     {
       header: "Project",
       accessor: (t: any) => (
@@ -86,18 +116,17 @@ export default function TasksClient({
         </span>
       ),
     },
+
     {
       header: "Status",
-      accessor: (t: any) => (
-        <span className={getStatusColor(t.status)}>
-          {t.status.replaceAll("_", " ")}
-        </span>
-      ),
+      accessor: (t: any) => <StatusBadge status={t.status} />,
     },
+
     {
       header: "Priority",
-      accessor: (t: any) => <span>{t.priority}</span>,
+      accessor: (t: any) => <PriorityBadge priority={t.priority} />,
     },
+
     {
       header: "Due Date",
       accessor: (t: any) => (
@@ -116,16 +145,15 @@ export default function TasksClient({
         </span>
       ),
     },
+
     {
       header: "Assignee",
       accessor: (t: any) => {
-        const names = t.assignees
-          ?.map((a: any) => a.user?.name)
-          .filter(Boolean);
+        const names = t.assignees?.map((a: any) => a.user?.name).filter(Boolean);
 
         return (
-          <div className="flex flex-wrap gap-1">
-            {names?.length > 0 ? (
+          <div className="flex flex-wrap gap-1 justify-center">
+            {names?.length ? (
               names.map((name: string) => (
                 <span
                   key={name}
@@ -143,65 +171,61 @@ export default function TasksClient({
         );
       },
     },
-  ];
 
-  // ===============================
-  // DETAILS COLUMN
-  // ===============================
-  const detailsColumn = {
-    header: "Details",
-    center: true,
-    accessor: (t: any) =>
+    /* ================= DETAILS CTA ================= */
+    {
+      header: "Details",
+      center: true,
+      accessor: (t: any) => (
+        <Link
+          href={`${baseRoute}/${t.id}`}
+          className="
+            inline-flex items-center gap-1
+            px-3 py-1.5
+            rounded-lg text-xs font-medium
+            bg-[var(--primary)]/10
+            text-[var(--primary)]
+            border border-[var(--primary)]/20
+            hover:bg-[var(--primary)]
+            hover:text-white
+            transition
+          "
+        >
+          <Eye size={14} />
+          View
+        </Link>
+      ),
+    },
 
-      <Link
-        href={`/dashboard${baseRoute}/${t.id}`}
-        className="btn btn-sm btn-ghost cursor-pointer"
-      >
-        <Eye size={24} color="#21f896" />
+    ...(canEdit || canDelete
+      ? [
+          {
+            header: "Actions",
+            center: true,
+            accessor: (t: any) => (
+              <div className="flex items-center justify-center gap-2">
+                {canEdit && (
+                  <button
+                    onClick={() => setEditingTask(t)}
+                    className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                )}
 
-      </Link>
-
-  };
-
-  // ===============================
-  // ACTIONS COLUMN (ONLY ADMIN/MANAGER)
-  // ===============================
-  const actionsColumn =
-    canEdit || canDelete
-      ? {
-        header: "Actions",
-        center: true,
-        accessor: (t: any) => (
-          <div className="flex items-center justify-center gap-2">
-            {canEdit && (
-              <button
-                onClick={() => openEdit(t)}
-                className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
-              >
-                <Pencil size={18} />
-              </button>
-            )}
-
-            {canDelete && (
-              <button
-                onClick={() => handleDelete(t.id)}
-                className="p-2 rounded-lg text-red-600 hover:bg-red-50"
-              >
-                <Trash2 size={18} />
-              </button>
-            )}
-          </div>
-        ),
-      }
-      : null;
-
-  // ===============================
-  // FINAL COLUMNS (SMART BUILD)
-  // ===============================
-  const columns = [
-    ...baseColumns,
-    detailsColumn,
-    ...(actionsColumn ? [actionsColumn] : []),
+                {canDelete && (
+                  <button
+                    onClick={() => handleDelete(t.id)}
+                    className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

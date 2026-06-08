@@ -1,6 +1,5 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
 import bcrypt from "bcryptjs";
 import prisma from "./prisma";
 
@@ -14,20 +13,15 @@ export const authOptions: NextAuthOptions = {
         isDemo: { label: "Demo Login", type: "text" }
       },
       async authorize(credentials) {
-        if (!credentials?.email) {
-          throw new Error("Email is required");
-        }
+        if (!credentials?.email) throw new Error("Email is required");
 
-        // Demo Login Logic
-        if (credentials.isDemo === 'true') {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          });
-          
-          if (!user) {
-            throw new Error("Demo user not found in the database.");
-          }
-          
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email }
+        });
+
+        if (!user) throw new Error("User not found");
+
+        if (credentials.isDemo === "true") {
           return {
             id: user.id,
             email: user.email,
@@ -37,23 +31,14 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
-        if (!credentials?.password) {
-          throw new Error("Password is required");
-        }
+        if (!credentials.password) throw new Error("Password required");
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
 
-        if (!user) {
-          throw new Error("No user found with this email");
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isPasswordValid) {
-          throw new Error("Invalid password");
-        }
+        if (!isValid) throw new Error("Invalid password");
 
         return {
           id: user.id,
@@ -65,27 +50,48 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
+      // login time
       if (user) {
-        token.role = user.role;
         token.id = user.id;
       }
+
+      // 🔥 ALWAYS FETCH FRESH DATA FROM DB (MAIN FIX)
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id }
+        });
+
+        if (dbUser) {
+          token.name = dbUser.name;
+          token.role = dbUser.role;
+          token.avatar = dbUser.avatar;
+        }
+      }
+
       return token;
     },
+
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.role = token.role as string;
+      if (session.user) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.name = token.name as string;
+        session.user.avatar = token.avatar as string;
       }
       return session;
     }
   },
+
   pages: {
-    signIn: '/login',
+    signIn: "/login",
   },
+
   session: {
     strategy: "jwt",
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };

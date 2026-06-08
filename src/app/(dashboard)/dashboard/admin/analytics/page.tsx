@@ -9,32 +9,29 @@ import TasksByPriorityChart from "@/components/dashboard/TasksByPriorityChart";
 import TeamProductivityChart from "@/components/dashboard/TeamProductivityChart";
 import ActivityChart from "@/components/dashboard/ActivityChart";
 
+import KpiCard from "@/components/shared/KpiCard";
+import {
+  CheckCircle2,
+  ListTodo,
+  Users,
+  Activity,
+} from "lucide-react";
+
 export default async function AdminAnalyticsPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) redirect("/login");
   if (session.user.role !== "ADMIN") redirect("/dashboard");
 
-  const userId = session.user.id;
-
-  // ================= ADMIN SCOPE =================
-  const taskWhere = {}; // admin sees all
-
-  const projectWhere = {};
-
-  const activityWhere = {};
-
   // ================= TASK STATUS =================
   const tasksByStatus = await prisma.task.groupBy({
     by: ["status"],
-    where: taskWhere,
     _count: { _all: true },
   });
 
-  // ================= TASK PRIORITY =================
+  // ================= PRIORITY =================
   const tasksByPriority = await prisma.task.groupBy({
     by: ["priority"],
-    where: taskWhere,
     _count: { _all: true },
   });
 
@@ -49,11 +46,11 @@ export default async function AdminAnalyticsPage() {
         select: {
           tasks: {
             where: {
-              task: { status: "COMPLETED" }
-            }
-          }
-        }
-      }
+              task: { status: "COMPLETED" },
+            },
+          },
+        },
+      },
     },
     take: 10,
   });
@@ -66,7 +63,6 @@ export default async function AdminAnalyticsPage() {
   // ================= ACTIVITY =================
   const activityActions = await prisma.activityLog.groupBy({
     by: ["action"],
-    where: activityWhere,
     _count: { _all: true },
   });
 
@@ -75,23 +71,75 @@ export default async function AdminAnalyticsPage() {
     count: a._count._all,
   }));
 
-  return (
-    <div className="space-y-6">
+  // ================= REAL KPIs =================
+  const totalTasks = await prisma.task.count();
+  const completedTasks = await prisma.task.count({
+    where: { status: "COMPLETED" },
+  });
+  const pendingTasks = totalTasks - completedTasks;
 
+  const totalUsers = await prisma.user.count();
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+
+      {/* HEADER */}
       <DashboardHeader
-        title="Admin Analytics & Insights"
-        subtitle="System-wide analytics overview"
+        title="Admin Analytics Overview"
+        subtitle="System-wide performance insights & reporting"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* KPI ROW (CONSISTENT WITH OTHER PAGES) */}
+      <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
-        <TaskStatusChart data={tasksByStatus} />
+        <KpiCard
+          title="Total Tasks"
+          value={totalTasks}
+          icon={<ListTodo size={20} />}
+          color="var(--info)"
+        />
 
-        <TasksByPriorityChart data={tasksByPriority} />
+        <KpiCard
+          title="Completed"
+          value={completedTasks}
+          icon={<CheckCircle2 size={20} />}
+          color="var(--success)"
+        />
 
-        <TeamProductivityChart data={teamProductivity} />
+        <KpiCard
+          title="Pending"
+          value={pendingTasks}
+          icon={<Activity size={20} />}
+          color="var(--accent-purple)"
+        />
 
-        <ActivityChart data={activityDistribution} />
+        <KpiCard
+          title="Total Users"
+          value={totalUsers}
+          icon={<Users size={20} />}
+          color="var(--primary)"
+        />
+
+      </div>
+
+      {/* CHART SECTION (CLEAN GRID LIKE PROJECT PAGE STYLE) */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+
+        <div className="bg-card rounded-xl shadow-sm p-4">
+          <TaskStatusChart data={tasksByStatus} />
+        </div>
+
+        <div className="bg-card rounded-xl shadow-sm p-4">
+          <TasksByPriorityChart data={tasksByPriority} />
+        </div>
+
+        <div className="bg-card rounded-xl shadow-sm p-4">
+          <TeamProductivityChart data={teamProductivity} />
+        </div>
+
+        <div className="bg-card rounded-xl shadow-sm p-4">
+          <ActivityChart data={activityDistribution} />
+        </div>
 
       </div>
     </div>

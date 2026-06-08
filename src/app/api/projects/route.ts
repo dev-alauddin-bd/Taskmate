@@ -4,6 +4,74 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Role, ActivityAction } from "../../../../generated/prisma/enums";
 
+// GET handler to fetch all projects
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    // Admin can see all projects
+    // Manager can see projects they are assigned to
+    // Member can see projects they are assigned to
+    if (session.user.role === "ADMIN") {
+      const projects = await prisma.project.findMany({
+        where: {
+          isDeleted: false,
+          OR: [
+            { managerId: session.user.id },
+            { members: { some: { userId: session.user.id } } },
+          ],
+        },
+        include: {
+          members: {
+            select: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      return NextResponse.json(projects);
+    }
+    const projects = await prisma.project.findMany({
+      where: {
+        isDeleted: false,
+        OR: [
+          { managerId: session.user.id },
+          { members: { some: { userId: session.user.id } } },
+        ],
+      },
+      include: {
+        members: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return NextResponse.json(projects);
+  } catch (error) {
+    console.error("PROJECT FETCH ERROR:", error);
+    return NextResponse.json({ message: "Server error", error: String(error) }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

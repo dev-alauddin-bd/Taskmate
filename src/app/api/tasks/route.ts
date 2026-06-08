@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { TaskStatus } from '../../../../generated/prisma/enums';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { title, description, dueDate, priority, status, projectId, userId } = body;
-
+  
     // 1. Prevent duplicate task titles inside the same project
     const duplicate = await prisma.task.findFirst({
       where: {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
         description,
         dueDate: new Date(dueDate),
         priority: priority || "MEDIUM",
-        status: status || "TODO",
+        status: Object.values(TaskStatus).includes(status) ? status : TaskStatus.TODO,
         projectId,
         assignees: userId ? { create: [{ userId }] } : undefined,
       },

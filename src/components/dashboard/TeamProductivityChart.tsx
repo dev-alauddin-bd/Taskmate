@@ -1,97 +1,111 @@
-"use client"
-import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
-import { ApexOptions } from "apexcharts"
-import { Users } from "lucide-react"
+"use client";
 
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false })
+import { Users, Trophy } from "lucide-react";
 
 interface Props {
-  data: { name: string; completedTasks: number }[]
+  data: { name: string; completedTasks: number }[];
 }
 
 export default function TeamProductivityChart({ data }: Props) {
-  const [isMounted, setIsMounted] = useState(false);
+  const total = data.reduce((acc, d) => acc + d.completedTasks, 0);
+  const max = Math.max(...data.map(d => d.completedTasks), 1);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const sorted = [...data].sort((a, b) => b.completedTasks - a.completedTasks);
 
-  const series = data.map(d => d.completedTasks)
-  const labels = data.map(d => d.name)
+  const getRankIcon = (index: number) => {
+    if (index === 0) return "🥇";
+    if (index === 1) return "🥈";
+    if (index === 2) return "🥉";
+    return "•";
+  };
 
-  const options: ApexOptions = isMounted
-    ? {
-        chart: {
-          type: "bar",
-          foreColor: "var(--text-muted)",
-          fontFamily: "Inter, sans-serif",
-          toolbar: { show: false },
-        },
-        plotOptions: {
-          bar: {
-            borderRadius: 6,
-            columnWidth: "35%",
-            distributed: true,
-          },
-        },
-        colors: [
-          "var(--primary)",
-          "var(--success)",
-          "var(--warning)",
-          "var(--danger)",
-          "#8b5cf6",
-        ],
-        grid: {
-          borderColor: "var(--border)",
-          strokeDashArray: 4,
-          yaxis: { lines: { show: true } },
-          xaxis: { lines: { show: false } },
-        },
-        xaxis: {
-          categories: labels,
-          axisBorder: { show: false },
-          axisTicks: { show: false },
-          labels: {
-            style: { colors: "var(--text-muted)", fontSize: "11px" },
-          },
-        },
-        yaxis: {
-          tickAmount: 4,
-          labels: {
-            formatter: (v) => Math.round(v).toString(),
-            style: { colors: "var(--text-muted)", fontSize: "11px" },
-          },
-        },
-        tooltip: { theme: "dark" },
-        legend: { show: false },
-      }
-    : {};
+  const getAvatar = (name: string) =>
+    name?.charAt(0)?.toUpperCase() || "?";
 
   return (
-    <div className="glass-panel p-6 rounded-2xl animate-fade-in flex flex-col justify-between border border-[var(--border)]/50 h-full min-h-[360px]">
-      <div className="flex items-center gap-2 mb-4 shrink-0">
+    <div className="bg-card border border-[var(--border)] rounded-xl shadow-sm p-5 flex flex-col h-full min-h-[360px]">
+
+      {/* HEADER */}
+      <div className="flex items-center gap-2 mb-5">
         <Users className="w-5 h-5 text-[var(--primary)]" />
-        <h3 className="text-base font-bold text-[var(--foreground)]">Team Productivity</h3>
+        <h3 className="text-base font-semibold text-[var(--foreground)]">
+          Team Productivity
+        </h3>
       </div>
-      <div className="flex-1 flex items-center justify-center w-full">
-        {!isMounted ? (
-          <div className="flex items-center justify-center h-[260px] w-full">
-            <div className="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : series.length > 0 ? (
-          <Chart
-            key={`team-productivity-chart-${series.length}`}
-            options={options}
-            series={[{ name: "Completed Tasks", data: series }]}
-            type="bar"
-            width="100%"
-            height={260}
-          />
-        ) : (
-          <p className="text-sm text-[var(--text-muted)]">No team productivity data available</p>
-        )}
+
+      {/* TOTAL */}
+      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 mb-5">
+        <p className="text-xs text-[var(--text-muted)]">Total Completed Tasks</p>
+        <p className="text-2xl font-bold text-[var(--foreground)]">
+          {total}
+        </p>
+      </div>
+
+      {/* LIST */}
+      <div className="space-y-4 flex-1">
+
+        {sorted.map((user, index) => {
+          const percent = Math.round((user.completedTasks / max) * 100);
+
+          return (
+            <div
+              key={user.name}
+              className="p-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition"
+            >
+
+              {/* TOP ROW */}
+              <div className="flex items-center justify-between mb-2">
+
+                {/* LEFT */}
+                <div className="flex items-center gap-3">
+
+                  {/* Avatar */}
+                  <div className="w-8 h-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-bold">
+                    {getAvatar(user.name)}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-[var(--foreground)] flex items-center gap-1">
+                      {getRankIcon(index)} {user.name}
+                    </p>
+
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {percent}% productivity
+                    </p>
+                  </div>
+
+                </div>
+
+                {/* RIGHT */}
+                <span className="text-sm font-semibold text-[var(--foreground)]">
+                  {user.completedTasks}
+                </span>
+
+              </div>
+
+              {/* PROGRESS */}
+              <div className="w-full h-2 bg-[var(--border)] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${percent}%`,
+                    backgroundColor:
+                      index === 0
+                        ? "#22c55e"
+                        : index === 1
+                        ? "#3b82f6"
+                        : index === 2
+                        ? "#f59e0b"
+                        : "var(--primary)",
+                  }}
+                />
+              </div>
+
+            </div>
+          );
+        })}
+
       </div>
     </div>
-  )
+  );
 }

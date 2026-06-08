@@ -12,11 +12,11 @@ import {
   Bell,
   BarChart3,
   UserCircle,
+  LogOut,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { type LucideIcon } from "lucide-react";
 
-// Define the shape of a navigation item
 type NavItem = {
   name: string;
   href: string;
@@ -27,6 +27,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = session?.user?.role ?? "GUEST";
+
   let navItems: NavItem[] = [];
 
   const adminNavItems: NavItem[] = [
@@ -72,39 +73,67 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] hidden md:flex flex-col shadow-sm z-10 sticky top-0 h-screen">
-      <div className="h-16 flex items-center px-6 border-b border-[var(--border)] shrink-0">
-        <h2 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
-          <CheckSquare className="w-6 h-6" />
-          Taskmate
-        </h2>
-      </div>
+    <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col h-full">
+
+      {/* TOP LOGO */}
+      <Link href="/dashboard">
+        <div className="h-16 flex items-center px-6 border-b border-[var(--border)]">
+          <h2 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
+            <CheckSquare className="w-6 h-6" />
+            Taskmate
+          </h2>
+        </div>
+      </Link>
+
+      {/* NAV ITEMS */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
+
         {navItems.map((item) => {
-          let isActive: boolean;
-          if (item.href === "/dashboard") {
-            // Only mark the top‑level Dashboard as active on the exact path
-            isActive = pathname === "/dashboard";
-          } else {
-            // For sub‑pages use startsWith to cover the whole section
-            isActive = pathname.startsWith(item.href);
-          }
+          const isActive =
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(item.href);
+
           const Icon = item.icon;
+
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive
-                ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium shadow-sm"
-                : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] hover:translate-x-1"
-                }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                isActive
+                  ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium"
+                  : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]"
+              }`}
             >
               <Icon className="w-5 h-5" />
               {item.name}
             </Link>
           );
         })}
+
       </nav>
+
+      {/* BOTTOM LOGOUT */}
+      <div className="p-4 border-t border-[var(--border)]">
+
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="
+            flex items-center gap-3 w-full
+            px-3 py-2.5 rounded-lg
+            text-red-500
+            hover:bg-red-500
+            hover:text-white
+            transition-all
+          "
+        >
+          <LogOut className="w-5 h-5" />
+          Logout
+        </button>
+
+      </div>
+
     </aside>
   );
 }

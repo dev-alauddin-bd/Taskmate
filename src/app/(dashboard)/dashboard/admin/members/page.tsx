@@ -1,10 +1,19 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import DataTable from "@/components/dashboard/DataTable";
-import Link from "next/link";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { redirect } from "next/navigation";
+
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import KpiCard from "@/components/shared/KpiCard";
+import DataTable from "@/components/dashboard/DataTable";
+
+import {
+  Users,
+  ListTodo,
+  CheckCircle2,
+  Clock3,
+  AlertTriangle,
+} from "lucide-react";
 
 export default async function AdminMembersPage({
   searchParams,
@@ -13,16 +22,13 @@ export default async function AdminMembersPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/login");
-  }
+  if (!session) redirect("/login");
+  if (session.user.role !== "ADMIN") redirect("/dashboard");
 
-  if (session.user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
-
-  const sp = await searchParams;
-  const search = typeof sp?.search === "string" ? sp.search : "";
+  const search =
+    typeof searchParams.search === "string"
+      ? searchParams.search
+      : "";
 
   const where: any = {};
   if (search) {
@@ -44,112 +50,176 @@ export default async function AdminMembersPage({
       },
       tasks: {
         where: {
-          task: { status: "COMPLETED" }
-        }
+          task: { status: "COMPLETED" },
+        },
       },
     },
     orderBy: { name: "asc" },
   });
 
+  /* ================= ROLE BADGE ================= */
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case "ADMIN":
+        return "bg-red-500/10 text-red-600 border-red-500/20";
+      case "PROJECT_MANAGER":
+        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+      case "MEMBER":
+        return "bg-green-500/10 text-green-600 border-green-500/20";
+      default:
+        return "bg-gray-500/10 text-gray-600 border-gray-500/20";
+    }
+  };
+
+  const RoleBadge = ({ role }: { role: string }) => (
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getRoleColor(
+        role
+      )}`}
+    >
+      {role.replace("_", " ")}
+    </span>
+  );
+
+  /* ================= STATS ================= */
+  const totalMembers = teamMembers.length;
+
+
+
+  const activeMembers = teamMembers.filter(
+    (m) => m._count.tasks > 0
+  ).length;
+
+  const idleMembers = teamMembers.filter(
+    (m) => m._count.tasks === 0
+  ).length;
+
+
   return (
-    <div className="space-y-6 container mx-auto">
+    <div className="space-y-6 animate-fade-in">
+
       {/* HEADER */}
       <DashboardHeader
-        title="Admin Members Directory"
-        subtitle="View and manage all registered team members in the system."
+        title="Admin Members Overview"
+        subtitle="Monitor team performance and activity"
       />
 
-      {/* Search Bar */}
-      <form method="GET" className="glass-panel p-4 rounded-xl flex gap-4 items-end shadow-sm">
+      {/* KPI SECTION (FULL ANALYTICS) */}
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+
+        <KpiCard
+          title="Total Members"
+          value={totalMembers}
+          icon={<Users size={20} />}
+          color="var(--primary)"
+        />
+
+
+        <KpiCard
+          title="Active Members"
+          value={activeMembers}
+          icon={<Users size={20} />}
+          color="var(--success)"
+        />
+
+        <KpiCard
+          title="Idle Members"
+          value={idleMembers}
+          icon={<Clock3 size={20} />}
+          color="var(--warning)"
+        />
+
+
+
+
+      </div>
+
+
+
+      {/* SEARCH */}
+      <form
+        method="GET"
+        className="bg-[var(--surface)] border border-[var(--border)] p-4 rounded-xl flex gap-4 items-end shadow-sm"
+      >
         <div className="flex-grow">
-          <label htmlFor="search" className="label text-xs">Search team members</label>
+          <label className="text-xs text-[var(--text-muted)]">
+            Search members
+          </label>
+
           <input
-            id="search"
             name="search"
-            type="text"
-            placeholder="Search by name..."
             defaultValue={search}
-            className="input py-1.5 text-sm"
+            placeholder="Search by name..."
+            className="w-full mt-1 px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)]"
           />
         </div>
-        <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary py-1.5 px-4 text-sm h-[38px]">
-            Search
-          </button>
-          {search && (
-            <Link href="/admin/members" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
-              Reset
-            </Link>
-          )}
-        </div>
+
+        <button
+          type="submit"
+          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90"
+        >
+          Search
+        </button>
       </form>
 
       {/* TABLE */}
-      <DataTable
-        data={teamMembers}
-        columns={[
-          {
-            header: "Name",
-            accessor: (m) => (
-              <span className="font-medium text-[var(--foreground)]">
-                {m.name}
-              </span>
-            ),
-          },
-          {
-            header: "Email",
-            accessor: (m) => (
-              <span className="text-[var(--text-muted)]">
-                {m.email}
-              </span>
-            ),
-          },
-          {
-            header: "Role",
-            accessor: (m) => (
-              <span
-                className={`px-2 py-1 rounded-md text-xs font-medium ${m.role === "ADMIN"
-                    ? "bg-[var(--danger)]/10 text-[var(--danger)]"
-                    : m.role === "PROJECT_MANAGER"
-                      ? "bg-[var(--primary-light)] text-[var(--primary)]"
-                      : "bg-[var(--success)]/10 text-[var(--success)]"
-                  }`}
-              >
-                {m.role}
-              </span>
-            ),
-          },
-          {
-            header: "Total Tasks",
-            accessor: (m) => (
-              <span className="font-semibold">
-                {m._count.tasks}
-              </span>
-            ),
-          },
-          {
-            header: "Completed Tasks",
-            accessor: (m) => (
-              <span className="text-[var(--success)] font-semibold">
-                {m.tasks?.length ?? 0}
-              </span>
-            ),
-          },
-          {
-            header: "Pending Tasks",
-            accessor: (m) => {
-              const pending =
-                m._count.tasks - (m.tasks?.length ?? 0);
+      <div className="bg-card rounded-xl shadow-sm overflow-hidden">
 
-              return (
-                <span className="text-[var(--warning)] font-semibold">
-                  {pending}
+        <DataTable
+          data={teamMembers}
+          columns={[
+            {
+              header: "Name",
+              accessor: (m) => (
+                <span className="font-medium text-[var(--foreground)]">
+                  {m.name}
                 </span>
-              );
+              ),
             },
-          },
-        ]}
-      />
+            {
+              header: "Email",
+              accessor: (m) => (
+                <span className="text-[var(--text-muted)]">
+                  {m.email}
+                </span>
+              ),
+            },
+            {
+              header: "Role",
+              accessor: (m) => <RoleBadge role={m.role} />,
+            },
+            {
+              header: "Total Tasks",
+              accessor: (m) => (
+                <span className="font-semibold">
+                  {m._count.tasks}
+                </span>
+              ),
+            },
+            {
+              header: "Completed",
+              accessor: (m) => (
+                <span className="text-[var(--success)] font-semibold">
+                  {m.tasks?.length ?? 0}
+                </span>
+              ),
+            },
+            {
+              header: "Pending",
+              accessor: (m) => {
+                const pending =
+                  m._count.tasks - (m.tasks?.length ?? 0);
+
+                return (
+                  <span className="text-[var(--warning)] font-semibold">
+                    {pending}
+                  </span>
+                );
+              },
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

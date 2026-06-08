@@ -3,13 +3,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { format } from "date-fns";
 import Link from "next/link";
+
 import TaskComments from "@/components/dashboard/TaskComments";
 import TaskAttachments from "@/components/dashboard/TaskAttachments";
 
 import prisma from "@/lib/prisma";
 
 const card =
-  "glass-panel rounded-3xl p-6 relative overflow-hidden";
+  "bg-card border border-[var(--border)] rounded-2xl shadow-sm";
+
+const badge =
+  "px-3 py-1 rounded-full text-xs font-medium border";
 
 export default async function ManagerTaskDetailPage({
   params,
@@ -20,17 +24,14 @@ export default async function ManagerTaskDetailPage({
 
   if (!session) redirect("/login");
 
-  if (!["ADMIN", "PROJECT_MANAGER"].includes(session.user.role)) {
+  if (!["ADMIN"].includes(session.user.role)) {
     redirect("/dashboard");
   }
 
   const { id } = await params;
 
   const task = await prisma.task.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-    },
+    where: { id, deletedAt: null },
     include: {
       project: true,
       assignees: { include: { user: true } },
@@ -42,105 +43,136 @@ export default async function ManagerTaskDetailPage({
   if (!task) notFound();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
 
-      {/* ================= HEADER ================= */}
-    
-      <div className={`${card} p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl`}>
+      {/* HEADER */}
+      <div className={`${card} p-6`}>
+        <h1 className="text-2xl md:text-3xl font-bold text-[var(--foreground)]">
+          {task.title}
+        </h1>
 
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <p className="mt-2 text-sm text-[var(--text-muted)] max-w-3xl">
+          {task.description || "No description provided"}
+        </p>
 
-          {/* LEFT CONTENT */}
-          <div className="flex-1 space-y-4">
+        {/* TAGS */}
+        <div className="flex flex-wrap gap-2 mt-4">
+          <span className={`${badge} bg-blue-500/10 text-blue-600 border-blue-500/20`}>
+            📁 {task.project?.name}
+          </span>
 
-            {/* TITLE */}
-            <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
-              {task.title}
-            </h1>
+          <span className={`${badge} bg-purple-500/10 text-purple-600 border-purple-500/20`}>
+            📌 {task.status.replaceAll("_", " ")}
+          </span>
 
-            {/* DESCRIPTION */}
-            <p className="text-sm md:text-base text-white/60 leading-relaxed max-w-3xl">
-              {task.description || "No description provided"}
-            </p>
+          <span className={`${badge} bg-yellow-500/10 text-yellow-600 border-yellow-500/20`}>
+            ⚡ {task.priority}
+          </span>
 
-            {/* TAGS */}
-            <div className="flex flex-wrap gap-2 pt-2">
+          <span className={`${badge} bg-green-500/10 text-green-600 border-green-500/20`}>
+            ⏰ {format(new Date(task.dueDate), "MMM d, yyyy")}
+          </span>
+        </div>
+      </div>
 
-              <span className="px-3 py-1 rounded-full text-xs bg-blue-500/15 text-blue-300 border border-blue-500/20">
-                📁 {task.project?.name}
-              </span>
+      {/* ================= MAIN GRID (ONLY 2 COLS) ================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-              <span className="px-3 py-1 rounded-full text-xs bg-purple-500/15 text-purple-300 border border-purple-500/20 capitalize">
-                📌 {task.status.replaceAll("_", " ")}
-              </span>
+        {/* ================= LEFT (FULL INFO PANEL) ================= */}
+        <div className={`lg:col-span-4 ${card} p-5 space-y-6`}>
 
-              <span className="px-3 py-1 rounded-full text-xs bg-yellow-500/15 text-yellow-300 border border-yellow-500/20 capitalize">
-                ⚡ {task.priority}
-              </span>
+          {/* OVERVIEW */}
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3">
+              Overview
+            </h2>
 
-              <span className="px-3 py-1 rounded-full text-xs bg-green-500/15 text-green-300 border border-green-500/20">
-                ⏰ Due {format(new Date(task.dueDate), "MMM d")}
-              </span>
+            <div className="space-y-3">
+
+              <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex justify-between">
+                <span className="text-[var(--text-muted)]">Priority</span>
+                <span className="font-medium text-[var(--foreground)]">
+                  {task.priority}
+                </span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex justify-between">
+                <span className="text-[var(--text-muted)]">Status</span>
+                <span className="font-medium text-[var(--foreground)]">
+                  {task.status.replaceAll("_", " ")}
+                </span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex justify-between">
+                <span className="text-[var(--text-muted)]">Due</span>
+                <span className="font-medium text-[var(--foreground)]">
+                  {format(new Date(task.dueDate), "MMM d, yyyy")}
+                </span>
+              </div>
 
             </div>
           </div>
 
-         
+          {/* ASSIGNEES */}
+          <div>
+            <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3">
+              Assignees
+            </h2>
 
-        </div>
-      </div>
-
-      {/* ================= DASHBOARD GRID ================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        {/* LEFT */}
-        <div className={`lg:col-span-3 ${card} p-5 space-y-5`}>
-
-          <h2 className="text-sm text-gray-400 font-semibold">
-            Assignees
-          </h2>
-
-          <div className="space-y-2">
-            {task.assignees.length > 0 ? (
-              task.assignees.map((a) => (
-                <div
-                  key={a.id}
-                  className="px-3 py-2 rounded-lg bg-white/5 text-white"
-                >
-                  {a.user?.name || "Unnamed"}
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm">No assignees</p>
-            )}
+            <div className="space-y-2">
+              {task.assignees.length > 0 ? (
+                task.assignees.map((a) => (
+                  <div
+                    key={a.id}
+                    className="p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--foreground)]"
+                  >
+                    {a.user?.name || "Unnamed"}
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-[var(--text-muted)]">
+                  No assignees
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-white/10 text-xs text-gray-400 space-y-1">
-            <p>ID: {task.id.slice(0, 8)}...</p>
-            <p>Created: {new Date(task.createdAt).toLocaleDateString()}</p>
-            <p>Status: {task.status}</p>
+          {/* META */}
+          <div className="pt-4 border-t border-[var(--border)] space-y-2 text-xs text-[var(--text-muted)]">
+
+            <div className="flex justify-between">
+              <span>ID</span>
+              <span className="text-[var(--foreground)]">
+                {task.id.slice(0, 8)}...
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Created</span>
+              <span className="text-[var(--foreground)]">
+                {format(new Date(task.createdAt), "MMM d, yyyy")}
+              </span>
+            </div>
+
           </div>
         </div>
 
-        {/* CENTER (MAIN CONTENT) */}
-        <div className="lg:col-span-6 space-y-6">
+        {/* ================= CENTER (COMMENTS + ATTACHMENTS) ================= */}
+        <div className="lg:col-span-8 space-y-6">
 
           <div className={`${card} p-6`}>
-            <h2 className="text-sm text-gray-400 mb-4">
+            <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-4">
               Comments
             </h2>
 
             <TaskComments
               taskId={task.id}
-              initialComments={task.comments.map((c) => ({
-                ...c,
-                createdAt: c.createdAt,
-              }))}
+              initialComments={task.comments}
             />
           </div>
 
           <div className={`${card} p-6`}>
-            <h2 className="text-sm text-gray-400 mb-4">
+            <h2 className="text-sm font-semibold text-[var(--text-muted)] mb-4">
               Attachments
             </h2>
 
@@ -151,42 +183,18 @@ export default async function ManagerTaskDetailPage({
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className={`lg:col-span-3 ${card} p-5`}>
-
-          <h2 className="text-sm text-gray-400 font-semibold mb-4">
-            Overview
-          </h2>
-
-          <div className="space-y-3 text-sm text-gray-300">
-
-            <div className="p-3 rounded-lg bg-white/5">
-              <span className="text-gray-400">Priority:</span>{" "}
-              {task.priority}
-            </div>
-
-            <div className="p-3 rounded-lg bg-white/5">
-              <span className="text-gray-400">Status:</span>{" "}
-              {task.status}
-            </div>
-
-            <div className="p-3 rounded-lg bg-white/5">
-              <span className="text-gray-400">Due:</span>{" "}
-              {format(new Date(task.dueDate), "MMM d, yyyy")}
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
       <div className="flex justify-end">
         <Link
           href="/dashboard/manager/tasks"
-          className="text-gray-400 hover:text-white transition"
+          className="text-[var(--text-muted)] hover:text-[var(--foreground)] transition"
         >
           ← Back to Tasks
         </Link>
       </div>
+
     </div>
   );
 }

@@ -6,6 +6,16 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 import TasksPageClient from "@/components/shared/TasksPageClient";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import KpiCard from "@/components/shared/KpiCard";
+
+import {
+  ListTodo,
+  CheckCircle2,
+  Clock3,
+  AlertTriangle,
+  User,
+} from "lucide-react";
 
 export default async function ManagerTasksPage({
   searchParams,
@@ -23,13 +33,26 @@ export default async function ManagerTasksPage({
   const page = Number(searchParams.page ?? 1);
   const limit = Number(searchParams.limit ?? 10);
 
-  const search = typeof searchParams.search === "string" ? searchParams.search : "";
-  const status = typeof searchParams.status === "string" ? searchParams.status : "";
-  const priority = typeof searchParams.priority === "string" ? searchParams.priority : "";
-  const assigneeId = typeof searchParams.assigneeId === "string" ? searchParams.assigneeId : "";
-  const deadlineStatus = typeof searchParams.deadlineStatus === "string" ? searchParams.deadlineStatus : "";
-  const sortBy = typeof searchParams.sortBy === "string" ? searchParams.sortBy : "dueDate";
-  const sortOrder = typeof searchParams.sortOrder === "string" ? searchParams.sortOrder : "asc";
+  const search =
+    typeof searchParams.search === "string" ? searchParams.search : "";
+  const status =
+    typeof searchParams.status === "string" ? searchParams.status : "";
+  const priority =
+    typeof searchParams.priority === "string" ? searchParams.priority : "";
+  const assigneeId =
+    typeof searchParams.assigneeId === "string" ? searchParams.assigneeId : "";
+  const deadlineStatus =
+    typeof searchParams.deadlineStatus === "string"
+      ? searchParams.deadlineStatus
+      : "";
+  const sortBy =
+    typeof searchParams.sortBy === "string"
+      ? searchParams.sortBy
+      : "dueDate";
+  const sortOrder =
+    typeof searchParams.sortOrder === "string"
+      ? searchParams.sortOrder
+      : "asc";
 
   const where: any = {};
 
@@ -66,31 +89,101 @@ export default async function ManagerTasksPage({
       where,
       include: {
         project: { select: { name: true } },
-        assignees: { select: { user: { select: { id: true, name: true } } } },
+        assignees: {
+          select: {
+            user: { select: { id: true, name: true } },
+          },
+        },
       },
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),
+
     prisma.task.count({ where }),
+
     prisma.user.findMany({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
   ]);
 
-  return (
-    <div className="space-y-6">
-    
+  // ================= KPI CALCULATION =================
+  const totalTasks = total;
 
-      {/* CLIENT WRAPPER (modal + button fix) */}
-      <TasksPageClient
-        tasks={tasks}
-        users={users}
-        page={page}
-        limit={limit}
-        total={total}
-      />
+  const completedTasks = tasks.filter(
+    (t) => t.status === "COMPLETED"
+  ).length;
+
+  const pendingTasks = tasks.filter(
+    (t) => t.status !== "COMPLETED"
+  ).length;
+
+  const overdueTasks = tasks.filter(
+    (t) =>
+      t.status !== "COMPLETED" &&
+      new Date(t.dueDate) < new Date()
+  ).length;
+
+  const uniqueAssignees = new Set(
+    tasks.flatMap((t) =>
+      t.assignees.map((a) => a.user.id)
+    )
+  ).size;
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+
+     
+      {/* KPI ROW (same dashboard style) */}
+      <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+
+        <KpiCard
+          title="Tasks"
+          value={totalTasks}
+          icon={<ListTodo size={20} />}
+          color="var(--primary)"
+        />
+
+        <KpiCard
+          title="Completed"
+          value={completedTasks}
+          icon={<CheckCircle2 size={20} />}
+          color="var(--success)"
+        />
+
+        <KpiCard
+          title="Pending"
+          value={pendingTasks}
+          icon={<Clock3 size={20} />}
+          color="var(--accent-purple)"
+        />
+
+        <KpiCard
+          title="Overdue"
+          value={overdueTasks}
+          icon={<AlertTriangle size={20} />}
+          color="var(--danger)"
+        />
+
+        <KpiCard
+          title="Active Users"
+          value={uniqueAssignees}
+          icon={<User size={20} />}
+          color="var(--info)"
+        />
+      </div>
+
+      {/* MAIN TASK LIST */}
+      <div className="bg-card rounded-xl shadow-sm ">
+        <TasksPageClient
+          tasks={tasks}
+          users={users}
+          page={page}
+          limit={limit}
+          total={total}
+        />
+      </div>
     </div>
   );
 }
