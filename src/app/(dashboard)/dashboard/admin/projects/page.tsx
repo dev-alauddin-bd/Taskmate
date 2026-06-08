@@ -19,6 +19,9 @@ export default async function AdminProjectsPage({ searchParams }: any) {
 
   const [projects, total] = await Promise.all([
     prisma.project.findMany({
+      where: {
+        isDeleted: false
+      },
       include: {
         manager: { select: { name: true } },
         _count: { select: { tasks: true } },
