@@ -20,7 +20,7 @@ export default async function ManagerTaskDetailPage({
 
   if (!session) redirect("/login");
 
-  if (!["MEMBER"].includes(session.user.role)) {
+  if (!["ADMIN", "PROJECT_MANAGER"].includes(session.user.role)) {
     redirect("/dashboard");
   }
 
@@ -45,7 +45,7 @@ export default async function ManagerTaskDetailPage({
     <div className="space-y-6">
 
       {/* ================= HEADER ================= */}
-
+    
       <div className={`${card} p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl`}>
 
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
@@ -85,7 +85,7 @@ export default async function ManagerTaskDetailPage({
             </div>
           </div>
 
-
+         
 
         </div>
       </div>

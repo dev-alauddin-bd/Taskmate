@@ -30,6 +30,7 @@ export type CommentMinAggregateOutputType = {
   createdAt: Date | null
   taskId: string | null
   userId: string | null
+  isDeleted: boolean | null
 }
 
 export type CommentMaxAggregateOutputType = {
@@ -38,6 +39,7 @@ export type CommentMaxAggregateOutputType = {
   createdAt: Date | null
   taskId: string | null
   userId: string | null
+  isDeleted: boolean | null
 }
 
 export type CommentCountAggregateOutputType = {
@@ -46,6 +48,7 @@ export type CommentCountAggregateOutputType = {
   createdAt: number
   taskId: number
   userId: number
+  isDeleted: number
   _all: number
 }
 
@@ -56,6 +59,7 @@ export type CommentMinAggregateInputType = {
   createdAt?: true
   taskId?: true
   userId?: true
+  isDeleted?: true
 }
 
 export type CommentMaxAggregateInputType = {
@@ -64,6 +68,7 @@ export type CommentMaxAggregateInputType = {
   createdAt?: true
   taskId?: true
   userId?: true
+  isDeleted?: true
 }
 
 export type CommentCountAggregateInputType = {
@@ -72,6 +77,7 @@ export type CommentCountAggregateInputType = {
   createdAt?: true
   taskId?: true
   userId?: true
+  isDeleted?: true
   _all?: true
 }
 
@@ -153,6 +159,7 @@ export type CommentGroupByOutputType = {
   createdAt: Date
   taskId: string
   userId: string
+  isDeleted: boolean
   _count: CommentCountAggregateOutputType | null
   _min: CommentMinAggregateOutputType | null
   _max: CommentMaxAggregateOutputType | null
@@ -182,6 +189,7 @@ export type CommentWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   taskId?: Prisma.StringFilter<"Comment"> | string
   userId?: Prisma.StringFilter<"Comment"> | string
+  isDeleted?: Prisma.BoolFilter<"Comment"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
@@ -192,6 +200,7 @@ export type CommentOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
 }
@@ -205,6 +214,7 @@ export type CommentWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   taskId?: Prisma.StringFilter<"Comment"> | string
   userId?: Prisma.StringFilter<"Comment"> | string
+  isDeleted?: Prisma.BoolFilter<"Comment"> | boolean
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id">
@@ -215,6 +225,7 @@ export type CommentOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   _count?: Prisma.CommentCountOrderByAggregateInput
   _max?: Prisma.CommentMaxOrderByAggregateInput
   _min?: Prisma.CommentMinOrderByAggregateInput
@@ -229,12 +240,14 @@ export type CommentScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Comment"> | Date | string
   taskId?: Prisma.StringWithAggregatesFilter<"Comment"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Comment"> | string
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"Comment"> | boolean
 }
 
 export type CommentCreateInput = {
   id?: string
   content: string
   createdAt?: Date | string
+  isDeleted?: boolean
   task: Prisma.TaskCreateNestedOneWithoutCommentsInput
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
 }
@@ -245,12 +258,14 @@ export type CommentUncheckedCreateInput = {
   createdAt?: Date | string
   taskId: string
   userId: string
+  isDeleted?: boolean
 }
 
 export type CommentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   task?: Prisma.TaskUpdateOneRequiredWithoutCommentsNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
 }
@@ -261,6 +276,7 @@ export type CommentUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentCreateManyInput = {
@@ -269,12 +285,14 @@ export type CommentCreateManyInput = {
   createdAt?: Date | string
   taskId: string
   userId: string
+  isDeleted?: boolean
 }
 
 export type CommentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentUncheckedUpdateManyInput = {
@@ -283,6 +301,7 @@ export type CommentUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentListRelationFilter = {
@@ -301,6 +320,7 @@ export type CommentCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type CommentMaxOrderByAggregateInput = {
@@ -309,6 +329,7 @@ export type CommentMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type CommentMinOrderByAggregateInput = {
@@ -317,6 +338,7 @@ export type CommentMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
 }
 
 export type CommentCreateNestedManyWithoutUserInput = {
@@ -407,6 +429,7 @@ export type CommentCreateWithoutUserInput = {
   id?: string
   content: string
   createdAt?: Date | string
+  isDeleted?: boolean
   task: Prisma.TaskCreateNestedOneWithoutCommentsInput
 }
 
@@ -415,6 +438,7 @@ export type CommentUncheckedCreateWithoutUserInput = {
   content: string
   createdAt?: Date | string
   taskId: string
+  isDeleted?: boolean
 }
 
 export type CommentCreateOrConnectWithoutUserInput = {
@@ -452,12 +476,14 @@ export type CommentScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Comment"> | Date | string
   taskId?: Prisma.StringFilter<"Comment"> | string
   userId?: Prisma.StringFilter<"Comment"> | string
+  isDeleted?: Prisma.BoolFilter<"Comment"> | boolean
 }
 
 export type CommentCreateWithoutTaskInput = {
   id?: string
   content: string
   createdAt?: Date | string
+  isDeleted?: boolean
   user: Prisma.UserCreateNestedOneWithoutCommentsInput
 }
 
@@ -466,6 +492,7 @@ export type CommentUncheckedCreateWithoutTaskInput = {
   content: string
   createdAt?: Date | string
   userId: string
+  isDeleted?: boolean
 }
 
 export type CommentCreateOrConnectWithoutTaskInput = {
@@ -499,12 +526,14 @@ export type CommentCreateManyUserInput = {
   content: string
   createdAt?: Date | string
   taskId: string
+  isDeleted?: boolean
 }
 
 export type CommentUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   task?: Prisma.TaskUpdateOneRequiredWithoutCommentsNestedInput
 }
 
@@ -513,6 +542,7 @@ export type CommentUncheckedUpdateWithoutUserInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentUncheckedUpdateManyWithoutUserInput = {
@@ -520,6 +550,7 @@ export type CommentUncheckedUpdateManyWithoutUserInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentCreateManyTaskInput = {
@@ -527,12 +558,14 @@ export type CommentCreateManyTaskInput = {
   content: string
   createdAt?: Date | string
   userId: string
+  isDeleted?: boolean
 }
 
 export type CommentUpdateWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutCommentsNestedInput
 }
 
@@ -541,6 +574,7 @@ export type CommentUncheckedUpdateWithoutTaskInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type CommentUncheckedUpdateManyWithoutTaskInput = {
@@ -548,6 +582,7 @@ export type CommentUncheckedUpdateManyWithoutTaskInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -558,6 +593,7 @@ export type CommentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdAt?: boolean
   taskId?: boolean
   userId?: boolean
+  isDeleted?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
@@ -568,6 +604,7 @@ export type CommentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   taskId?: boolean
   userId?: boolean
+  isDeleted?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
@@ -578,6 +615,7 @@ export type CommentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   createdAt?: boolean
   taskId?: boolean
   userId?: boolean
+  isDeleted?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["comment"]>
@@ -588,9 +626,10 @@ export type CommentSelectScalar = {
   createdAt?: boolean
   taskId?: boolean
   userId?: boolean
+  isDeleted?: boolean
 }
 
-export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "content" | "createdAt" | "taskId" | "userId", ExtArgs["result"]["comment"]>
+export type CommentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "content" | "createdAt" | "taskId" | "userId" | "isDeleted", ExtArgs["result"]["comment"]>
 export type CommentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -616,6 +655,7 @@ export type $CommentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     createdAt: Date
     taskId: string
     userId: string
+    isDeleted: boolean
   }, ExtArgs["result"]["comment"]>
   composites: {}
 }
@@ -1046,6 +1086,7 @@ export interface CommentFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Comment", 'DateTime'>
   readonly taskId: Prisma.FieldRef<"Comment", 'String'>
   readonly userId: Prisma.FieldRef<"Comment", 'String'>
+  readonly isDeleted: Prisma.FieldRef<"Comment", 'Boolean'>
 }
     
 

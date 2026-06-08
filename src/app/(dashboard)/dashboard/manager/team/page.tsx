@@ -1,172 +1,124 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import DataTable from "@/components/dashboard/DataTable";
-import Link from "next/link";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { redirect } from "next/navigation";
 
-export default async function ManagerTeamPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default async function ManagerTeamPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/login");
+  if (!session?.user?.id) {
+    return <div>Unauthorized</div>;
   }
 
-  if (session.user.role !== "PROJECT_MANAGER" && session.user.role !== "MANAGER") {
-    redirect("/dashboard");
-  }
-
-  // Find all projects managed by this manager
-  const managedProjects = await prisma.project.findMany({
-    where: { managerId: session.user.id },
-    select: { id: true },
-  });
-  const projectIds = managedProjects.map((p) => p.id);
-
-  // Find all project members in these projects
-  const pms = await prisma.projectMember.findMany({
-    where: { projectId: { in: projectIds } },
-    select: { userId: true },
-  });
-  const teamUserIds = Array.from(new Set(pms.map((pm) => pm.userId)));
-
-  const sp = await searchParams;
-  const search = typeof sp?.search === "string" ? sp.search : "";
-
-  const where: any = {
-    id: { in: teamUserIds },
-  };
-  if (search) {
-    where.name = {
-      contains: search,
-      mode: "insensitive",
-    };
-  }
-
-  const teamMembers = await prisma.user.findMany({
-    where,
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      _count: {
-        select: { tasks: { where: { projectId: { in: projectIds } } } },
+  const projects = await prisma.project.findMany({
+    where: {
+      managerId: session.user.id,
+      isDeleted: false,
+    },
+    include: {
+      members: {
+        include: {
+          user: true,
+        },
       },
-      tasks: {
-        where: {
-          projectId: { in: projectIds },
-          status: "COMPLETED",
+      _count: {
+        select: {
+          members: true,
+          tasks: true,
         },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return (
-    <div className="space-y-6 container mx-auto">
+    <div className="space-y-6 p-6">
+
       {/* HEADER */}
-      <DashboardHeader
-        title="My Team Members"
-        subtitle="Manage and view the workload of team members assigned to your projects."
-      />
+      <div>
+        <h1 className="text-2xl font-bold">My Team</h1>
+        <p className="text-sm text-gray-500">
+          Manage all your project teams in one place
+        </p>
+      </div>
 
-      {/* Search Bar */}
-      <form method="GET" className="glass-panel p-4 rounded-xl flex gap-4 items-end shadow-sm">
-        <div className="flex-grow">
-          <label htmlFor="search" className="label text-xs">Search team members</label>
-          <input
-            id="search"
-            name="search"
-            type="text"
-            placeholder="Search by name..."
-            defaultValue={search}
-            className="input py-1.5 text-sm"
-          />
+      {/* PROJECT LIST */}
+      {projects.map((project) => (
+        <div
+          key={project.id}
+          className="border rounded-xl p-4 space-y-4 glass-panel"
+        >
+
+          {/* PROJECT HEADER */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold">
+                {project.name}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {project.description}
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-500">
+              Members: {project._count.members} | Tasks:{" "}
+              {project._count.tasks}
+            </div>
+          </div>
+
+          {/* TEAM MEMBERS */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left border-b">
+                  <th className="py-2">Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {project.members.map((m) => (
+                  <tr
+                    key={m.id}
+                    className="border-b last:border-none"
+                  >
+                    <td className="py-2 font-medium">
+                      {m.user.name}
+                    </td>
+
+                    <td className="text-gray-500">
+                      {m.user.email}
+                    </td>
+
+                    <td>
+                      <span className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-800">
+                        {m.role}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span
+                        className={
+                          m.user.isActive
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }
+                      >
+                        {m.user.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
         </div>
-        <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary py-1.5 px-4 text-sm h-[38px]">
-            Search
-          </button>
-          {search && (
-            <Link href="/manager/team" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">
-              Reset
-            </Link>
-          )}
-        </div>
-      </form>
+      ))}
 
-      {/* TABLE */}
-      <DataTable
-        data={teamMembers}
-        columns={[
-          {
-            header: "Name",
-            accessor: (m) => (
-              <span className="font-medium text-[var(--foreground)]">
-                {m.name}
-              </span>
-            ),
-          },
-          {
-            header: "Email",
-            accessor: (m) => (
-              <span className="text-[var(--text-muted)]">
-                {m.email}
-              </span>
-            ),
-          },
-          {
-            header: "Role",
-            accessor: (m) => (
-              <span
-                className={`px-2 py-1 rounded-md text-xs font-medium ${m.role === "ADMIN"
-                    ? "bg-[var(--danger)]/10 text-[var(--danger)]"
-                    : m.role === "PROJECT_MANAGER"
-                      ? "bg-[var(--primary-light)] text-[var(--primary)]"
-                      : "bg-[var(--success)]/10 text-[var(--success)]"
-                  }`}
-              >
-                {m.role}
-              </span>
-            ),
-          },
-          {
-            header: "Total Tasks (Your Projects)",
-            accessor: (m) => (
-              <span className="font-semibold">
-                {m._count.tasks}
-              </span>
-            ),
-          },
-          {
-            header: "Completed Tasks",
-            accessor: (m) => (
-              <span className="text-[var(--success)] font-semibold">
-                {m.tasks?.length ?? 0}
-              </span>
-            ),
-          },
-          {
-            header: "Pending Tasks",
-            accessor: (m) => {
-              const pending =
-                m._count.tasks - (m.tasks?.length ?? 0);
-
-              return (
-                <span className="text-[var(--warning)] font-semibold">
-                  {pending}
-                </span>
-              );
-            },
-          },
-        ]}
-      />
     </div>
   );
 }

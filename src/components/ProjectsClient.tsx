@@ -4,15 +4,23 @@ import { useState } from "react";
 import { Modal } from "@/components/Modal";
 import { ProjectForm } from "@/components/ProjectForm";
 import DataTable, { getStatusColor } from "@/components/dashboard/DataTable";
-import { DeleteIcon, Edit2Icon, Eye, Pencil, Trash2 } from "lucide-react";
-
+import { Pencil, Trash2 } from "lucide-react";
+import { TaskForm } from "@/components/TaskForm";
+// Link import removed as not needed
 export default function ProjectsClient({ projects }: any) {
     const [open, setOpen] = useState(false);
     const [editData, setEditData] = useState<any>(null);
+    const [taskProjectId, setTaskProjectId] = useState<string | null>(null);
+    const [openTask, setOpenTask] = useState(false);
 
     const openEdit = (project: any) => {
         setEditData(project);
         setOpen(true);
+    };
+
+    const openTaskModal = (projectId: string) => {
+        setTaskProjectId(projectId);
+        setOpenTask(true);
     };
 
     const closeModal = () => {
@@ -110,10 +118,22 @@ export default function ProjectsClient({ projects }: any) {
                             </div>
                         ),
                     },
+                    {
+                        header: "Add Task",
+                        center: true,
+                        accessor: (p: any) => (
+                            <button
+                                onClick={() => openTaskModal(p.id)}
+                                className="px-3 py-1 rounded-lg bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] transition"
+                            >
+                                + Task
+                            </button>
+                        ),
+                    },
                 ]}
             />
 
-            {/* MODAL */}
+            {/* PROJECT MODAL */}
             <Modal
                 isOpen={open}
                 onClose={closeModal}
@@ -127,6 +147,20 @@ export default function ProjectsClient({ projects }: any) {
                         window.location.reload();
                     }}
                 />
+            </Modal>
+
+            {/* TASK MODAL */}
+            <Modal
+                isOpen={openTask}
+                onClose={() => { setOpenTask(false); setTaskProjectId(null); }}
+                title="Create Task"
+            >
+                {taskProjectId && (
+                    <TaskForm
+                        projectId={taskProjectId}
+                        onCancel={() => { setOpenTask(false); setTaskProjectId(null); }}
+                    />
+                )}
             </Modal>
         </>
     );

@@ -30,7 +30,7 @@ export function Navbar() {
             <UserIcon className="w-5 h-5" />
           </div>
           <button 
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => signOut({ callbackUrl: "/" })}
             className="p-2 text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 rounded-full transition-colors ml-1"
             title="Sign out"
           >

@@ -43,7 +43,9 @@ export default async function AdminMembersPage({
         select: { tasks: true },
       },
       tasks: {
-        where: { status: "COMPLETED" },
+        where: {
+          task: { status: "COMPLETED" }
+        }
       },
     },
     orderBy: { name: "asc" },

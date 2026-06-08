@@ -10,15 +10,15 @@ import ProjectsClient from "@/components/ProjectsClient";
 
 export default async function ManagerProjectsPage({ searchParams }: any) {
   const session = await getServerSession(authOptions);
-
-  if (!session) redirect("/login");
-  if (session.user.role !== "PROJECT_MANAGER") redirect("/manager");
-
-  const page = parseInt(searchParams?.page ?? "1", 10);
-  const limit = parseInt(searchParams?.limit ?? "10", 10);
+  const sp = await searchParams; // unwrap Promise
+  const page = parseInt(sp?.page ?? "1", 10);
+  const limit = parseInt(sp?.limit ?? "10", 10);
 
   const [projects, total] = await Promise.all([
     prisma.project.findMany({
+      where: {
+        managerId: session?.user.id
+      },
       include: {
         manager: { select: { name: true } },
         _count: { select: { tasks: true } },
@@ -29,6 +29,7 @@ export default async function ManagerProjectsPage({ searchParams }: any) {
     }),
     prisma.project.count(),
   ]);
+  console.log(projects);
 
   return (
     <div className="space-y-6">

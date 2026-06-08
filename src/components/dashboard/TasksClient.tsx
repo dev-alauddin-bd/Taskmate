@@ -1,17 +1,12 @@
-// src/components/dashboard/AdminTasksClient.tsx
 "use client";
 
 import { useState } from "react";
 import DataTable, { getStatusColor } from "@/components/dashboard/DataTable";
-import { Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
-/**
- * Client‑side component responsible for rendering the tasks table.
- * It receives data from the Server Component (AdminTasksPage) and
- * provides interactive actions such as edit/delete. The UI follows
- * the premium design guidelines (rounded icons, hover effects).
- */
 export default function TasksClient({
   tasks,
   users,
@@ -22,37 +17,79 @@ export default function TasksClient({
   const router = useRouter();
   const [editingTask, setEditingTask] = useState<any>(null);
 
-  const isOverdue = (t: any) => new Date(t.dueDate) < new Date() && t.status !== "COMPLETED";
+  const { data: session } = useSession();
+
+  const role = session?.user?.role;
+  const userId = session?.user?.id;
+
+  // ===============================
+  // ROLE CHECK
+  // ===============================
+  const isAdmin = role === "ADMIN";
+  const isManager = role === "PROJECT_MANAGER";
+  const isMember = role === "MEMBER";
+
+  // ===============================
+  // PERMISSIONS
+  // ===============================
+  const canEdit = isAdmin || isManager;
+  const canDelete = isAdmin;
+
+
+  // ===============================
+  // ROUTE BASE
+  // ===============================
+  const baseRoute = isAdmin
+    ? "/admin/tasks"
+    : isManager
+      ? "/manager/tasks"
+      : "/member/tasks";
+
+  // ===============================
+  // HELPERS
+  // ===============================
+  const isOverdue = (t: any) =>
+    new Date(t.dueDate) < new Date() && t.status !== "COMPLETED";
 
   const openEdit = (task: any) => setEditingTask(task);
-  const closeEdit = () => setEditingTask(null);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this task permanently?")) return;
+
     const res = await fetch(`/api/tasks/${id}`, {
       method: "DELETE",
     });
+
     if (res.ok) router.refresh();
     else alert("Failed to delete task");
   };
 
-  const columns = [
+  // ===============================
+  // BASE COLUMNS
+  // ===============================
+  const baseColumns = [
     {
       header: "Task",
       accessor: (t: any) => (
-        <span className="font-medium text-[var(--foreground)]">{t.title}</span>
+        <span className="font-medium text-[var(--foreground)]">
+          {t.title}
+        </span>
       ),
     },
     {
       header: "Project",
       accessor: (t: any) => (
-        <span className="text-[var(--text-muted)]">{t.project?.name}</span>
+        <span className="text-[var(--text-muted)]">
+          {t.project?.name}
+        </span>
       ),
     },
     {
       header: "Status",
       accessor: (t: any) => (
-        <span className={getStatusColor(t.status)}>{t.status.replace("_", " ")}</span>
+        <span className={getStatusColor(t.status)}>
+          {t.status.replaceAll("_", " ")}
+        </span>
       ),
     },
     {
@@ -64,7 +101,9 @@ export default function TasksClient({
       accessor: (t: any) => (
         <span
           className={
-            isOverdue(t) ? "text-[var(--danger)] font-medium" : "text-[var(--text-muted)]"
+            isOverdue(t)
+              ? "text-[var(--danger)] font-medium"
+              : "text-[var(--text-muted)]"
           }
         >
           {new Date(t.dueDate).toLocaleDateString(undefined, {
@@ -78,38 +117,96 @@ export default function TasksClient({
     {
       header: "Assignee",
       accessor: (t: any) => {
-        const names = t.assignees?.map((a: any) => a.user?.name).filter(Boolean);
-        return <span>{names?.length ? names.join(', ') : 'Unassigned'}</span>;
+        const names = t.assignees
+          ?.map((a: any) => a.user?.name)
+          .filter(Boolean);
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {names?.length > 0 ? (
+              names.map((name: string) => (
+                <span
+                  key={name}
+                  className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] text-xs"
+                >
+                  {name}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs text-[var(--text-muted)] italic">
+                Unassigned
+              </span>
+            )}
+          </div>
+        );
       },
     },
-    {
-      header: "Actions",
-      center: true,
-      accessor: (t: any) => (
-        <div className="flex justify-center items-center gap-2">
-          <button
-            onClick={() => openEdit(t)}
-            className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
-            title="Edit"
-          >
-            <Pencil size={18} />
-          </button>
-          <button
-            onClick={() => handleDelete(t.id)}
-            className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition cursor-pointer"
-            title="Delete"
-          >
-            <Trash2 size={18} />
-          </button>
-        </div>
-      ),
-    },
+  ];
+
+  // ===============================
+  // DETAILS COLUMN
+  // ===============================
+  const detailsColumn = {
+    header: "Details",
+    center: true,
+    accessor: (t: any) =>
+
+      <Link
+        href={`/dashboard${baseRoute}/${t.id}`}
+        className="btn btn-sm btn-ghost cursor-pointer"
+      >
+        <Eye size={24} color="#21f896" />
+
+      </Link>
+
+  };
+
+  // ===============================
+  // ACTIONS COLUMN (ONLY ADMIN/MANAGER)
+  // ===============================
+  const actionsColumn =
+    canEdit || canDelete
+      ? {
+        header: "Actions",
+        center: true,
+        accessor: (t: any) => (
+          <div className="flex items-center justify-center gap-2">
+            {canEdit && (
+              <button
+                onClick={() => openEdit(t)}
+                className="p-2 rounded-lg text-blue-600 hover:bg-blue-50"
+              >
+                <Pencil size={18} />
+              </button>
+            )}
+
+            {canDelete && (
+              <button
+                onClick={() => handleDelete(t.id)}
+                className="p-2 rounded-lg text-red-600 hover:bg-red-50"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
+          </div>
+        ),
+      }
+      : null;
+
+  // ===============================
+  // FINAL COLUMNS (SMART BUILD)
+  // ===============================
+  const columns = [
+    ...baseColumns,
+    detailsColumn,
+    ...(actionsColumn ? [actionsColumn] : []),
   ];
 
   return (
     <>
       <DataTable data={tasks} columns={columns} />
-      {/* Future: render edit modal/form using editingTask state */}
+
+      {editingTask && <div>{/* edit modal */}</div>}
     </>
   );
 }

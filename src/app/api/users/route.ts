@@ -49,6 +49,7 @@ export async function GET(request: Request) {
     const [users, total] = await Promise.all([
       prisma.user.findMany({
         where,
+
         skip,
         take: limit,
         select: {
@@ -94,3 +95,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+
+

@@ -1,13 +1,19 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, CheckSquare, Users, Activity, Settings } from "lucide-react";
-import { useSession } from "next-auth/react";
 import {
+  LayoutDashboard,
+  FolderKanban,
+  CheckSquare,
+  Users,
+  Activity,
+  Settings,
   Bell,
   BarChart3,
   UserCircle,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { type LucideIcon } from "lucide-react";
 
 // Define the shape of a navigation item
@@ -20,119 +26,36 @@ type NavItem = {
 export function Sidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  // Determine user role, default to "GUEST" if not available
   const role = session?.user?.role ?? "GUEST";
-
-
   let navItems: NavItem[] = [];
 
-
   const adminNavItems: NavItem[] = [
-    {
-      name: "Dashboard",
-      href: "/dashboard/admin",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Projects",
-      href: "/dashboard/admin/projects",
-      icon: FolderKanban,
-    },
-    {
-      name: "Tasks",
-      href: "/dashboard/admin/tasks",
-      icon: CheckSquare,
-    },
-    {
-      name: "Team Members",
-      href: "/dashboard/admin/members",
-      icon: Users,
-    },
-    {
-      name: "Analytics",
-      href: "/dashboard/admin/analytics",
-      icon: BarChart3,
-    },
-    {
-      name: "Activity Logs",
-      href: "/dashboard/admin/activity",
-      icon: Activity,
-    },
-    {
-      name: "Notifications",
-      href: "/dashboard/admin/notifications",
-      icon: Bell,
-    },
-    {
-      name: "Settings",
-      href: "/dashboard/admin/settings",
-      icon: Settings,
-    },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Projects", href: "/dashboard/admin/projects", icon: FolderKanban },
+    { name: "Tasks", href: "/dashboard/admin/tasks", icon: CheckSquare },
+    { name: "Team Members", href: "/dashboard/admin/members", icon: Users },
+    { name: "Analytics", href: "/dashboard/admin/analytics", icon: BarChart3 },
+    { name: "Activity Logs", href: "/dashboard/admin/activity", icon: Activity },
+    { name: "Notifications", href: "/dashboard/admin/notifications", icon: Bell },
+    { name: "Settings", href: "/dashboard/admin/settings", icon: Settings },
   ];
 
   const managerNavItems: NavItem[] = [
-    {
-      name: "Dashboard",
-      href: "/dashboard/manager",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "Manage Projects",
-      href: "/dashboard/manager/projects",
-      icon: FolderKanban,
-    },
-    {
-      name: "Tasks",
-      href: "/dashboard/manager/tasks",
-      icon: CheckSquare,
-    },
-    {
-      name: "My Team",
-      href: "/dashboard/manager/team",
-      icon: Users,
-    },
-    {
-      name: "Analytics",
-      href: "/dashboard/manager/analytics",
-      icon: BarChart3,
-    },
-    {
-      name: "Activity Logs",
-      href: "/dashboard/manager/activity",
-      icon: Activity,
-    },
-    {
-      name: "Notifications",
-      href: "/dashboard/manager/notifications",
-      icon: Bell,
-    },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Manage Projects", href: "/dashboard/manager/projects", icon: FolderKanban },
+    { name: "Tasks", href: "/dashboard/manager/tasks", icon: CheckSquare },
+    { name: "My Team", href: "/dashboard/manager/team", icon: Users },
+    { name: "Analytics", href: "/dashboard/manager/analytics", icon: BarChart3 },
+    { name: "Activity Logs", href: "/dashboard/manager/activity", icon: Activity },
+    { name: "Notifications", href: "/dashboard/manager/notifications", icon: Bell },
   ];
 
   const memberNavItems: NavItem[] = [
-    {
-      name: "Dashboard",
-      href: "/dashboard/member",
-      icon: LayoutDashboard,
-    },
-    {
-      name: "My Tasks",
-      href: "/dashboard/member/tasks",
-      icon: CheckSquare,
-    },
-
-    {
-      name: "Notifications",
-      href: "/dashboard/member/notifications",
-      icon: Bell,
-    },
-    {
-      name: "Profile",
-      href: "/dashboard/member/profile",
-      icon: UserCircle,
-    },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "My Tasks", href: "/dashboard/member/tasks", icon: CheckSquare },
+    { name: "Notifications", href: "/dashboard/member/notifications", icon: Bell },
+    { name: "Profile", href: "/dashboard/member/profile", icon: UserCircle },
   ];
-
-    
 
   switch (role) {
     case "ADMIN":
@@ -146,10 +69,8 @@ export function Sidebar() {
       navItems = memberNavItems;
       break;
     default:
-      // Provide a minimal navigation for guests or unknown roles
-      navItems = [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }];
+      navItems = [];
   }
-
 
   return (
     <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] hidden md:flex flex-col shadow-sm z-10 sticky top-0 h-screen">
@@ -161,16 +82,17 @@ export function Sidebar() {
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive
-                ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium shadow-sm"
-                : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] hover:translate-x-1"
-                }`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium shadow-sm"
+                  : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] hover:translate-x-1"
+              }`}
             >
               <Icon className="w-5 h-5" />
               {item.name}

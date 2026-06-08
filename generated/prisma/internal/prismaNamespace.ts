@@ -1144,7 +1144,8 @@ export const ProjectScalarFieldEnum = {
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  managerId: 'managerId'
+  managerId: 'managerId',
+  isDeleted: 'isDeleted'
 } as const
 
 export type ProjectScalarFieldEnum = (typeof ProjectScalarFieldEnum)[keyof typeof ProjectScalarFieldEnum]
@@ -1155,7 +1156,8 @@ export const ProjectMemberScalarFieldEnum = {
   userId: 'userId',
   projectId: 'projectId',
   role: 'role',
-  joinedAt: 'joinedAt'
+  joinedAt: 'joinedAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type ProjectMemberScalarFieldEnum = (typeof ProjectMemberScalarFieldEnum)[keyof typeof ProjectMemberScalarFieldEnum]
@@ -1175,7 +1177,8 @@ export const TaskScalarFieldEnum = {
   deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  projectId: 'projectId'
+  projectId: 'projectId',
+  isDeleted: 'isDeleted'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
@@ -1196,7 +1199,8 @@ export const CommentScalarFieldEnum = {
   content: 'content',
   createdAt: 'createdAt',
   taskId: 'taskId',
-  userId: 'userId'
+  userId: 'userId',
+  isDeleted: 'isDeleted'
 } as const
 
 export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
@@ -1206,11 +1210,10 @@ export const AttachmentScalarFieldEnum = {
   id: 'id',
   fileName: 'fileName',
   fileUrl: 'fileUrl',
-  fileType: 'fileType',
-  fileSize: 'fileSize',
-  mimeType: 'mimeType',
+  taskId: 'taskId',
+  uploadedById: 'uploadedById',
   uploadedAt: 'uploadedAt',
-  taskId: 'taskId'
+  isDeleted: 'isDeleted'
 } as const
 
 export type AttachmentScalarFieldEnum = (typeof AttachmentScalarFieldEnum)[keyof typeof AttachmentScalarFieldEnum]
@@ -1223,7 +1226,8 @@ export const NotificationScalarFieldEnum = {
   isRead: 'isRead',
   type: 'type',
   userId: 'userId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
@@ -1236,7 +1240,8 @@ export const ActivityLogScalarFieldEnum = {
   userId: 'userId',
   projectId: 'projectId',
   taskId: 'taskId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isDeleted: 'isDeleted'
 } as const
 
 export type ActivityLogScalarFieldEnum = (typeof ActivityLogScalarFieldEnum)[keyof typeof ActivityLogScalarFieldEnum]

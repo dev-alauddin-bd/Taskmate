@@ -1,65 +1,58 @@
-// src/app/(dashboard)/admin/tasks/page.tsx
+// src/app/(dashboard)/dashboard/manager/tasks/page.tsx
+
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { format } from "date-fns";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import Link from "next/link";
-import Pagination from "@/components/dashboard/Pagination";
-import TasksClient from "@/components/dashboard/TasksClient";
 
-export default async function TasksPage({
+import TasksPageClient from "@/components/shared/TasksPageClient";
+
+export default async function ManagerTasksPage({
   searchParams,
 }: {
-  // Next.js provides searchParams as a Promise in Server Components
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  // Resolve the promise to safely access its properties
-  const sp = await searchParams;
-
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/login");
+  if (!session) redirect("/login");
+
+  if (!["ADMIN", "PROJECT_MANAGER"].includes(session.user.role)) {
+    redirect("/dashboard");
   }
 
-  if (session.user.role !== "PROJECT_MANAGER") {
-    redirect("/manager");
-  }
+  const page = Number(searchParams.page ?? 1);
+  const limit = Number(searchParams.limit ?? 10);
 
-  // ----- Pagination parsing -----
-  const pageStr = Array.isArray(sp?.page) ? sp.page[0] : sp.page ?? "1";
-  const limitStr = Array.isArray(sp?.limit) ? sp.limit[0] : sp.limit ?? "10";
-  const page = parseInt(pageStr, 10);
-  const limit = parseInt(limitStr, 10);
+  const search = typeof searchParams.search === "string" ? searchParams.search : "";
+  const status = typeof searchParams.status === "string" ? searchParams.status : "";
+  const priority = typeof searchParams.priority === "string" ? searchParams.priority : "";
+  const assigneeId = typeof searchParams.assigneeId === "string" ? searchParams.assigneeId : "";
+  const deadlineStatus = typeof searchParams.deadlineStatus === "string" ? searchParams.deadlineStatus : "";
+  const sortBy = typeof searchParams.sortBy === "string" ? searchParams.sortBy : "dueDate";
+  const sortOrder = typeof searchParams.sortOrder === "string" ? searchParams.sortOrder : "asc";
 
-  // ----- Filter values -----
-  const search = typeof sp?.search === "string" ? sp.search : "";
-  const status = typeof sp?.status === "string" ? sp.status : "";
-  const priority = typeof sp?.priority === "string" ? sp.priority : "";
-  const assigneeId = typeof sp?.assigneeId === "string" ? sp.assigneeId : "";
-  const deadlineStatus = typeof sp?.deadlineStatus === "string" ? sp.deadlineStatus : "";
-  const sortBy = typeof sp?.sortBy === "string" ? sp.sortBy : "dueDate";
-  const sortOrder = typeof sp?.sortOrder === "string" ? sp.sortOrder : "asc";
-
-  // ----- Build Prisma query -----
   const where: any = {};
+
   if (search) {
     where.OR = [
       { title: { contains: search, mode: "insensitive" } },
       { description: { contains: search, mode: "insensitive" } },
     ];
   }
+
   if (status) where.status = status;
   if (priority) where.priority = priority;
+
   if (assigneeId) {
     where.assignees = { some: { userId: assigneeId } };
   }
+
   if (deadlineStatus === "OVERDUE") {
     where.status = { not: "COMPLETED" };
     where.dueDate = { lt: new Date() };
-  } else if (deadlineStatus === "UPCOMING") {
+  }
+
+  if (deadlineStatus === "UPCOMING") {
     where.dueDate = { gte: new Date() };
   }
 
@@ -73,50 +66,31 @@ export default async function TasksPage({
       where,
       include: {
         project: { select: { name: true } },
-        assignees: {
-          include: {
-            user: {
-              select: { name: true }
-            }
-          }
-        }
+        assignees: { select: { user: { select: { id: true, name: true } } } },
       },
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),
     prisma.task.count({ where }),
-    prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.user.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
-
 
   return (
     <div className="space-y-6">
-      <DashboardHeader
-        title="Admin Tasks Management"
-        subtitle="Manage and track all tasks across all projects globally."
+    
+
+      {/* CLIENT WRAPPER (modal + button fix) */}
+      <TasksPageClient
+        tasks={tasks}
+        users={users}
+        page={page}
+        limit={limit}
+        total={total}
       />
-
-      {/* Search & Filter Bar */}
-      <form method="GET" className="glass-panel p-4 rounded-xl flex flex-wrap gap-4 items-end shadow-sm">
-        <div className="flex-1 min-w-[200px]">
-          <label htmlFor="search" className="label text-xs">Search tasks</label>
-          <input id="search" name="search" type="text" placeholder="Title or description..." defaultValue={search} className="input py-1.5 text-sm" />
-        </div>
-        {/* other filter selects (status, priority, assignee, deadline, sort) can be added here – omitted for brevity */}
-        <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary py-1.5 px-4 text-sm h-[38px]">Apply</button>
-          {(search || status || priority || assigneeId || deadlineStatus || sortBy !== "dueDate" || sortOrder !== "asc") && (
-            <Link href="/admin/tasks" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">Reset</Link>
-          )}
-        </div>
-      </form>
-
-      {/* Table – delegated to a client component for interactive UI */}
-      <TasksClient tasks={tasks} users={users} />
-
-      {/* Pagination */}
-      <Pagination page={page} limit={limit} total={total} basePath="/admin/tasks" />
     </div>
   );
 }

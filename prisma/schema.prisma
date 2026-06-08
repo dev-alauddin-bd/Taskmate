@@ -67,21 +67,22 @@ model User {
   password String
   role     Role   @default(MEMBER)
 
-  avatar   String?
-  bio      String?
-  isActive Boolean   @default(true)
+  avatar      String?
+  bio         String?
+  isActive    Boolean   @default(true)
   lastLoginAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relations
-  managedProjects Project[] @relation("ProjectManager")
+  managedProjects Project[]       @relation("ProjectManager")
   tasks           TaskAssignee[]
   comments        Comment[]
   notifications   Notification[]
   activities      ActivityLog[]
   memberships     ProjectMember[]
+  attachments     Attachment[]
 }
 
 //////////////////////
@@ -89,27 +90,28 @@ model User {
 //////////////////////
 
 model Project {
-  id          String        @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
 
-  deadline    DateTime
-  status      ProjectStatus @default(ACTIVE)
+  deadline DateTime
+  status   ProjectStatus @default(ACTIVE)
 
-  progress    Int @default(0)
-  deletedAt   DateTime?
+  progress  Int       @default(0)
+  deletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // manager
   managerId String
-  manager   User @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Cascade)
+  manager   User   @relation("ProjectManager", fields: [managerId], references: [id], onDelete: Cascade)
 
   // relations
   tasks        Task[]
   members      ProjectMember[]
   activityLogs ActivityLog[]
+  isDeleted    Boolean         @default(false)
 
   @@index([managerId])
 }
@@ -130,6 +132,8 @@ model ProjectMember {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  isDeleted Boolean @default(false)
 
   @@unique([userId, projectId])
   @@index([userId])
@@ -153,7 +157,7 @@ model Task {
   estimatedHours Int?
   actualHours    Int?
 
-  completedAt DateTime?
+  completedAt   DateTime?
   attachmentUrl String?
 
   deletedAt DateTime?
@@ -170,6 +174,8 @@ model Task {
   comments     Comment[]
   attachments  Attachment[]
   activityLogs ActivityLog[]
+
+  isDeleted Boolean @default(false)
 
   @@unique([title, projectId])
   @@index([projectId])
@@ -208,10 +214,12 @@ model Comment {
   createdAt DateTime @default(now())
 
   taskId String
-  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  isDeleted Boolean @default(false)
 
   @@index([taskId])
   @@index([userId])
@@ -226,16 +234,16 @@ model Attachment {
 
   fileName String
   fileUrl  String
-  fileType String?
-  fileSize Int?
-  mimeType String?
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
 
   uploadedAt DateTime @default(now())
 
-  taskId String
-  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@index([taskId])
+  isDeleted Boolean @default(false)
 }
 
 //////////////////////
@@ -252,9 +260,11 @@ model Notification {
   type NotificationType @default(INFO)
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+
+  isDeleted Boolean @default(false)
 
   @@index([userId])
 }
@@ -266,20 +276,22 @@ model Notification {
 model ActivityLog {
   id String @id @default(cuid())
 
-  action  ActivityAction
+  action ActivityAction
 
   details Json?
 
   userId String?
-  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   projectId String?
   project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   taskId String?
-  task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+
+  isDeleted Boolean @default(false)
 
   @@index([userId])
   @@index([projectId])

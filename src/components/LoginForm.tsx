@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Shield, User, Users, Crown } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
-  const { data: session } = useSession();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,32 +26,25 @@ export function LoginForm() {
       password,
     });
 
-    if (res?.error) {
-      setError(res.error);
-      setLoading(false);
-    } else {
-      router.refresh();
-      // Determine role from session after refresh
-      const role = session?.user?.role;
-      if (role === "ADMIN") {
-        router.push("/admin");
-      } else if (role === "PROJECT_MANAGER" || role === "MANAGER") {
-        router.push("/manager");
-      } else {
-        router.push("/member");
-      }
+    setLoading(false);
+
+    if (!res?.ok) {
+      setError(res?.error || "Invalid credentials");
+      return;
     }
+
+    router.refresh();
+    router.push("/dashboard");
   };
 
   const handleDemoLogin = async (role: "ADMIN" | "PROJECT_MANAGER" | "MEMBER") => {
     setDemoLoading(true);
     setError("");
-    
-    // Mapping demo roles to preset emails
+
     const demoEmails = {
       ADMIN: "admin@demo.com",
       PROJECT_MANAGER: "pm@demo.com",
-      MEMBER: "member@demo.com"
+      MEMBER: "member@demo.com",
     };
 
     const res = await signIn("credentials", {
@@ -59,89 +53,93 @@ export function LoginForm() {
       isDemo: "true",
     });
 
-    if (res?.error) {
-      setError(res.error);
-      setDemoLoading(false);
-    } else {
-      router.refresh();
-      const role = session?.user?.role;
-      if (role === "ADMIN") {
-        router.push("/admin");
-      } else if (role === "PROJECT_MANAGER" || role === "MANAGER") {
-        router.push("/manager");
-      } else {
-        router.push("/member");
-      }
+    setDemoLoading(false);
+
+    if (!res?.ok) {
+      setError(res?.error || "Demo login failed");
+      return;
     }
+
+    router.refresh();
+    router.push("/dashboard");
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 relative">
+
+      {/* error */}
+      {error && (
+        <div className="p-3 rounded-xl bg-[var(--danger)]/10 border border-[var(--danger)]/30 text-[var(--danger)] text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* form */}
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {error && (
-          <div className="p-3 rounded-md bg-[var(--danger)]/10 border border-[var(--danger)] text-[var(--danger)] text-sm">
-            {error}
-          </div>
-        )}
         
         <div>
-          <label className="label" htmlFor="email">Email</label>
+          <label className="text-sm text-[var(--text-muted)]">Email</label>
           <input
-            id="email"
             type="email"
-            className="input"
+            className="w-full mt-1 px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
         </div>
-        
+
         <div>
-          <label className="label" htmlFor="password">Password</label>
+          <label className="text-sm text-[var(--text-muted)]">Password</label>
           <input
-            id="password"
             type="password"
-            className="input"
+            className="w-full mt-1 px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
         </div>
-        
-        <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading || demoLoading}>
+
+        <button
+          type="submit"
+          disabled={loading || demoLoading}
+          className="w-full py-3 rounded-xl bg-[var(--primary)] text-white font-semibold hover:bg-[var(--primary-hover)] transition disabled:opacity-60"
+        >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
-      <div className="relative flex items-center py-2">
-        <div className="flex-grow border-t border-[var(--border)]"></div>
-        <span className="flex-shrink-0 mx-4 text-[var(--text-muted)] text-sm">Or continue with</span>
-        <div className="flex-grow border-t border-[var(--border)]"></div>
+      {/* divider */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-px bg-[var(--border)]" />
+        <span className="text-xs text-[var(--text-muted)]">Demo access</span>
+        <div className="flex-1 h-px bg-[var(--border)]" />
       </div>
 
-      <div className="flex flex-col gap-3">
-        <button 
+      {/* demo buttons */}
+      <div className="grid gap-3">
+
+        <button
           onClick={() => handleDemoLogin("ADMIN")}
           disabled={loading || demoLoading}
-          className="btn btn-outline w-full"
+          className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] hover:bg-[var(--surface-hover)] transition"
         >
-          Demo Admin
+          <Crown size={18} /> Demo Admin
         </button>
-        <button 
+
+        <button
           onClick={() => handleDemoLogin("PROJECT_MANAGER")}
           disabled={loading || demoLoading}
-          className="btn btn-outline w-full"
+          className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] hover:bg-[var(--surface-hover)] transition"
         >
-          Demo Project Manager
+          <Users size={18} /> Project Manager
         </button>
-        <button 
+
+        <button
           onClick={() => handleDemoLogin("MEMBER")}
           disabled={loading || demoLoading}
-          className="btn btn-outline w-full"
+          className="flex items-center gap-2 px-4 py-3 rounded-xl border border-[var(--border)] hover:bg-[var(--surface-hover)] transition"
         >
-          Demo Team Member
+          <User size={18} /> Team Member
         </button>
       </div>
     </div>
