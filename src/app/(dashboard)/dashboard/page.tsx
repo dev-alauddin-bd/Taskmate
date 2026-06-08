@@ -8,7 +8,6 @@ import ProjectProgressChart from "@/components/dashboard/ProjectProgressChart";
 import UpcomingDeadlinesCard from "@/components/dashboard/UpcomingDeadlinesCard";
 import RecentActivityCard from "@/components/dashboard/RecentActivityCard";
 import ProjectSummaryCard from "@/components/dashboard/ProjectSummaryCard";
-import TeamMembersWorkedCard from "@/components/dashboard/TeamMembersWorkedCard";
 
 import {
   AlertTriangle,
@@ -55,11 +54,15 @@ export default async function DashboardPage() {
     _count: { _all: true },
   });
 
-  const recentActivities = await prisma.activityLog.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 5,
-  });
+  // ================= ACTIVITY LOG (ONLY ADMIN) =================
+  let recentActivities: any[] = [];
 
+  if (isAdmin) {
+    recentActivities = await prisma.activityLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+  }
   const upcomingDeadlines = await prisma.task.findMany({
     where: {
       dueDate: { gte: now },
@@ -209,7 +212,9 @@ export default async function DashboardPage() {
 
         <TasksByPriorityChart data={tasksByPriority} />
         <UpcomingDeadlinesCard data={upcomingDeadlines} />
-        <RecentActivityCard recentActivities={recentActivities} />
+        {isAdmin && (
+          <RecentActivityCard recentActivities={recentActivities} />
+        )}
 
         {(isAdmin || isManager) && (
           <>
@@ -221,7 +226,7 @@ export default async function DashboardPage() {
               pendingTasks={pendingTasks}
               overdueTasks={overdueTasks}
             />
-            <TeamMembersWorkedCard members={teamMembers} />
+   
           </>
         )}
       </div>

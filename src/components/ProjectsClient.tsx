@@ -6,20 +6,28 @@ import { ProjectForm } from "@/components/ProjectForm";
 import DataTable, { getStatusColor } from "@/components/dashboard/DataTable";
 import { Pencil, Trash2 } from "lucide-react";
 import { TaskForm } from "@/components/TaskForm";
-// Link import removed as not needed
+import toast from "react-hot-toast";
+
 export default function ProjectsClient({ projects }: any) {
     const [open, setOpen] = useState(false);
     const [editData, setEditData] = useState<any>(null);
+
     const [taskProjectId, setTaskProjectId] = useState<string | null>(null);
     const [openTask, setOpenTask] = useState(false);
+
+    // 🔥 DELETE CONFIRM STATE
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [openDelete, setOpenDelete] = useState(false);
+
+    const [projectList, setProjectList] = useState(projects);
 
     const openEdit = (project: any) => {
         setEditData(project);
         setOpen(true);
     };
 
-    const openTaskModal = (projectId: string) => {
-        setTaskProjectId(projectId);
+    const openTaskModal = (id: string) => {
+        setTaskProjectId(id);
         setOpenTask(true);
     };
 
@@ -28,17 +36,41 @@ export default function ProjectsClient({ projects }: any) {
         setEditData(null);
     };
 
-    const handleDelete = async (id: string) => {
-        await fetch(`/api/projects/${id}`, {
-            method: "DELETE",
-        });
-        window.location.reload();
+    // 🔥 OPEN DELETE CONFIRM
+    const confirmDelete = (id: string) => {
+        setDeleteId(id);
+        setOpenDelete(true);
+    };
+
+    // 🔥 FINAL DELETE
+    const handleDelete = async () => {
+        if (!deleteId) return;
+
+        try {
+            const res = await fetch(`/api/projects/${deleteId}`, {
+                method: "DELETE",
+            });
+
+            if (!res.ok) throw new Error("Delete failed");
+
+            // remove from UI
+            setProjectList((prev: any[]) =>
+                prev.filter((p) => p.id !== deleteId)
+            );
+
+            toast.success("Project deleted successfully");
+        } catch (err) {
+            toast.error("Failed to delete project");
+        } finally {
+            setOpenDelete(false);
+            setDeleteId(null);
+        }
     };
 
     return (
         <>
             <DataTable
-                data={projects}
+                data={projectList}
                 columns={[
                     {
                         header: "Project Name",
@@ -57,7 +89,7 @@ export default function ProjectsClient({ projects }: any) {
                         center: true,
                         accessor: (p: any) => (
                             <span
-                                className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
                                     p.status
                                 )}`}
                             >
@@ -87,53 +119,43 @@ export default function ProjectsClient({ projects }: any) {
                         header: "Actions",
                         center: true,
                         accessor: (p: any) => (
-                            <div className="flex justify-center items-center gap-2">
+                            <div className="flex justify-center gap-2">
 
                                 {/* EDIT */}
                                 <button
                                     onClick={() => openEdit(p)}
-                                    className="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition cursor-pointer"
-                                    title="Edit"
+                                    className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100"
                                 >
                                     <Pencil size={18} />
                                 </button>
 
                                 {/* DELETE */}
                                 <button
-                                    onClick={() => handleDelete(p.id)}
-                                    className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition cursor-pointer"
-                                    title="Delete"
+                                    onClick={() => confirmDelete(p.id)}
+                                    className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100"
                                 >
                                     <Trash2 size={18} />
                                 </button>
-
-                                {/* VIEW (optional future use) */}
-                                {/* <button
-                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition"
-                                    title="View"
-                                >
-                                    <Eye size={18} />
-                                </button> */}
-
                             </div>
                         ),
                     },
+
                     {
                         header: "Add Task",
                         center: true,
                         accessor: (p: any) => (
                             <button
                                 onClick={() => openTaskModal(p.id)}
-                                className="px-3 py-1 rounded-lg bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] transition"
+                                className="px-3 py-1 rounded-xl bg-[var(--primary)] text-white hover:opacity-90"
                             >
-                                + Task
+                                Add Task
                             </button>
                         ),
                     },
                 ]}
             />
 
-            {/* PROJECT MODAL */}
+            {/* ================= PROJECT MODAL ================= */}
             <Modal
                 isOpen={open}
                 onClose={closeModal}
@@ -149,18 +171,53 @@ export default function ProjectsClient({ projects }: any) {
                 />
             </Modal>
 
-            {/* TASK MODAL */}
+            {/* ================= TASK MODAL ================= */}
             <Modal
                 isOpen={openTask}
-                onClose={() => { setOpenTask(false); setTaskProjectId(null); }}
+                onClose={() => {
+                    setOpenTask(false);
+                    setTaskProjectId(null);
+                }}
                 title="Create Task"
             >
                 {taskProjectId && (
                     <TaskForm
                         projectId={taskProjectId}
-                        onCancel={() => { setOpenTask(false); setTaskProjectId(null); }}
+                        onCancel={() => {
+                            setOpenTask(false);
+                            setTaskProjectId(null);
+                        }}
                     />
                 )}
+            </Modal>
+
+            {/* ================= DELETE CONFIRM MODAL ================= */}
+            <Modal
+                isOpen={openDelete}
+                onClose={() => setOpenDelete(false)}
+                title="Delete Project"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600">
+                        Are you sure you want to delete this project?
+                    </p>
+
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={() => setOpenDelete(false)}
+                            className="px-4 py-2 rounded-xl border"
+                        >
+                            No
+                        </button>
+
+                        <button
+                            onClick={handleDelete}
+                            className="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600"
+                        >
+                            Yes, Delete
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </>
     );

@@ -17,7 +17,8 @@ export default async function ManagerProjectsPage({ searchParams }: any) {
   const [projects, total] = await Promise.all([
     prisma.project.findMany({
       where: {
-        managerId: session?.user.id
+        managerId: session?.user.id,
+        isDeleted: false
       },
       include: {
         manager: { select: { name: true } },

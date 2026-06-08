@@ -5,9 +5,17 @@ import { createPortal } from "react-dom";
 
 export function Modal({ isOpen, onClose, title, children }: any) {
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden"; // 🔥 extra safety
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -23,7 +31,7 @@ export function Modal({ isOpen, onClose, title, children }: any) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-4 border-b pb-3">
+        <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-lg">{title}</h3>
 
           <button onClick={onClose}>✕</button>

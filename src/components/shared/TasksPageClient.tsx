@@ -36,12 +36,12 @@ export default function TasksPageClient({
       />
 
       {/* ADD BUTTON */}
-      <button
+      {/* <button
         onClick={() => openTaskModal("GENERAL")}
         className="px-3 py-1 rounded-lg bg-[var(--primary)] text-white hover:bg-[var(--primary-hover)] transition"
       >
         + Task
-      </button>
+      </button> */}
 
       {/* TABLE */}
       <TasksClient tasks={tasks} users={users} />

@@ -13,72 +13,82 @@ export function TaskForm({
   onCancel: () => void;
 }) {
   const router = useRouter();
+
+  const today = new Date().toISOString().split("T")[0];
+
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [dueDate, setDueDate] = useState(
     task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
   );
-  const [priority, setPriority] = useState(task?.priority || "MEDIUM");
-  const [status, setStatus] = useState(task?.status || "TODO");
+  const [priority, setPriority] = useState(task?.priority || "");
+  const [status, setStatus] = useState(task?.status || "");
   const [userId, setUserId] = useState(
     task?.assignees?.[0]?.userId || task?.userId || ""
   );
+
   const [users, setUsers] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // USERS
   useEffect(() => {
-    // Fetch users for assignment
     fetch("/api/users", { credentials: "include" })
-        .then((res) => res.json())
-        .then((data) => {
-          // The users endpoint returns { success, data, pagination }
-          // Use the nested data array if present, otherwise fallback to raw array.
-          const usersArray = data?.data ?? data;
-          if (Array.isArray(usersArray)) setUsers(usersArray);
-        })
-        .catch((err) => {
-          console.warn("Failed to load users – check auth session", err);
-        });
+      .then((res) => res.json())
+      .then((data) => {
+        const usersArray = data?.data ?? data;
+        if (Array.isArray(usersArray)) setUsers(usersArray);
+      });
   }, []);
 
+  // ================= VALIDATION =================
+  const validate = () => {
+    if (!title.trim()) return "Task title is required";
+    if (!description.trim()) return "Description is required";
+    if (!dueDate) return "Due date is required";
+    if (dueDate < today) return "Past date is not allowed";
+    if (!priority) return "Priority is required";
+    if (!status) return "Status is required";
+    if (!userId) return "You must assign this task to a user";
+
+    return null;
+  };
+
+  // ================= SUBMIT =================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    try {
-      // Simple client‑side validation
-      if (!title.trim()) {
-        setError("Task title is required");
-        setLoading(false);
-        return;
-      }
-      if (!dueDate) {
-        setError("Due date is required");
-        setLoading(false);
-        return;
-      }
+    const validationError = validate();
 
+    if (validationError) {
+      setError(validationError);
+      setLoading(false);
+      return;
+    }
+
+    try {
       const url = task ? `/api/tasks/${task.id}` : "/api/tasks";
       const method = task ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          title, 
-          description, 
-          dueDate, 
-          priority, 
-          status, 
-          projectId, 
-          userId: userId || undefined 
+        body: JSON.stringify({
+          title,
+          description,
+          dueDate,
+          priority,
+          status,
+          projectId,
+          userId,
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.message || "Failed to save task");
       }
 
@@ -91,110 +101,99 @@ export function TaskForm({
     }
   };
 
-
-  console.log("users", users);
-  
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+      {/* ERROR */}
       {error && (
-        <div className="p-3 rounded-md bg-[var(--danger)]/10 border border-[var(--danger)] text-[var(--danger)] text-sm">
+        <div className="p-3 rounded-md bg-red-100 border border-red-400 text-red-600 text-sm">
           {error}
         </div>
       )}
 
-      <div>
-        <label className="label" htmlFor="title">Task Title</label>
-        <input
-          id="title"
-          type="text"
-          className="input"
-          placeholder="e.g. Design Homepage"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
+      {/* TITLE */}
+      <input
+        className="input"
+        placeholder="Task Title "
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
 
-      <div>
-        <label className="label" htmlFor="description">Description</label>
-        <textarea
-          id="description"
-          className="input min-h-[80px]"
-          placeholder="Brief details..."
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
+      {/* DESCRIPTION */}
+      <textarea
+        className="input min-h-[80px]"
+        placeholder="Description "
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="label" htmlFor="dueDate">Due Date</label>
-          <input
-            id="dueDate"
-            type="date"
-            className="input"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-          />
-        </div>
+      {/* DATE */}
+      <input
+        type="date"
+        className="input cursor-pointer"
+        value={dueDate}
+        min={today}
+        onChange={(e) => setDueDate(e.target.value)}
+      />
 
-        <div>
-          <label className="label" htmlFor="userId">Assign To</label>
-          <select
-            id="userId"
-            className="input"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-          >
-            <option value="">Unassigned</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name} ({user.email})
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      {/* PRIORITY */}
+      <select
+        className="input cursor-pointer"
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+      >
+        <option value="">Select Priority </option>
+        <option value="LOW">Low</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HIGH">High</option>
+      </select>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="label" htmlFor="priority">Priority</label>
-          <select
-            id="priority"
-            className="input"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
-          </select>
-        </div>
+      {/* STATUS */}
+      <select
+        className="input cursor-pointer"
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
+      >
+        <option value="">Select Status </option>
+        <option value="TODO">To Do</option>
+        <option value="IN_PROGRESS">In Progress</option>
+        <option value="COMPLETED">Completed</option>
+      </select>
 
-        <div>
-          <label className="label" htmlFor="status">Status</label>
-          <select
-            id="status"
-            className="input"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="TODO">To Do</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="COMPLETED">Completed</option>
-          </select>
-        </div>
-      </div>
+      {/* ASSIGN USER */}
+      <select
+        className="input cursor-pointer"
+        value={userId}
+        onChange={(e) => setUserId(e.target.value)}
+      >
+        <option value="">Assign User </option>
+        {users.map((user) => (
+          <option key={user.id} value={user.id}>
+            {user.name} ({user.email})
+          </option>
+        ))}
+      </select>
 
+      {/* ACTIONS */}
       <div className="flex gap-3 justify-end mt-2">
-        <button type="button" className="btn btn-outline" onClick={onCancel} disabled={loading}>
+
+        <button
+          type="button"
+          className="btn btn-outline cursor-pointer"
+          onClick={onCancel}
+          disabled={loading}
+        >
           Cancel
         </button>
-         <button type="submit" className="btn btn-primary" disabled={loading}>
+
+        <button
+          type="submit"
+          className="btn btn-primary cursor-pointer"
+          disabled={loading}
+        >
           {loading ? "Saving..." : task ? "Update Task" : "Create Task"}
         </button>
+
       </div>
     </form>
   );

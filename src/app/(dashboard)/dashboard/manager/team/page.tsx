@@ -6,7 +6,7 @@ export default async function ManagerTeamPage() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    return <div>Unauthorized</div>;
+    return <div className="p-6 text-red-500">Unauthorized</div>;
   }
 
   const projects = await prisma.project.findMany({
@@ -33,92 +33,82 @@ export default async function ManagerTeamPage() {
   });
 
   return (
-    <div className="space-y-6 p-6">
-
+    <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <h1 className="text-2xl font-bold">My Team</h1>
+        <h1 className="text-3xl font-bold">Project Teams</h1>
         <p className="text-sm text-gray-500">
           Manage all your project teams in one place
         </p>
       </div>
 
-      {/* PROJECT LIST */}
-      {projects.map((project) => (
-        <div
-          key={project.id}
-          className="border rounded-xl p-4 space-y-4 glass-panel"
-        >
-
-          {/* PROJECT HEADER */}
-          <div className="flex justify-between items-center">
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {projects.map((project) => (
+          <div
+            key={project.id}
+            className="rounded-2xl border glass-panel p-5 flex flex-col gap-4"
+          >
+            {/* PROJECT HEADER */}
             <div>
               <h2 className="text-lg font-semibold">
                 {project.name}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 line-clamp-2">
                 {project.description}
               </p>
             </div>
 
-            <div className="text-sm text-gray-500">
-              Members: {project._count.members} | Tasks:{" "}
-              {project._count.tasks}
+            {/* STATS */}
+            <div className="flex justify-between text-sm">
+              <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600">
+                Members: {project._count.members}
+              </span>
+
+              <span className="px-3 py-1 rounded-full bg-green-50 text-green-600">
+                Tasks: {project._count.tasks}
+              </span>
+            </div>
+
+            {/* MEMBERS LIST */}
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {project.members.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between p-2 rounded-lg glass-panel"
+                >
+                  {/* LEFT */}
+                  <div>
+                    <p className="text-sm font-medium">
+                      {m.user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {m.user.email}
+                    </p>
+                  </div>
+
+                  {/* RIGHT */}
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700">
+                      {m.role}
+                    </span>
+
+                    <span
+                      className={`text-xs font-semibold ${
+                        m.user.isActive
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {m.user.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* TEAM MEMBERS */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="py-2">Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {project.members.map((m) => (
-                  <tr
-                    key={m.id}
-                    className="border-b last:border-none"
-                  >
-                    <td className="py-2 font-medium">
-                      {m.user.name}
-                    </td>
-
-                    <td className="text-gray-500">
-                      {m.user.email}
-                    </td>
-
-                    <td>
-                      <span className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-800">
-                        {m.role}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={
-                          m.user.isActive
-                            ? "text-green-500"
-                            : "text-red-500"
-                        }
-                      >
-                        {m.user.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      ))}
-
+        ))}
+      </div>
     </div>
   );
 }

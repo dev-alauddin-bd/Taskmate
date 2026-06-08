@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Check, X, Pencil } from "lucide-react";
+import { Role } from "../../generated/prisma/enums";
 
 type Member = {
   userId: string;
+  role: Role;
 };
 
 export function ProjectForm({
@@ -15,11 +16,12 @@ export function ProjectForm({
 }: {
   onCancel?: () => void;
   onSuccess?: () => void;
-  initialData?: any; // 👈 edit mode
+  initialData?: any;
 }) {
   const router = useRouter();
-
   const isEdit = !!initialData;
+
+  const today = new Date().toISOString().split("T")[0];
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -28,10 +30,10 @@ export function ProjectForm({
 
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<any[]>([]);
-  const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<any>({});
 
-  // ================= FETCH USERS =================
+  // ================= USERS =================
   useEffect(() => {
     (async () => {
       const res = await fetch("/api/users");
@@ -40,7 +42,7 @@ export function ProjectForm({
     })();
   }, []);
 
-  // ================= EDIT MODE LOAD =================
+  // ================= EDIT MODE =================
   useEffect(() => {
     if (!initialData) return;
 
@@ -57,35 +59,65 @@ export function ProjectForm({
     setMembers(
       initialData.members?.map((m: any) => ({
         userId: m.userId,
-      })) || []
+        role: m.role ?? Role.MEMBER,
+      })) ?? []
     );
   }, [initialData]);
 
+  // ================= VALIDATION =================
+  const validate = () => {
+    const err: any = {};
+
+    if (!name.trim()) err.name = "Project name is required";
+    if (!description.trim()) err.description = "Description is required";
+    if (!deadline) err.deadline = "Deadline is required";
+
+    if (deadline && deadline < today) {
+      err.deadline = "Past date is not allowed";
+    }
+
+    setErrors(err);
+    return Object.keys(err).length === 0;
+  };
+
   // ================= MEMBERS =================
-  const addMember = (userId: string) => {
-    if (members.some((m) => m.userId === userId)) return;
-    setMembers((prev) => [...prev, { userId }]);
+  const addMember = (user: any) => {
+    if (members.some((m) => m.userId === user.id)) return;
+
+    setMembers((prev) => [
+      ...prev,
+      {
+        userId: user.id,
+        role: user.role || Role.MEMBER,
+      },
+    ]);
+  };
+
+  const updateRole = (userId: string, role: Role) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.userId === userId ? { ...m, role } : m))
+    );
   };
 
   const removeMember = (userId: string) => {
     setMembers((prev) => prev.filter((m) => m.userId !== userId));
   };
 
-  const isSelected = (userId: string) =>
-    members.some((m) => m.userId === userId);
-
   // ================= SUBMIT =================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     setLoading(true);
 
     try {
       const payload = {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
         deadline,
         status,
-        members: members.filter((m) => m.userId),
+        members,
       };
 
       const res = await fetch(
@@ -97,44 +129,69 @@ export function ProjectForm({
         }
       );
 
-      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
 
-      await res.json();
+      if (!res.ok) {
+        alert(data?.message || "Failed to create project");
+        return;
+      }
 
       onSuccess?.();
       router.refresh();
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 glass-panel p-6 rounded-2xl shadow-xl "
+    >
+      {/* NAME */}
+      <div>
+        <input
+          className="input"
+          placeholder="Project Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+      </div>
 
-      {/* TITLE */}
-      <input
-        className="input"
-        placeholder="Project Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      {/* DESCRIPTION */}
+      <div>
+        <textarea
+          className="input min-h-[100px]"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        {errors.description && (
+          <p className="text-red-500 text-sm">{errors.description}</p>
+        )}
+      </div>
 
-      <textarea
-        className="input"
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+      {/* DATE */}
+      <div>
+        <input
+          type="date"
+          className="input cursor-pointer"
+          value={deadline}
+          min={today}
+          onChange={(e) => setDeadline(e.target.value)}
+        />
+        {errors.deadline && (
+          <p className="text-red-500 text-sm">{errors.deadline}</p>
+        )}
+      </div>
 
-      <input
-        type="date"
-        className="input"
-        value={deadline}
-        onChange={(e) => setDeadline(e.target.value)}
-      />
-
+      {/* STATUS */}
       <select
-        className="input"
+        className="input cursor-pointer"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
       >
@@ -143,110 +200,73 @@ export function ProjectForm({
         <option value="COMPLETED">Completed</option>
       </select>
 
-      {/* ================= MEMBERS ================= */}
-      <div className="space-y-3">
+      {/* MEMBERS */}
+      <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
+        <h3 className="font-semibold mb-3">Team Members</h3>
 
-        <div className="flex justify-between items-center">
-          <h3 className="font-semibold">
-            Team Members {isEdit ? "(Edit Mode)" : "(Create Mode)"}
-          </h3>
-
-          <button
-            type="button"
-            onClick={() => setShowPicker(!showPicker)}
-            className="btn btn-outline btn-sm"
-          >
-            Manage Members
-          </button>
-        </div>
-
-        {/* PICKER */}
-        {showPicker && (
-          <div className="border rounded-xl p-3 max-h-60 overflow-y-auto space-y-2">
-
-            {users.map((u) => {
-              const selected = isSelected(u.id);
-
-              return (
-                <div
-                  key={u.id}
-                  className="flex justify-between items-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <div>
-                    <p className="font-medium">{u.name}</p>
-                    <p className="text-xs text-gray-500">{u.email}</p>
-                  </div>
-
-                  {!selected ? (
-                    <button
-                      type="button"
-                      onClick={() => addMember(u.id)}
-                      className="btn btn-sm btn-primary"
-                    >
-                      <Check size={16} />
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => removeMember(u.id)}
-                      className="btn btn-sm btn-outline"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* SELECTED MEMBERS */}
-        <div className="flex flex-wrap gap-2 mt-2">
-          {members.map((m) => {
-            const user = users.find((u) => u.id === m.userId);
+        <div className="space-y-2 max-h-60 overflow-y-auto">
+          {users.map((u) => {
+            const member = members.find((m) => m.userId === u.id);
+            const selected = !!member;
 
             return (
-              <span
-                key={m.userId}
-                className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm flex items-center gap-2"
+              <label
+                key={u.id}
+                className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-gray-900"
               >
-                {user?.name || "Unknown"}
+                <div>
+                  <p className="font-medium">{u.name}</p>
+                  <p className="text-xs text-gray-500">{u.email}</p>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => removeMember(m.userId)}
-                >
-                  <X size={14} />
-                </button>
-              </span>
+                <div className="flex items-center gap-3">
+                  {selected && (
+                    <select
+                      value={member.role}
+                      onChange={(e) =>
+                        updateRole(u.id, e.target.value as Role)
+                      }
+                      className="text-xs border rounded px-2 py-1 glass-panel"
+                    >
+                      <option value="ADMIN">Admin</option>
+                      <option value="PROJECT_MANAGER">Manager</option>
+                      <option value="MEMBER">Member</option>
+                    </select>
+                  )}
+
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() =>
+                      selected ? removeMember(u.id) : addMember(u)
+                    }
+                    className="w-5 h-5 cursor-pointer accent-[var(--primary)]"
+                  />
+                </div>
+              </label>
             );
           })}
         </div>
+
+        <p className="text-xs text-gray-500 mt-2">
+          Selected Members: <b>{members.length}</b>
+        </p>
       </div>
 
       {/* ACTIONS */}
       <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="btn btn-outline"
-        >
+        <button type="button" onClick={onCancel} className="btn btn-outline">
           Cancel
         </button>
 
         <button
           type="submit"
-          className="btn btn-primary"
           disabled={loading}
+          className="btn btn-primary"
         >
-          {loading
-            ? "Saving..."
-            : isEdit
-              ? "Update Project"
-              : "Create Project"}
+          {loading ? "Saving..." : isEdit ? "Update" : "Create"}
         </button>
       </div>
-
     </form>
   );
 }
