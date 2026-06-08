@@ -11,7 +11,6 @@ export default withAuth(function middleware(req) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
-  console.log(token)
 
   // ADMIN ROUTE
   if (
