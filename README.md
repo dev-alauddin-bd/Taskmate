@@ -9,17 +9,6 @@ Welcome to **SmartTask**, a modern, full-stack, enterprise-grade project and tas
 
 ---
 
-## 🔑 Demo Credentials
-Click the **Demo Login** buttons on the sign-in page to instantly login with prefilled credentials, or use:
-
-| Role | Email | Password | Permissions |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@demo.com` | `password123` | Full system access |
-| **Project Manager** | `pm@demo.com` | `password123` | Manage projects, assign/create tasks |
-| **Team Member** | `member@demo.com` | `password123` | View tasks and update status of assigned tasks |
-
----
-
 ## ✨ Features Overview
 
 ### 1. Authentication & Role-Based Access Control (RBAC)
@@ -101,8 +90,8 @@ NODE_ENV="development"
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/Taskmate-smarttask.git
-   cd Taskmate-smarttask
+   git clone https://github.com/dev-alauddin-bd/Taskmate.git
+   cd Taskmate
    ```
 
 2. **Install dependencies**:
