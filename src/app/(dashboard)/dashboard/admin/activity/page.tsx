@@ -14,7 +14,13 @@ export default async function AdminActivityPage() {
 
   const logs = await prisma.activityLog.findMany({
     include: {
-      user: { select: { name: true } },
+      user: {
+        select: {
+          name: true,
+          role: true,
+          avatar: true,
+        },
+      },
       project: { select: { name: true } },
       task: { select: { title: true } },
     },
@@ -22,7 +28,17 @@ export default async function AdminActivityPage() {
     take: 50,
   });
 
-  // 🔥 SMART FORMATTER (NO STRINGIFY)
+  // ================= AVATAR FALLBACK =================
+  const getAvatar = (user: any) => {
+    if (user?.avatar) return user.avatar;
+
+    const name = user?.name || "U";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name
+    )}&background=random&color=fff&bold=true`;
+  };
+
+  // ================= DETAILS FORMATTER =================
   const formatDetails = (details: any) => {
     if (!details) return null;
 
@@ -38,7 +54,7 @@ export default async function AdminActivityPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="space-y-6">
 
       {/* HEADER */}
       <DashboardHeader
@@ -57,7 +73,7 @@ export default async function AdminActivityPage() {
           </h2>
         </div>
 
-        {/* EMPTY */}
+        {/* EMPTY STATE */}
         {logs.length === 0 ? (
           <div className="text-center py-12 text-[var(--text-muted)]">
             No system activity found
@@ -112,7 +128,7 @@ export default async function AdminActivityPage() {
                       </span>
                     </div>
 
-                    {/* DETAILS (CLEAN - NO STRINGIFY) */}
+                    {/* DETAILS */}
                     {details && (
                       <p className="text-sm text-[var(--text-muted)] mt-2">
                         {details}
@@ -122,13 +138,31 @@ export default async function AdminActivityPage() {
                     {/* META */}
                     <div className="flex flex-wrap gap-4 text-xs text-[var(--text-muted)] mt-3 pt-3 border-t border-[var(--border)]/30">
 
+                      {/* USER */}
                       {log.user && (
-                        <span className="flex items-center gap-1">
-                          <User className="w-3 h-3 text-[var(--primary)]" />
-                          {log.user.name}
+                        <span className="flex items-center gap-2">
+
+                          {/* AVATAR */}
+                          <img
+                            src={getAvatar(log.user)}
+                            className="w-6 h-6 rounded-full object-cover border border-[var(--border)]"
+                          />
+
+                          {/* NAME + ROLE */}
+                          <div className="flex flex-col leading-tight">
+                            <span className="text-xs font-medium text-[var(--text)]">
+                              {log.user.name}
+                            </span>
+
+                            <span className="text-[10px] text-[var(--text-muted)] uppercase">
+                              {log.user.role}
+                            </span>
+                          </div>
+
                         </span>
                       )}
 
+                      {/* PROJECT */}
                       {log.project && (
                         <span className="flex items-center gap-1">
                           <Briefcase className="w-3 h-3 text-indigo-500" />
@@ -136,6 +170,7 @@ export default async function AdminActivityPage() {
                         </span>
                       )}
 
+                      {/* TASK */}
                       {log.task && (
                         <span className="flex items-center gap-1">
                           <CheckSquare className="w-3 h-3 text-green-500" />

@@ -123,7 +123,7 @@ export function ProjectForm({
       const res = await fetch(
         isEdit ? `/api/projects/${initialData.id}` : "/api/projects",
         {
-          method: isEdit ? "PUT" : "POST",
+          method: isEdit ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }
