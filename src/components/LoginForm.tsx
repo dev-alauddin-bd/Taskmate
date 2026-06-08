@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { User, Users, Crown, Loader2 } from "lucide-react";
 
 export function LoginForm() {
@@ -91,39 +92,51 @@ export function LoginForm() {
 
       {/* ERROR */}
       {error && (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
           {error}
         </div>
       )}
 
       {/* FORM */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 text-left">
 
         {/* EMAIL */}
-        <input
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white"
-        />
+        <div>
+          <label className="label font-semibold mb-1.5 block" htmlFor="email">
+            Email Address
+          </label>
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="input"
+          />
+        </div>
 
         {/* PASSWORD */}
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="w-full rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-white"
-        />
+        <div>
+          <label className="label font-semibold mb-1.5 block" htmlFor="password">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="input"
+          />
+        </div>
 
         {/* BUTTON */}
         <button
           type="submit"
           disabled={loading || demoLoading}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 py-3 font-semibold text-white"
+          className="btn btn-primary w-full mt-2"
         >
           {loading ? (
             <>
@@ -136,11 +149,19 @@ export function LoginForm() {
         </button>
       </form>
 
+      {/* LINK TO SIGNUP */}
+      <div className="text-center text-sm text-[var(--text-muted)]">
+        Don&apos;t have an account?{" "}
+        <Link href="/signup" className="text-[var(--primary)] hover:underline font-semibold">
+          Sign Up
+        </Link>
+      </div>
+
       {/* DIVIDER */}
       <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-xs text-slate-400">Demo Access</span>
-        <div className="h-px flex-1 bg-white/10" />
+        <div className="h-px flex-1 bg-[var(--border)]/60" />
+        <span className="text-xs text-[var(--text-muted)] font-medium">Demo Access</span>
+        <div className="h-px flex-1 bg-[var(--border)]/60" />
       </div>
 
       {/* DEMO BUTTONS */}
@@ -149,27 +170,27 @@ export function LoginForm() {
         <button
           onClick={() => handleDemoLogin("ADMIN")}
           disabled={loading || demoLoading}
-          className="flex w-full items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-white"
+          className="btn btn-outline w-full justify-start gap-3 text-[var(--foreground)] border-[var(--warning)]/30 hover:bg-[var(--warning)]/10"
         >
-          <Crown size={18} />
+          <Crown size={18} className="text-[var(--warning)]" />
           Demo Admin
         </button>
 
         <button
           onClick={() => handleDemoLogin("PROJECT_MANAGER")}
           disabled={loading || demoLoading}
-          className="flex w-full items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-white"
+          className="btn btn-outline w-full justify-start gap-3 text-[var(--foreground)] border-[var(--primary)]/30 hover:bg-[var(--primary)]/10"
         >
-          <Users size={18} />
+          <Users size={18} className="text-[var(--primary)]" />
           Demo Project Manager
         </button>
 
         <button
           onClick={() => handleDemoLogin("MEMBER")}
           disabled={loading || demoLoading}
-          className="flex w-full items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-white"
+          className="btn btn-outline w-full justify-start gap-3 text-[var(--foreground)] border-[var(--success)]/30 hover:bg-[var(--success)]/10"
         >
-          <User size={18} />
+          <User size={18} className="text-[var(--success)]" />
           Demo Member
         </button>
 

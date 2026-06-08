@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export function ThemeProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     const prefersDark = window.matchMedia(
@@ -16,13 +14,18 @@ export function ThemeProvider({
     ).matches;
 
     const theme = stored || (prefersDark ? "dark" : "light");
+    const root = document.documentElement;
 
-    document.documentElement.classList.add(theme);
-
-    setMounted(true);
+    if (theme === "dark") {
+      root.classList.add("dark", "dark-theme");
+      root.classList.remove("light", "light-theme");
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.classList.add("light", "light-theme");
+      root.classList.remove("dark", "dark-theme");
+      root.setAttribute("data-theme", "light");
+    }
   }, []);
-
-  if (!mounted) return null;
 
   return <>{children}</>;
 }

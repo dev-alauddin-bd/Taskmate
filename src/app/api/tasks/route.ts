@@ -2,15 +2,51 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
-  const { title, description, dueDate, priority, status, projectId, userId } = await request.json();
   try {
+    const body = await request.json();
+    const { title, description, dueDate, priority, status, projectId, userId } = body;
+
+    // 1. Prevent duplicate task titles inside the same project
+    const duplicate = await prisma.task.findFirst({
+      where: {
+        title: { equals: title, mode: 'insensitive' },
+        projectId,
+        deletedAt: null,
+      }
+    });
+    if (duplicate) {
+      return NextResponse.json(
+        { message: "This task already exists in the project." },
+        { status: 400 }
+      );
+    }
+
+    // 2. Prevent setting past dates as deadlines
+    const due = new Date(dueDate);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    if (due < today) {
+      return NextResponse.json(
+        { message: "Please select a valid deadline." },
+        { status: 400 }
+      );
+    }
+
+    // 3. Prevent assigning completed tasks
+    if (status === "COMPLETED" && userId) {
+      return NextResponse.json(
+        { message: "Completed tasks cannot be reassigned." },
+        { status: 400 }
+      );
+    }
+
     const task = await prisma.task.create({
       data: {
         title,
         description,
         dueDate: new Date(dueDate),
-        priority,
-        status,
+        priority: priority || "MEDIUM",
+        status: status || "TODO",
         projectId,
         assignees: userId ? { create: [{ userId }] } : undefined,
       },

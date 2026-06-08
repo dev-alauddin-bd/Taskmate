@@ -41,16 +41,22 @@ export function SignupForm() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {error && (
-          <div className="p-3 rounded-md bg-[var(--danger)]/10 border border-[var(--danger)] text-[var(--danger)] text-sm">
-            {error}
-          </div>
-        )}
+    <div className="space-y-6">
+      {/* ERROR */}
+      {error && (
+        <div className="rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
+          {error}
+        </div>
+      )}
+      
+      {/* FORM */}
+      <form onSubmit={handleSubmit} className="space-y-4 text-left">
         
+        {/* NAME */}
         <div>
-          <label className="label" htmlFor="name">Full Name</label>
+          <label className="label font-semibold mb-1.5 block" htmlFor="name">
+            Full Name
+          </label>
           <input
             id="name"
             type="text"
@@ -62,8 +68,11 @@ export function SignupForm() {
           />
         </div>
 
+        {/* EMAIL */}
         <div>
-          <label className="label" htmlFor="email">Email</label>
+          <label className="label font-semibold mb-1.5 block" htmlFor="email">
+            Email Address
+          </label>
           <input
             id="email"
             type="email"
@@ -75,8 +84,11 @@ export function SignupForm() {
           />
         </div>
         
+        {/* PASSWORD */}
         <div>
-          <label className="label" htmlFor="password">Password</label>
+          <label className="label font-semibold mb-1.5 block" htmlFor="password">
+            Password
+          </label>
           <input
             id="password"
             type="password"
@@ -89,27 +101,39 @@ export function SignupForm() {
           />
         </div>
 
+        {/* ROLE */}
         <div>
-          <label className="label" htmlFor="role">Role</label>
+          <label className="label font-semibold mb-1.5 block" htmlFor="role">
+            Role
+          </label>
           <select 
             id="role" 
-            className="input" 
+            className="input bg-[var(--surface)] text-[var(--foreground)]" 
             value={role} 
             onChange={(e) => setRole(e.target.value)}
           >
-            <option value="MEMBER">Team Member</option>
-            <option value="PROJECT_MANAGER">Project Manager</option>
-            <option value="ADMIN">Admin</option>
+            <option value="MEMBER" className="bg-[var(--surface)]">Team Member</option>
+            <option value="PROJECT_MANAGER" className="bg-[var(--surface)]">Project Manager</option>
+            <option value="ADMIN" className="bg-[var(--surface)]">Admin</option>
           </select>
         </div>
         
-        <button type="submit" className="btn btn-primary w-full mt-2" disabled={loading}>
+        {/* BUTTON */}
+        <button 
+          type="submit" 
+          className="btn btn-primary w-full mt-2" 
+          disabled={loading}
+        >
           {loading ? "Signing up..." : "Sign Up"}
         </button>
       </form>
 
+      {/* LINK TO LOGIN */}
       <div className="text-center text-sm text-[var(--text-muted)]">
-        Already have an account? <Link href="/login" className="text-[var(--primary)] hover:underline">Log in</Link>
+        Already have an account?{" "}
+        <Link href="/login" className="text-[var(--primary)] hover:underline font-semibold">
+          Log in
+        </Link>
       </div>
     </div>
   );

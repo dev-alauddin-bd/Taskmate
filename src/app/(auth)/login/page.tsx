@@ -1,10 +1,20 @@
 import { LoginForm } from "@/components/LoginForm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user) {
+    redirect("/dashboard");
+  }
+
   return (
+    <>
 
-    <div className="w-full max-w-md">
-      <div className="overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]/70 backdrop-blur-2xl shadow-2xl p-8">
+      <div className="w-full max-w-md">
+        <div className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)]/70 backdrop-blur-2xl shadow-2xl p-8">
 
         {/* glow */}
         <div className="absolute -top-24 -right-24 h-48 w-48 bg-[var(--primary)]/20 blur-3xl rounded-full" />
@@ -23,6 +33,7 @@ export default function LoginPage() {
         <LoginForm />
       </div>
     </div>
+    </>
 
   );
 }

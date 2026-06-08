@@ -4,12 +4,12 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { TaskForm } from "@/components/TaskForm";
 import { Modal } from "@/components/Modal";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function ProjectTasksView({ projectId, initialTasks, role }: { projectId: string, initialTasks: any[], role: string }) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<any>(null);
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm("Are you sure you want to delete this task?")) return;
@@ -106,9 +106,12 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
                           <button onClick={() => handleDeleteTask(task.id)} className="text-sm font-medium text-[var(--danger)] hover:underline">
                             Delete
                           </button>
-                          <Link href={`/dashboard/member/tasks/${task.id}/edit`} className="text-sm font-medium text-[var(--primary)] hover:underline ml-2">
+                          <button
+                            onClick={() => setEditingTask(task)}
+                            className="text-sm font-medium text-[var(--primary)] hover:underline ml-2"
+                          >
                             Edit
-                          </Link>
+                          </button>
                         </>
                       )}
                     </td>
@@ -122,6 +125,16 @@ export function ProjectTasksView({ projectId, initialTasks, role }: { projectId:
 
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Create New Task">
         <TaskForm projectId={projectId} onCancel={() => setShowModal(false)} />
+      </Modal>
+
+      <Modal isOpen={editingTask !== null} onClose={() => setEditingTask(null)} title="Edit Task">
+        {editingTask && (
+          <TaskForm
+            projectId={projectId}
+            task={editingTask}
+            onCancel={() => setEditingTask(null)}
+          />
+        )}
       </Modal>
     </div>
   );

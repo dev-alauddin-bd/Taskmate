@@ -3,14 +3,26 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel: () => void }) {
+export function TaskForm({
+  projectId,
+  task,
+  onCancel,
+}: {
+  projectId: string;
+  task?: any;
+  onCancel: () => void;
+}) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState("MEDIUM");
-  const [status, setStatus] = useState("TODO");
-  const [userId, setUserId] = useState("");
+  const [title, setTitle] = useState(task?.title || "");
+  const [description, setDescription] = useState(task?.description || "");
+  const [dueDate, setDueDate] = useState(
+    task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+  );
+  const [priority, setPriority] = useState(task?.priority || "MEDIUM");
+  const [status, setStatus] = useState(task?.status || "TODO");
+  const [userId, setUserId] = useState(
+    task?.assignees?.[0]?.userId || task?.userId || ""
+  );
   const [users, setUsers] = useState<any[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,8 +59,12 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
         setLoading(false);
         return;
       }
-      const res = await fetch("/api/tasks", {
-        method: "POST",
+
+      const url = task ? `/api/tasks/${task.id}` : "/api/tasks";
+      const method = task ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           title, 
@@ -63,7 +79,7 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || "Failed to create task");
+        throw new Error(data.message || "Failed to save task");
       }
 
       router.refresh();
@@ -176,8 +192,8 @@ export function TaskForm({ projectId, onCancel }: { projectId: string, onCancel:
         <button type="button" className="btn btn-outline" onClick={onCancel} disabled={loading}>
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Saving..." : "Create Task"}
+         <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? "Saving..." : task ? "Update Task" : "Create Task"}
         </button>
       </div>
     </form>

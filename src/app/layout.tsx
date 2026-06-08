@@ -30,10 +30,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning={true}
     >
+
       <body>
         <Providers>{children}</Providers>
         <Toaster />
       </body>
     </html>
   );
-}
+} 

@@ -6,6 +6,8 @@ import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Modal } from "@/components/Modal";
+import { TaskForm } from "@/components/TaskForm";
 
 export default function TasksClient({
   tasks,
@@ -206,7 +208,19 @@ export default function TasksClient({
     <>
       <DataTable data={tasks} columns={columns} />
 
-      {editingTask && <div>{/* edit modal */}</div>}
+      {editingTask && (
+        <Modal
+          isOpen={true}
+          onClose={() => setEditingTask(null)}
+          title="Edit Task"
+        >
+          <TaskForm
+            projectId={editingTask.projectId}
+            task={editingTask}
+            onCancel={() => setEditingTask(null)}
+          />
+        </Modal>
+      )}
     </>
   );
 }

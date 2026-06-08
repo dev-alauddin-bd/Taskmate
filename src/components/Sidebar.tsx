@@ -81,24 +81,31 @@ export function Sidebar() {
         </h2>
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-2">
-        {navItems.map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-                isActive
-                  ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium shadow-sm"
-                  : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] hover:translate-x-1"
-              }`}
-            >
-              <Icon className="w-5 h-5" />
-              {item.name}
-            </Link>
-          );
-        })}
+          {navItems.map((item) => {
+            let isActive: boolean;
+            if (item.href === "/dashboard") {
+              // Only mark the top‑level Dashboard as active on the exact path
+              isActive = pathname === "/dashboard";
+            } else {
+              // For sub‑pages use startsWith to cover the whole section
+              isActive = pathname.startsWith(item.href);
+            }
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium shadow-sm"
+                    : "text-[var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)] hover:translate-x-1"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {item.name}
+              </Link>
+            );
+          })}
       </nav>
     </aside>
   );
