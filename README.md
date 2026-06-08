@@ -5,8 +5,7 @@ Welcome to **SmartTask**, a modern, full-stack, enterprise-grade project and tas
 ---
 
 ## 🚀 Live Demo & Repository
-- **GitHub Repository**: [GitHub Link](https://github.com/your-username/Taskmate-)
-- **Live Application URL**: [Vercel Deployment Link](https://Taskmate-smarttask.vercel.app)
+- **Live Application URL**: https://taskmate-pearl-seven.vercel.app
 
 ---
 
