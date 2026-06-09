@@ -25,10 +25,8 @@ export default async function AdminMembersPage({
   if (!session) redirect("/login");
   if (session.user.role !== "ADMIN") redirect("/dashboard");
 
-  const search =
-    typeof searchParams.search === "string"
-      ? searchParams.search
-      : "";
+  const search = typeof searchParams?.search === "string" ? searchParams.search : "";
+
 
   const where: any = {};
   if (search) {

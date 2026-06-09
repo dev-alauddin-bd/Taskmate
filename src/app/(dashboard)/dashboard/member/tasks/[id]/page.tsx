@@ -14,8 +14,9 @@ const card = "glass-panel rounded-3xl p-6 relative overflow-hidden";
 export default async function MemberTaskDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session) redirect("/login");
@@ -26,7 +27,7 @@ export default async function MemberTaskDetailPage({
 
   const task = await prisma.task.findFirst({
     where: {
-      id: params.id,
+      id,
       assignees: {
         some: {
           userId: session.user.id,
