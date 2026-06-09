@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
+/* =========================
+   DARK VARIANT SUPPORT
+========================= */
 @variant dark (&:where(.dark, .dark *, .dark-theme, .dark-theme *, [data-theme="dark"], [data-theme="dark"] *));
 
 /* =========================
    THEME TOKENS
 ========================= */
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -14,9 +16,8 @@
 }
 
 /* =========================
-   LIGHT THEME (DEFAULT)
+   LIGHT THEME
 ========================= */
-
 :root,
 .light,
 .light-theme,
@@ -27,14 +28,14 @@
 
   --foreground: #1f2937;
   --text-muted: #6b7280;
-  --border: #e5e7eb;
 
-  /* PRIMARY (PURPLE) */
+  /* 🔥 FIXED BORDER (cleaner) */
+  --border: #e2e8f0;
+
   --primary: #8b5cf6;
   --primary-hover: #7c3aed;
   --primary-light: rgba(139, 92, 246, 0.12);
 
-  /* STATUS COLORS */
   --success: #10b981;
   --info: #06b6d4;
   --danger: #ef4444;
@@ -44,9 +45,8 @@
 }
 
 /* =========================
-   DARK THEME (FIXED)
+   DARK THEME (IMPROVED)
 ========================= */
-
 .dark,
 .dark-theme,
 :root[data-theme="dark"] {
@@ -56,14 +56,14 @@
 
   --foreground: #f8fafc;
   --text-muted: #94a3b8;
-  --border: #1f2a3a;
 
-  /* PRIMARY */
+  /* 🔥 FIXED BORDER (softer dark) */
+  --border: #243041;
+
   --primary: #a78bfa;
   --primary-hover: #8b5cf6;
   --primary-light: rgba(167, 139, 250, 0.18);
 
-  /* STATUS COLORS */
   --success: #2ee6a6;
   --info: #38bdf8;
   --danger: #fb7185;
@@ -72,34 +72,9 @@
   --accent-purple: #c084fc;
 }
 
-/* Auto dark mode fallback */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not(.light-theme):not([data-theme="light"]) {
-    --background: #0b0f19;
-    --surface: #121826;
-    --surface-hover: #1a2234;
-
-    --foreground: #f8fafc;
-    --text-muted: #94a3b8;
-    --border: #1f2a3a;
-
-    --primary: #a78bfa;
-    --primary-hover: #8b5cf6;
-    --primary-light: rgba(167, 139, 250, 0.18);
-
-    --success: #2ee6a6;
-    --info: #38bdf8;
-    --danger: #fb7185;
-    --warning: #fbbf24;
-
-    --accent-purple: #c084fc;
-  }
-}
-
 /* =========================
    BASE
 ========================= */
-
 @layer base {
   body {
     background-color: var(--background);
@@ -108,25 +83,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    /* premium gradient noise */
+    /* subtle premium noise */
     background-image:
-      radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.08), transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06), transparent 40%);
-    background-attachment: fixed;
+      radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.06), transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.04), transparent 40%);
   }
 }
 
 /* =========================
-   SCROLLBAR (CLEAN)
+   SCROLLBAR
 ========================= */
-
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -139,24 +108,23 @@
 }
 
 /* =========================
-   GLASS CARD (FIXED)
+   GLASS PANEL (FIXED)
 ========================= */
-
 .glass-panel {
-  @apply bg-[var(--surface)]/80 border border-[var(--border)]/60 backdrop-blur-xl
-  shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-[2px];
+  @apply bg-[var(--surface)]/70 border border-[var(--border)] backdrop-blur-xl
+  shadow-md transition-all duration-300
+  hover:shadow-lg hover:-translate-y-[2px];
 
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .dark-theme .glass-panel {
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 /* =========================
    BUTTONS
 ========================= */
-
 .btn {
   @apply inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold
   transition-all duration-300 cursor-pointer
@@ -165,12 +133,8 @@
 }
 
 .btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   @apply text-white;
-  background: linear-gradient(
-    135deg,
-    var(--primary),
-    var(--primary-hover)
-  );
 }
 
 .btn-outline {
@@ -179,20 +143,21 @@
 }
 
 /* =========================
-   INPUTS
+   INPUTS (CLEAN BORDER FIX)
 ========================= */
-
 .input {
-  @apply w-full px-4 py-3 rounded-xl border border-[var(--border)]
-  bg-[var(--surface)] text-[var(--foreground)]
-  focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30
-  placeholder:text-[var(--text-muted)];
+  @apply w-full px-4 py-3 rounded-xl
+  border border-[var(--border)]
+  bg-[var(--surface)]
+  text-[var(--foreground)]
+  placeholder:text-[var(--text-muted)]
+  focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/25
+  transition;
 }
 
 /* =========================
    LABEL
 ========================= */
-
 .label {
   @apply text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)];
 }
@@ -200,7 +165,6 @@
 /* =========================
    ANIMATION
 ========================= */
-
 .animate-fade-in {
   animation: fadeIn 0.35s ease-out;
 }

@@ -1,3 +1,4 @@
+"use client";
 // hooks/useDebounce.ts
 
 import { useEffect, useState } from "react";
