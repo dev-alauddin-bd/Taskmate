@@ -75,7 +75,7 @@ export default async function HomePage() {
             {/* Utilities Group */}
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <LocaleSwitcher />
+              {/* <LocaleSwitcher /> */}
             </div>
 
             {/* CTA Button (Primary Action) */}
