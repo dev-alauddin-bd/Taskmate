@@ -1,3 +1,5 @@
+// src/app/(dashboard)/dashboard/page.tsx
+
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -30,10 +32,12 @@ export default async function DashboardPage() {
   const isAdmin = role === "ADMIN";
   const isManager = role === "PROJECT_MANAGER";
   const isMember = role === "MEMBER";
-  function getTaskScope(role: string, userId: string) {
-    if (role === "ADMIN") return {};
 
-    if (role === "PROJECT_MANAGER") {
+  /* ================= SAFE USER SCOPE ================= */
+  const getScope = () => {
+    if (isAdmin) return {};
+
+    if (isManager) {
       return {
         project: {
           managerId: userId,
@@ -42,19 +46,42 @@ export default async function DashboardPage() {
     }
 
     return {
-      assignees: {
-        some: { userId },
+      project: {
+        isDeleted: false,
+        members: {
+          some: { userId },
+        },
       },
     };
-  }
-  // ================= COMMON =================
+  };
+
+  const scope = getScope();
+
+  /* ================= TASK PRIORITY CHART ================= */
   const tasksByPriority = await prisma.task.groupBy({
     by: ["priority"],
-    where: { isDeleted: false, project: { isDeleted: false }, ...getTaskScope(role, userId) },
+    where: {
+      isDeleted: false,
+      project: { isDeleted: false },
+      ...scope,
+    },
     _count: { _all: true },
   });
 
-  // ================= ACTIVITY LOG (ONLY ADMIN) =================
+  /* ================= UPCOMING DEADLINES ================= */
+  const upcomingDeadlines = await prisma.task.findMany({
+    where: {
+      isDeleted: false,
+      project: { isDeleted: false },
+      dueDate: { gte: now },
+      status: { not: "COMPLETED" },
+      ...scope,
+    },
+    orderBy: { dueDate: "asc" },
+    take: 5,
+  });
+
+  /* ================= ACTIVITY LOG ================= */
   let recentActivities: any[] = [];
 
   if (isAdmin) {
@@ -63,19 +90,8 @@ export default async function DashboardPage() {
       take: 5,
     });
   }
-  const upcomingDeadlines = await prisma.task.findMany({
-    where: {
-      isDeleted: false,
-      project: { isDeleted: false },
-      dueDate: { gte: now },
-      status: { not: "COMPLETED" },
-      ...getTaskScope(role, userId),
-    },
-    orderBy: { dueDate: "asc" },
-    take: 5,
-  });
 
-  // ================= STATS DEFAULT =================
+  /* ================= DEFAULT STATS ================= */
   let totalProjects = 0;
   let totalTasks = 0;
   let completedTasks = 0;
@@ -85,58 +101,49 @@ export default async function DashboardPage() {
   let projectProgress: any[] = [];
   let teamMembers: any[] = [];
 
-  // ===================================================
-  // ADMIN / MANAGER LOGIC (FIXED SCOPING)
-  // ===================================================
+  /* ================= ADMIN / MANAGER ================= */
   if (isAdmin || isManager) {
     const projects = await prisma.project.findMany({
       where: isManager
-        ? { managerId: userId, isDeleted: false } // 🔥 IMPORTANT FIX
+        ? { managerId: userId, isDeleted: false }
         : { isDeleted: false },
       include: { tasks: true },
+      
+      
     });
 
     const tasks = await prisma.task.findMany({
       where: {
         isDeleted: false,
-        project: { isDeleted: false },
-        ...(isManager ? { project: { managerId: userId } } : {}),
+        project: isManager
+          ? { managerId: userId, isDeleted: false }
+          : { isDeleted: false },
       },
     });
 
     const users = await prisma.user.findMany({
       where: isManager
         ? {
-          memberships: {
-            some: {
-              project: { managerId: userId },
+            memberships: {
+              some: {
+                project: { managerId: userId },
+              },
             },
-          },
-        }
+          }
         : undefined,
       include: {
-        tasks: {
-          include: {
-            task: true,
-          },
-        },
+        tasks: true,
       },
     });
 
     totalProjects = projects.length;
     totalTasks = tasks.length;
 
-    completedTasks = tasks.filter(
-      (t) => t.status === "COMPLETED"
-    ).length;
-
-    pendingTasks = tasks.filter(
-      (t) => t.status !== "COMPLETED"
-    ).length;
+    completedTasks = tasks.filter((t) => t.status === "COMPLETED").length;
+    pendingTasks = tasks.filter((t) => t.status !== "COMPLETED").length;
 
     overdueTasks = tasks.filter(
-      (t) =>
-        t.status !== "COMPLETED" && new Date(t.dueDate) < now
+      (t) => t.status !== "COMPLETED" && new Date(t.dueDate) < now
     ).length;
 
     projectProgress = projects.map((p) => {
@@ -156,22 +163,19 @@ export default async function DashboardPage() {
       id: u.id,
       name: u.name,
       taskCount: u.tasks.length,
-      completedCount: u.tasks.filter(
-        (t) => t.task?.status === "COMPLETED"
-      ).length,
     }));
   }
 
-  // ===================================================
-  // MEMBER LOGIC (FIXED)
-  // ===================================================
+  /* ================= MEMBER ================= */
   if (isMember) {
     const memberTasks = await prisma.task.findMany({
       where: {
         isDeleted: false,
-        project: { isDeleted: false },
-        assignees: {
-          some: { userId },
+        project: {
+          isDeleted: false,
+          members: {
+            some: { userId },
+          },
         },
       },
     });
@@ -191,14 +195,17 @@ export default async function DashboardPage() {
         t.status !== "COMPLETED" && new Date(t.dueDate) < now
     ).length;
 
-    totalProjects = await prisma.projectMember.count({
-      where: { userId, isDeleted: false },
+    totalProjects = await prisma.project.count({
+      where: {
+        isDeleted: false,
+        members: {
+          some: { userId },
+        },
+      },
     });
   }
 
-  // ===================================================
-  // UI
-  // ===================================================
+  /* ================= UI ================= */
   return (
     <div className="space-y-6 animate-fade-in">
 
@@ -218,6 +225,7 @@ export default async function DashboardPage() {
 
         <TasksByPriorityChart data={tasksByPriority} />
         <UpcomingDeadlinesCard data={upcomingDeadlines} />
+
         {isAdmin && (
           <RecentActivityCard recentActivities={recentActivities} />
         )}
@@ -232,9 +240,9 @@ export default async function DashboardPage() {
               pendingTasks={pendingTasks}
               overdueTasks={overdueTasks}
             />
-   
           </>
         )}
+
       </div>
     </div>
   );

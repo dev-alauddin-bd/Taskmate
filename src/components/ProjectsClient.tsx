@@ -7,8 +7,14 @@ import DataTable, { getStatusColor } from "@/components/dashboard/DataTable";
 import { Pencil, Trash2 } from "lucide-react";
 import { TaskForm } from "@/components/TaskForm";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function ProjectsClient({ projects }: any) {
+  const { data: session } = useSession();
+  const role = session?.user?.role;
+  const isAdmin = role === "ADMIN";
+  const isManager = role === "PROJECT_MANAGER";
+  const canDelete = isAdmin;;
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
 
@@ -133,12 +139,14 @@ export default function ProjectsClient({ projects }: any) {
                   <Pencil size={18} />
                 </button>
 
-                <button
-                  onClick={() => confirmDelete(p.id)}
-                  className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
-                >
-                  <Trash2 size={18} />
-                </button>
+                {canDelete && (
+              <button
+                onClick={() => confirmDelete(p.id)}
+                className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
+              >
+                <Trash2 size={18} />
+              </button>
+            )}
               </div>
             ),
           },

@@ -62,16 +62,18 @@ const PriorityBadge = ({ priority }: { priority: string }) => (
 
 export default function TasksClient({
   tasks,
-  users,
 }: {
   tasks: any[];
-  users: { id: string; name: string }[];
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [editingTask, setEditingTask] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null); // ✅ modal state
+
+  if (status === "loading") {
+    return null; // optional: could show a loader
+  }
 
   const role = session?.user?.role;
 
@@ -79,7 +81,7 @@ export default function TasksClient({
   const isManager = role === "PROJECT_MANAGER";
 
   const canEdit = isAdmin || isManager;
-  const canDelete = isAdmin;
+  const canDelete = isAdmin || isManager; // ✅ allow managers to delete
 
   const baseRoute = isAdmin
     ? "/dashboard/admin/tasks"

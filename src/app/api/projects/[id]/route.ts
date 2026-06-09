@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+
 import prisma from "@/lib/prisma";
 import { Role } from "../../../../../generated/prisma/enums";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { Prisma } from "../../../../../generated/prisma/client";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -109,37 +111,47 @@ export async function PATCH(req: Request, { params }: Props) {
   }
 }
 
+// Updated DELETE with role verification
 export async function DELETE(req: Request, { params }: Props) {
   try {
     const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
     const { id } = await params;
 
-    const project = await prisma.project.update({
-      where: { id },
-      data: { isDeleted: true },
-    });
-
-    // ACTIVITY LOG
-    if (session?.user?.id) {
-      await prisma.activityLog.create({
-        data: {
-          action: "PROJECT_DELETED",
-          userId: session.user.id,
-          projectId: id,
-          details: {
-            deleted: true,
-          },
-        },
+    // Verify permission: ADMIN can delete any, MANAGER only their own project
+    const isAdmin = session.user.role === "ADMIN";
+    let project
+    if (isAdmin) {
+      project = await prisma.project.update({
+        where: { id },
+        data: { isDeleted: true },
+      });
+    } else {
+      await prisma.project.update({
+        where: { id, managerId: session.user.id },
+        data: { isDeleted: true },
       });
     }
+
+    // ACTIVITY LOG
+    await prisma.activityLog.create({
+      data: {
+        action: "PROJECT_DELETED",
+        userId: session.user.id,
+        projectId: id,
+        details: { deleted: true },
+      },
+    });
 
     return NextResponse.json(project);
   } catch (error) {
     console.error(error);
-
-    return NextResponse.json(
-      { message: "Failed to delete project" },
-      { status: 500 }
-    );
+    // Check for Prisma known request error (e.g., missing record)
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return NextResponse.json({ message: "Not found or insufficient permissions" }, { status: 403 });
+    }
+    return NextResponse.json({ message: "Failed to delete project" }, { status: 500 });
   }
 }

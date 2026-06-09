@@ -37,7 +37,6 @@ export default async function ManagerProjectsPage({ searchParams }: any) {
     },
   }),
 ]);
-  console.log(projects);
 
   return (
     <div className="space-y-6">

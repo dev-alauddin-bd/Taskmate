@@ -135,7 +135,7 @@ export default function TasksPageClient({
 
       {/* TABLE */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4">
-        <TasksClient tasks={tasks} users={users} />
+        <TasksClient tasks={tasks}  />
       </div>
 
       {/* PAGINATION */}
