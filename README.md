@@ -173,16 +173,6 @@ Open: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📌 System Highlights
-
-* Enterprise-level RBAC system
-* Real-time task tracking
-* Scalable database structure
-* Clean modular architecture
-* Production-ready dashboard system
-
----
-
 ## 👨‍💻 Author
 
 Built with ❤️ by Taskmate Developer
