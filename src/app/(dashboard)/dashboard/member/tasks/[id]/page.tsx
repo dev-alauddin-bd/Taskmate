@@ -5,31 +5,34 @@ import { format } from "date-fns";
 import Link from "next/link";
 import TaskComments from "@/components/dashboard/TaskComments";
 import TaskAttachments from "@/components/dashboard/TaskAttachments";
-
 import prisma from "@/lib/prisma";
+import { TaskStatus, ActivityAction } from "../../../../../../../generated/prisma/enums";
+import { taskSchema } from "@/lib/validations";
 
-const card =
-  "glass-panel rounded-3xl p-6 relative overflow-hidden";
+const card = "glass-panel rounded-3xl p-6 relative overflow-hidden";
 
-export default async function ManagerTaskDetailPage({
+export default async function MemberTaskDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const session = await getServerSession(authOptions);
 
   if (!session) redirect("/login");
 
-  if (!["MEMBER"].includes(session.user.role)) {
+  if (session.user.role !== "MEMBER") {
     redirect("/dashboard");
   }
 
-  const { id } = await params;
-
   const task = await prisma.task.findFirst({
     where: {
-      id,
-      deletedAt: null,
+      id: params.id,
+      assignees: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+      isDeleted: false,
     },
     include: {
       project: true,
@@ -41,29 +44,59 @@ export default async function ManagerTaskDetailPage({
 
   if (!task) notFound();
 
+  // ================= SERVER ACTION =================
+  async function updateStatus(formData: FormData) {
+    "use server";
+
+    const status = formData.get("status") as string;
+
+    const allowed = ["TODO", "IN_PROGRESS", "COMPLETED"];
+
+    if (!allowed.includes(status)) return;
+
+    // old status store
+    const oldStatus = task!.status;
+
+    // update task
+    await prisma.task.update({
+      where: { id: task!.id },
+      data: { status: status as TaskStatus },
+    });
+
+    // ================= ACTIVITY LOG =================
+    await prisma.activityLog.create({
+      data: {
+        action: ActivityAction.TASK_UPDATED,
+        details: { message: `${session!.user.name} changed task "${task!.title}" from ${oldStatus} to ${status}` },
+        userId: session!.user.id,
+        projectId: task!.projectId,
+        taskId: task!.id,
+
+      },
+    });
+
+    // ================= FORCE RELOAD =================
+    redirect(`/dashboard/member/tasks/${task!.id}`);
+  }
+
   return (
     <div className="space-y-6">
 
       {/* ================= HEADER ================= */}
-
       <div className={`${card} p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl`}>
 
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
 
-          {/* LEFT CONTENT */}
-          <div className="flex-1 space-y-4">
+          <div className="space-y-4 flex-1">
 
-            {/* TITLE */}
-            <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
               {task.title}
             </h1>
 
-            {/* DESCRIPTION */}
-            <p className="text-sm md:text-base text-white/60 leading-relaxed max-w-3xl">
+            <p className="text-sm md:text-base text-white/60">
               {task.description || "No description provided"}
             </p>
 
-            {/* TAGS */}
             <div className="flex flex-wrap gap-2 pt-2">
 
               <span className="px-3 py-1 rounded-full text-xs bg-blue-500/15 text-blue-300 border border-blue-500/20">
@@ -83,14 +116,39 @@ export default async function ManagerTaskDetailPage({
               </span>
 
             </div>
+
           </div>
 
+          {/* ================= STATUS SELECT ================= */}
+          <div className="flex items-start justify-end">
 
+            <form action={updateStatus} className="flex items-center gap-2">
+
+              <select
+                name="status"
+                defaultValue={task.status}
+                className="px-3 py-2 text-xs rounded-lg glass-panel border border-white/10 focus:outline-none"
+              >
+                <option value="TODO">Todo</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+              </select>
+
+              <button
+                type="submit"
+                className="px-3 py-2 text-xs rounded-lg bg-green-500/20 text-green-300 hover:bg-green-500/30"
+              >
+                Update
+              </button>
+
+            </form>
+
+          </div>
 
         </div>
       </div>
 
-      {/* ================= DASHBOARD GRID ================= */}
+      {/* ================= GRID ================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* LEFT */}
@@ -120,35 +178,30 @@ export default async function ManagerTaskDetailPage({
             <p>Created: {new Date(task.createdAt).toLocaleDateString()}</p>
             <p>Status: {task.status}</p>
           </div>
+
         </div>
 
-        {/* CENTER (MAIN CONTENT) */}
+        {/* CENTER */}
         <div className="lg:col-span-6 space-y-6">
 
           <div className={`${card} p-6`}>
-            <h2 className="text-sm text-gray-400 mb-4">
-              Comments
-            </h2>
+            <h2 className="text-sm text-gray-400 mb-4">Comments</h2>
 
             <TaskComments
               taskId={task.id}
-              initialComments={task.comments.map((c) => ({
-                ...c,
-                createdAt: c.createdAt,
-              }))}
+              initialComments={task.comments}
             />
           </div>
 
           <div className={`${card} p-6`}>
-            <h2 className="text-sm text-gray-400 mb-4">
-              Attachments
-            </h2>
+            <h2 className="text-sm text-gray-400 mb-4">Attachments</h2>
 
             <TaskAttachments
               taskId={task.id}
-              initialAttachments={task.attachments ?? []}
+              initialAttachments={task.attachments}
             />
           </div>
+
         </div>
 
         {/* RIGHT */}
@@ -161,24 +214,24 @@ export default async function ManagerTaskDetailPage({
           <div className="space-y-3 text-sm text-gray-300">
 
             <div className="p-3 rounded-lg bg-white/5">
-              <span className="text-gray-400">Priority:</span>{" "}
-              {task.priority}
+              <span className="text-gray-400">Priority:</span> {task.priority}
             </div>
 
             <div className="p-3 rounded-lg bg-white/5">
-              <span className="text-gray-400">Status:</span>{" "}
-              {task.status}
+              <span className="text-gray-400">Status:</span> {task.status}
             </div>
 
             <div className="p-3 rounded-lg bg-white/5">
               <span className="text-gray-400">Due:</span>{" "}
               {format(new Date(task.dueDate), "MMM d, yyyy")}
             </div>
+
           </div>
         </div>
+
       </div>
 
-      {/* ================= FOOTER ================= */}
+      {/* FOOTER */}
       <div className="flex justify-end">
         <Link
           href="/dashboard/manager/tasks"
@@ -187,6 +240,7 @@ export default async function ManagerTaskDetailPage({
           ← Back to Tasks
         </Link>
       </div>
+
     </div>
   );
 }

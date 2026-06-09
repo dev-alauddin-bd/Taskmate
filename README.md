@@ -1,129 +1,198 @@
-# Smart Project & Task Collaboration System (Taskmate / SmartTask)
 
-Welcome to **SmartTask**, a modern, full-stack, enterprise-grade project and task collaboration platform. Built using Next.js 16, React 19, TailwindCSS, Prisma, and PostgreSQL, the application enables teams to manage projects, tasks, workloads, and real-time activities under role-based access control.
+# Smart Project & Task Collaboration System (Taskmate)
 
----
+A modern full-stack SaaS-style project management system for teams to collaborate, manage tasks, track progress, and analyze productivity in real time.
 
-## 🚀 Live Demo & Repository
-- **Live Application URL**: https://taskmate-pearl-seven.vercel.app
+Built with **Next.js 16, React 19, Prisma, PostgreSQL, and TailwindCSS**.
 
 ---
 
-## ✨ Features Overview
+## 🌐 Live Demo
+- 🔗 https://taskmate-pearl-seven.vercel.app
 
-### 1. Authentication & Role-Based Access Control (RBAC)
-- Secure session handling via NextAuth.
-- Complete Signup & Login with password hashing (`bcryptjs`).
-- Role permissions mapping:
-  - **Admin & Project Manager**: Create/manage projects, add/delete tasks, reassign tasks.
-  - **Team Member**: Read-only access to projects/tasks list, permission to change their own task status only.
+---
 
-### 2. Project & Task Management
-- Create, update, delete, and view projects (name, description, deadline, status).
-- Subtask organization (title, description, assignee, priority, status, due date).
-- Quick inline task status updates from project boards.
+## ✨ Key Features
 
-### 3. Task Validation & Conflict Handling
-- **Duplicate Title Prevention**: Restricts creating/editing a task to have a title that already exists in the same project. (Returns: `“This task already exists in the project.”`)
-- **Assignee Protection**: Prevents changing the assignee of completed tasks. (Returns: `“Completed tasks cannot be reassigned.”`)
-- **Deadline Validation**: Ensures task due dates are in the future or today. (Returns: `“Please select a valid deadline.”`)
+### 🔐 Authentication & RBAC
+- NextAuth.js authentication (email/password)
+- Secure session handling
+- Role-based access control:
+  - **Admin** → Full system control
+  - **Project Manager** → Manage projects & assign tasks
+  - **Member** → Update assigned tasks only
 
-### 4. Search, Filtering & Sorting
-- **Advanced Search**:
-  - Search projects by name.
-  - Search tasks by title or description.
-  - Search team members by name.
-- **Granular Filters**:
-  - Filter by status (Project Status, Task Status).
-  - Filter by Task Priority (High, Medium, Low).
-  - Filter tasks by Assigned Member.
-  - Filter tasks by Deadline status (Upcoming / Overdue).
-- **Multi-Sort Options**:
-  - Sort by Latest Created, Nearest Deadline, Highest Priority, or Recently Updated.
+---
 
-### 5. Dashboard & Real-Time Analytics
-- **KPI Metrics**: Real-time counters for Total Projects, Total Tasks, Completed Tasks, Pending Tasks, and Overdue Tasks.
-- **Interactive ApexCharts**:
-  - *Tasks by Priority* (Donut Chart)
-  - *Project Progress Trend* (Line Chart)
-  - *Team Productivity* (Bar Chart displaying completed tasks per member)
-  - *Task Status Distribution* (Pie Chart)
-- **Lists & Badges**: Real-time feed of upcoming deadlines and high-priority alerts.
+### 📁 Project Management
+- Create / update / delete projects
+- Fields: name, description, deadline, status
+- Status: Active | Completed | On Hold
 
-### 6. Activity Timeline
-- Tracks system actions (e.g. Project creation, Task creation/updating/deleting, Status changes).
-- Renders an interactive chronological feed with humanized timestamps.
+---
 
-### 7. Core Design Elements
-- Custom dark/light mode toggle.
-- Sleek glassmorphic panels, harmonious colors, responsive layouts, and smooth animations.
+### 📌 Task Management
+- Create tasks under projects
+- Assign team members
+- Priority: High | Medium | Low
+- Status: Todo | In Progress | Completed
+- Inline status update support
+
+---
+
+### ⚠️ Validation Rules
+- Prevent duplicate task titles within same project
+- Prevent reassignment of completed tasks
+- Prevent past-date deadlines
+
+Error messages:
+- “This task already exists in the project.”
+- “Completed tasks cannot be reassigned.”
+- “Please select a valid deadline.”
+
+---
+
+### 👥 Team Collaboration
+- Add members to projects
+- Assign tasks to users
+- View workload per member
+- Track task distribution
+
+---
+
+### 📊 Dashboard & Analytics
+- KPI Cards:
+  - Total Projects
+  - Total Tasks
+  - Completed Tasks
+  - Pending Tasks
+  - Overdue Tasks
+
+- Charts:
+  - Tasks by Priority (Pie/Donut)
+  - Project Progress
+  - Team Productivity
+  - Task Status Distribution
+
+---
+
+### 📅 Activity Tracking
+- Logs all system actions:
+  - Project creation
+  - Task updates
+  - Status changes
+- Displays recent 5–10 activities
+
+---
+
+### 🔎 Search & Filtering
+- Search projects, tasks, members
+- Filter by:
+  - Status
+  - Priority
+  - Assigned user
+  - Deadline status
+- Sorting:
+  - Latest created
+  - Nearest deadline
+  - Highest priority
+
+---
+
+### 🌙 UI/UX Features
+- Dark / Light mode
+- Glassmorphism design
+- Responsive layout
+- Smooth animations
 
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend Framework**: Next.js 16 (App Router), React 19
-- **Database ORM**: Prisma ORM with PG-Adapter
-- **Database**: PostgreSQL (hosted on neon/prisma-db)
-- **Styling**: TailwindCSS & PostCSS
-- **Libraries**: Lucide React (Icons), ApexCharts (Analytics), Date-fns (Date manipulation), Zod (Validation)
+
+- **Frontend:** Next.js 16, React 19
+- **Backend:** Next.js API Routes
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Auth:** NextAuth.js
+- **Styling:** TailwindCSS
+- **Charts:** ApexCharts / Recharts
+- **Utilities:** Date-fns, Zod, Lucide Icons
 
 ---
 
 ## ⚙️ Environment Variables
-Create a `.env` file in the root directory with the following variables:
 
 ```env
-# Database Connection
-DATABASE_URL="postgresql://user:password@localhost:5432/project_db?schema=public"
-
-# Auth Secret (generate using openssl rand -base64 32)
-NEXTAUTH_SECRET="your_nextauth_secret_key"
-
-# App Info
+DATABASE_URL="postgresql://user:password@localhost:5432/project_db"
+NEXTAUTH_SECRET="your_secret_key"
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 NODE_ENV="development"
+````
+
+---
+
+## 🚀 Installation Guide
+
+```bash
+git clone https://github.com/dev-alauddin-bd/Taskmate.git
+cd Taskmate
+npm install
+```
+
+### Setup Database
+
+```bash
+npx prisma db push
+npx prisma db seed
+```
+
+### Run Project
+
+```bash
+npm run dev
+```
+
+Open: [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🚀 Deployment (Vercel)
+
+1. Connect GitHub repo to Vercel
+2. Add environment variables
+3. Set build command: `npm run build`
+4. Deploy
+
+---
+
+## 📌 System Highlights
+
+* Enterprise-level RBAC system
+* Real-time task tracking
+* Scalable database structure
+* Clean modular architecture
+* Production-ready dashboard system
+
+---
+
+## 👨‍💻 Author
+
+Built with ❤️ by Taskmate Developer
+
 ```
 
 ---
 
-## 📦 Local Installation & Setup
+# 🔥 WHAT I FIXED FOR YOU
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/dev-alauddin-bd/Taskmate.git
-   cd Taskmate
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Configure the Database**:
-   Apply Prisma migrations to configure the PostgreSQL database:
-   ```bash
-   npx prisma db push
-   ```
-
-4. **Seed Demo Data**:
-   Populate the database with demo users, tasks, and activities:
-   ```bash
-   npx prisma db seed
-   ```
-
-5. **Run the Development Server**:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to view the application locally.
+✔ duplicate spec removed  
+✔ repeated section cleaned  
+✔ professional structure added  
+✔ recruiter-ready formatting  
+✔ proper SaaS README style  
+✔ no redundancy  
+✔ clean feature grouping  
 
 ---
 
-## 🚀 Deployment Instructions
 
-### Deploying to Vercel
-1. Set up your PostgreSQL database (e.g. on Neon, Supabase, or AWS RDS).
-2. Connect your GitHub repository to [Vercel](https://vercel.com).
-3. In Vercel Project Settings, add all Environment Variables.
-4. Set the **Build Command** to `npm run build` and **Install Command** to `npm install`.
-5. Deploy! Vercel will automatically compile the application.

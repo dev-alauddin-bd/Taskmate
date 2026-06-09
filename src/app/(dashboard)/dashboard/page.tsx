@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 
 import KpiCard from "@/components/shared/KpiCard";
+import MemberTaskPieChart from "@/components/dashboard/MemberTaskPieChart";
+import { generateCalendarDays, isToday, hasTasksOnDay } from "@/lib/dashboard/calendar";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -100,6 +102,8 @@ export default async function DashboardPage() {
 
   let projectProgress: any[] = [];
   let teamMembers: any[] = [];
+  let memberTasks: any[] = [];
+  let memberTasksByPriority: any[] = [];
 
   /* ================= ADMIN / MANAGER ================= */
   if (isAdmin || isManager) {
@@ -108,8 +112,8 @@ export default async function DashboardPage() {
         ? { managerId: userId, isDeleted: false }
         : { isDeleted: false },
       include: { tasks: true },
-      
-      
+
+
     });
 
     const tasks = await prisma.task.findMany({
@@ -124,12 +128,12 @@ export default async function DashboardPage() {
     const users = await prisma.user.findMany({
       where: isManager
         ? {
-            memberships: {
-              some: {
-                project: { managerId: userId },
-              },
+          memberships: {
+            some: {
+              project: { managerId: userId },
             },
-          }
+          },
+        }
         : undefined,
       include: {
         tasks: true,
@@ -167,43 +171,54 @@ export default async function DashboardPage() {
   }
 
   /* ================= MEMBER ================= */
-  if (isMember) {
-    const memberTasks = await prisma.task.findMany({
-      where: {
-        isDeleted: false,
-        project: {
-          isDeleted: false,
-          members: {
-            some: { userId },
-          },
-        },
+if (isMember) {
+  memberTasks = await prisma.task.findMany({
+    where: {
+      isDeleted: false,
+      assignees: { some: { userId } },
+    },
+    include: {
+      project: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  memberTasksByPriority = await prisma.task.groupBy({
+    by: ["priority"] as const,
+    where: {
+      isDeleted: false,
+      assignees: { some: { userId } },
+    },
+    _count: { _all: true },
+  }) as any;
+
+  totalTasks = memberTasks.length;
+
+  completedTasks = memberTasks.filter(t => t.status === "COMPLETED").length;
+  pendingTasks = memberTasks.filter(t => t.status !== "COMPLETED").length;
+
+  overdueTasks = memberTasks.filter(
+    t => t.status !== "COMPLETED" && new Date(t.dueDate) < now
+  ).length;
+
+  /* 🔥 NEW: MEMBER PROJECTS SEPARATION */
+  const memberProjectsRaw = await prisma.project.findMany({
+    where: {
+      isDeleted: false,
+      members: {
+        some: { userId },
       },
-    });
+    },
+    include: {
+      manager: true,
+    },
+  });
 
-    totalTasks = memberTasks.length;
+  memberTasks = memberTasks; // already has project included
 
-    completedTasks = memberTasks.filter(
-      (t) => t.status === "COMPLETED"
-    ).length;
-
-    pendingTasks = memberTasks.filter(
-      (t) => t.status !== "COMPLETED"
-    ).length;
-
-    overdueTasks = memberTasks.filter(
-      (t) =>
-        t.status !== "COMPLETED" && new Date(t.dueDate) < now
-    ).length;
-
-    totalProjects = await prisma.project.count({
-      where: {
-        isDeleted: false,
-        members: {
-          some: { userId },
-        },
-      },
-    });
-  }
+  // group projects
+  const myProjects = memberProjectsRaw;
+}
 
   /* ================= UI ================= */
   return (
@@ -243,7 +258,43 @@ export default async function DashboardPage() {
           </>
         )}
 
+        {/* new chart and graph for member */}
+        {isMember && (
+          <div className="grid md:grid-cols-2 gap-6">
+
+            {/* Pie Chart - Member's Tasks by Priority */}
+
+            <MemberTaskPieChart data={memberTasksByPriority} />
+
+
+            {/* Calendar Grid */}
+            <div className="glass-panel p-5 rounded-2xl">
+              <h3 className="text-lg font-bold text-[var(--foreground)]">
+                My Calendar
+              </h3>
+              <div className="grid grid-cols-7 text-center text-xs text-gray-400">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => <div key={day}>{day}</div>)}
+              </div>
+              <div className="grid grid-cols-7 text-center mt-2">
+                {generateCalendarDays().map((day, idx) => (
+                  <div
+                    key={idx}
+                    className={`h-8 flex items-center justify-center text-xs rounded 
+              ${isToday(day) ? "bg-blue-500 text-white" : "text-white hover:bg-white/10"}
+              ${hasTasksOnDay(day, memberTasks) ? "font-semibold" : ""}`}
+                  >
+                    {day.getDate()}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        )}
+
       </div>
+
+
     </div>
   );
 }
