@@ -13,7 +13,7 @@ export default async function ManagerNotificationsPage() {
     redirect("/login");
   }
 
-  if (session.user.role !== "PROJECT_MANAGER" && session.user.role !== "MANAGER") {
+  if (session.user.role !== "PROJECT_MANAGER") {
     redirect("/dashboard");
   }
 
@@ -27,10 +27,10 @@ export default async function ManagerNotificationsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6">
       <DashboardHeader
         title="Manager Notifications"
-        subtitle="Manage your project updates, task assignments, and activity notifications."
+        subtitle="You're all caught up! Check back here for updates on your projects and tasks."
       />
 
       <div className="glass-panel p-6 rounded-2xl shadow-sm space-y-6">
