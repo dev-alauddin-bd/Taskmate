@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Pagination from "@/components/dashboard/Pagination";
@@ -107,17 +108,17 @@ export default async function AdminProjectsPage({ searchParams }: any) {
       </div>
 
       {/* PROJECT LIST (same layout feel) */}
-      <div className="bg-card rounded-xl shadow-sm p-4">
-        <ProjectsClient projects={projects} />
-      </div>
+      <ProjectsClient projects={projects} />
 
       {/* PAGINATION */}
-      {/* <Pagination
-        page={page}
-        limit={limit}
-        total={totalProjects}
-        basePath="/admin/projects"
-      /> */}
+      <Suspense fallback={null}>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={totalProjects}
+          basePath="/dashboard/admin/projects"
+        />
+      </Suspense>
     </div>
   );
 }

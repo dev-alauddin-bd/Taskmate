@@ -13,13 +13,9 @@ async function main() {
   await prisma.project.deleteMany();
   await prisma.projectMember.deleteMany();
   await prisma.notification.deleteMany();
-  await prisma.user.deleteMany({
-    where: {
-      email: {
-        in: ["admin@demo.com", "pm@demo.com", "member@demo.com"],
-      },
-    },
-  });
+  await prisma.taskAssignee.deleteMany();
+  await prisma.attachment.deleteMany();
+  await prisma.user.deleteMany();
 
   // ======================
   // USERS

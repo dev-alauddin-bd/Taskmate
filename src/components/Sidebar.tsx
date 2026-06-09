@@ -23,7 +23,7 @@ type NavItem = {
   icon: LucideIcon;
 };
 
-export function Sidebar() {
+export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = session?.user?.role ?? "GUEST";
@@ -76,7 +76,7 @@ export function Sidebar() {
     <aside className="w-64 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col h-full">
 
       {/* TOP LOGO */}
-      <Link href="/dashboard">
+      <Link href="/dashboard" onClick={onItemClick}>
         <div className="h-16 flex items-center px-6 border-b border-[var(--border)]">
           <h2 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
             <CheckSquare className="w-6 h-6" />
@@ -100,6 +100,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={onItemClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                 isActive
                   ? "bg-[var(--primary-light)] text-[var(--primary)] font-medium"

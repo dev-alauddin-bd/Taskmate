@@ -175,15 +175,13 @@ export default async function ManagerTasksPage({
       </div>
 
       {/* MAIN TASK LIST */}
-      <div className="bg-card rounded-xl shadow-sm ">
-        <TasksPageClient
-          tasks={tasks}
-          users={users}
-          page={page}
-          limit={limit}
-          total={total}
-        />
-      </div>
+      <TasksPageClient
+        tasks={tasks}
+        users={users}
+        page={page}
+        limit={limit}
+        total={total}
+      />
     </div>
   );
 }

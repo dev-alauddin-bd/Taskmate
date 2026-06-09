@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Pagination from "@/components/dashboard/Pagination";
@@ -14,22 +15,28 @@ export default async function ManagerProjectsPage({ searchParams }: any) {
   const page = parseInt(sp?.page ?? "1", 10);
   const limit = parseInt(sp?.limit ?? "10", 10);
 
-  const [projects, total] = await Promise.all([
-    prisma.project.findMany({
-      where: {
-        managerId: session?.user.id,
-        isDeleted: false
-      },
-      include: {
-        manager: { select: { name: true } },
-        _count: { select: { tasks: true } },
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.project.count(),
-  ]);
+ const [projects, total] = await Promise.all([
+  prisma.project.findMany({
+    where: {
+      managerId: session?.user.id,
+      isDeleted: false,
+    },
+    include: {
+      manager: { select: { name: true } },
+      _count: { select: { tasks: true } },
+    },
+    skip: (page - 1) * limit,
+    take: limit,
+    orderBy: { createdAt: "desc" },
+  }),
+
+  prisma.project.count({
+    where: {
+      managerId: session?.user.id,
+      isDeleted: false,
+    },
+  }),
+]);
   console.log(projects);
 
   return (
@@ -43,12 +50,14 @@ export default async function ManagerProjectsPage({ searchParams }: any) {
 
       <ProjectsClient projects={projects} />
 
-      <Pagination
-        page={page}
-        limit={limit}
-        total={total}
-        basePath="/manager/projects"
-      />
+      <Suspense fallback={null}>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={total}
+          basePath="/dashboard/manager/projects"
+        />
+      </Suspense>
     </div>
   );
 }

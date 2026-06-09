@@ -31,7 +31,7 @@ export default function DashboardLayout({
 
           {/* sidebar */}
           <div className="relative w-64 bg-[var(--surface)] h-full shadow-xl">
-            <Sidebar />
+            <Sidebar onItemClick={() => setOpen(false)} />
           </div>
         </div>
       )}

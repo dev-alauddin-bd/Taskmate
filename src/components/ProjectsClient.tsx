@@ -74,12 +74,10 @@ export default function ProjectsClient({ projects }: any) {
                 columns={[
                     {
                         header: "Project Name",
+                        className: "min-w-[150px]",
                         accessor: (p: any) => (
                             <div>
                                 <div className="font-medium">{p.name}</div>
-                                <div className="text-xs text-gray-400">
-                                    {p.description}
-                                </div>
                             </div>
                         ),
                     },
@@ -87,6 +85,7 @@ export default function ProjectsClient({ projects }: any) {
                     {
                         header: "Status",
                         center: true,
+                        className: "whitespace-nowrap",
                         accessor: (p: any) => (
                             <span
                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
@@ -100,31 +99,35 @@ export default function ProjectsClient({ projects }: any) {
 
                     {
                         header: "Deadline",
+                        className: "whitespace-nowrap",
                         accessor: (p: any) =>
                             new Date(p.deadline).toLocaleDateString(),
                     },
 
                     {
                         header: "Manager",
+                        className: "whitespace-nowrap",
                         accessor: (p: any) => p.manager?.name,
                     },
 
                     {
                         header: "Tasks",
                         center: true,
+                        className: "whitespace-nowrap",
                         accessor: (p: any) => p._count.tasks,
                     },
 
                     {
                         header: "Actions",
                         center: true,
+                        className: "whitespace-nowrap",
                         accessor: (p: any) => (
                             <div className="flex justify-center gap-2">
 
                                 {/* EDIT */}
                                 <button
                                     onClick={() => openEdit(p)}
-                                    className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                    className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 cursor-pointer"
                                 >
                                     <Pencil size={18} />
                                 </button>
@@ -132,7 +135,7 @@ export default function ProjectsClient({ projects }: any) {
                                 {/* DELETE */}
                                 <button
                                     onClick={() => confirmDelete(p.id)}
-                                    className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100"
+                                    className="p-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 cursor-pointer"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -143,10 +146,11 @@ export default function ProjectsClient({ projects }: any) {
                     {
                         header: "Add Task",
                         center: true,
+                        className: "whitespace-nowrap",
                         accessor: (p: any) => (
                             <button
                                 onClick={() => openTaskModal(p.id)}
-                                className="px-3 py-1 rounded-xl bg-[var(--primary)] text-white hover:opacity-90"
+                                className="px-3 py-1 rounded-xl bg-[var(--primary)] text-white hover:opacity-90 cursor-pointer"
                             >
                                 Add Task
                             </button>

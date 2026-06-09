@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { Suspense } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Link from "next/link";
 import Pagination from "@/components/dashboard/Pagination";
@@ -88,16 +89,16 @@ export default async function ManagerTasksPage({
       />
 
       {/* Search & Filter Bar */}
-      <form method="GET" className="glass-panel p-4 rounded-xl flex flex-wrap gap-4 items-end shadow-sm">
-        <div className="flex-1 min-w-[200px]">
+      <form method="GET" className="glass-panel p-4 rounded-xl flex flex-col sm:flex-row gap-4 items-stretch sm:items-end shadow-sm">
+        <div className="flex-grow min-w-[200px]">
           <label htmlFor="search" className="label text-xs">Search tasks</label>
-          <input id="search" name="search" type="text" placeholder="Title or description..." defaultValue={search} className="input py-1.5 text-sm" />
+          <input id="search" name="search" type="text" placeholder="Title or description..." defaultValue={search} className="input mt-1 py-1.5 text-sm" />
         </div>
         {/* Additional filter controls can be added here */}
-        <div className="flex gap-2">
-          <button type="submit" className="btn btn-primary py-1.5 px-4 text-sm h-[38px]">Apply</button>
+        <div className="flex gap-2 justify-end">
+          <button type="submit" className="btn btn-primary py-1.5 px-4 text-sm h-[38px] cursor-pointer">Apply</button>
           {(search || status || priority || assigneeId || deadlineStatus || sortBy !== "dueDate" || sortOrder !== "asc") && (
-            <Link href="/manager/tasks" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">Reset</Link>
+            <Link href="/dashboard/member/tasks" className="btn btn-outline py-1.5 px-4 text-sm h-[38px] flex items-center justify-center">Reset</Link>
           )}
         </div>
       </form>
@@ -106,7 +107,9 @@ export default async function ManagerTasksPage({
       <TasksClient tasks={tasks} users={users} />
 
       {/* Pagination */}
-      <Pagination page={page} limit={limit} total={total} basePath="/member/tasks" />
+      <Suspense fallback={null}>
+        <Pagination page={page} limit={limit} total={total} basePath="/dashboard/member/tasks" />
+      </Suspense>
     </div>
   );
 }

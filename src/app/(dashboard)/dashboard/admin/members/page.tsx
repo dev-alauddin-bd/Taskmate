@@ -139,7 +139,7 @@ export default async function AdminMembersPage({
       {/* SEARCH */}
       <form
         method="GET"
-        className="bg-[var(--surface)] border border-[var(--border)] p-4 rounded-xl flex gap-4 items-end shadow-sm"
+        className="bg-[var(--surface)] border border-[var(--border)] p-4 rounded-xl flex flex-col sm:flex-row gap-4 items-stretch sm:items-end shadow-sm"
       >
         <div className="flex-grow">
           <label className="text-xs text-[var(--text-muted)]">
@@ -156,70 +156,72 @@ export default async function AdminMembersPage({
 
         <button
           type="submit"
-          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90"
+          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90 cursor-pointer"
         >
           Search
         </button>
       </form>
 
       {/* TABLE */}
-      <div className="bg-card rounded-xl shadow-sm overflow-hidden">
+      <DataTable
+        data={teamMembers}
+        columns={[
+          {
+            header: "Name",
+            accessor: (m) => (
+              <span className="font-medium text-[var(--foreground)]">
+                {m.name}
+              </span>
+            ),
+          },
+          {
+            header: "Email",
+            className: "min-w-[120px]",
+            accessor: (m) => (
+              <span className="text-[var(--text-muted)]">
+                {m.email}
+              </span>
+            ),
+          },
+          {
+            header: "Role",
+            className: "whitespace-nowrap",
+            accessor: (m) => <RoleBadge role={m.role} />,
+          },
+          {
+            header: "Total Tasks",
+            className: "whitespace-nowrap",
+            accessor: (m) => (
+              <span className="font-semibold">
+                {m._count.tasks}
+              </span>
+            ),
+          },
+          {
+            header: "Completed",
+            className: "whitespace-nowrap",
+            accessor: (m) => (
+              <span className="text-[var(--success)] font-semibold">
+                {m.tasks?.length ?? 0}
+              </span>
+            ),
+          },
+          {
+            header: "Pending",
+            className: "whitespace-nowrap",
+            accessor: (m) => {
+              const pending =
+                m._count.tasks - (m.tasks?.length ?? 0);
 
-        <DataTable
-          data={teamMembers}
-          columns={[
-            {
-              header: "Name",
-              accessor: (m) => (
-                <span className="font-medium text-[var(--foreground)]">
-                  {m.name}
+              return (
+                <span className="text-[var(--warning)] font-semibold">
+                  {pending}
                 </span>
-              ),
+              );
             },
-            {
-              header: "Email",
-              accessor: (m) => (
-                <span className="text-[var(--text-muted)]">
-                  {m.email}
-                </span>
-              ),
-            },
-            {
-              header: "Role",
-              accessor: (m) => <RoleBadge role={m.role} />,
-            },
-            {
-              header: "Total Tasks",
-              accessor: (m) => (
-                <span className="font-semibold">
-                  {m._count.tasks}
-                </span>
-              ),
-            },
-            {
-              header: "Completed",
-              accessor: (m) => (
-                <span className="text-[var(--success)] font-semibold">
-                  {m.tasks?.length ?? 0}
-                </span>
-              ),
-            },
-            {
-              header: "Pending",
-              accessor: (m) => {
-                const pending =
-                  m._count.tasks - (m.tasks?.length ?? 0);
-
-                return (
-                  <span className="text-[var(--warning)] font-semibold">
-                    {pending}
-                  </span>
-                );
-              },
-            },
-          ]}
-        />
-      </div>
+          },
+        ]}
+      />
     </div>
   );
 }

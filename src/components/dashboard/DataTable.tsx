@@ -20,6 +20,7 @@ interface Column {
   header: string;
   accessor: (row: any) => React.ReactNode;
   center?: boolean;
+  className?: string;
 }
 
 interface DataTableProps {
@@ -32,7 +33,7 @@ export default function DataTable({ data, columns }: DataTableProps) {
     <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-hidden">
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm min-w-max md:min-w-0">
 
           {/* ================= HEADER ================= */}
           <thead className="sticky top-0 z-10">
@@ -42,6 +43,7 @@ export default function DataTable({ data, columns }: DataTableProps) {
                   key={i}
                   className={`px-5 py-4 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]
                     ${col.center ? "text-center" : "text-left"}
+                    ${col.className || ""}
                   `}
                 >
                   {col.header}
@@ -77,6 +79,7 @@ export default function DataTable({ data, columns }: DataTableProps) {
                       key={colIndex}
                       className={`px-5 py-4 text-[var(--foreground)]
                         ${col.center ? "text-center" : "text-left"}
+                        ${col.className || ""}
                       `}
                     >
                       {col.accessor(row)}

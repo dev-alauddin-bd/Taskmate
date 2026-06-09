@@ -11,6 +11,7 @@ interface FilterProps {
   deadlineStatus: string;
   sortBy: string;
   sortOrder: string;
+  basePath: string;
 }
 
 export default function TaskFilterBar({
@@ -20,6 +21,7 @@ export default function TaskFilterBar({
   deadlineStatus,
   sortBy,
   sortOrder,
+  basePath,
 }: FilterProps) {
   const router = useRouter();
   const [values, setValues] = useState({
@@ -42,7 +44,7 @@ export default function TaskFilterBar({
     Object.entries(newVals).forEach(([key, val]) => {
       if (val) params.set(key, val);
     });
-    router.replace(`/member/tasks?${params.toString()}`);
+    router.replace(`${basePath}?${params.toString()}`);
   };
 
   const handleChange = (
@@ -70,20 +72,22 @@ export default function TaskFilterBar({
           name="search"
           type="text"
           placeholder="Title or description..."
-          defaultValue={search}
-          className="input py-1.5 text-sm"
+          value={values.search}
+          onChange={(e) => setValues({ ...values, search: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         />
       </div>
 
-      <div className="w-40">
+      <div className="w-full sm:w-40">
         <label htmlFor="status" className="label text-xs">
           Status
         </label>
         <select
           id="status"
           name="status"
-          defaultValue={status}
-          className="input py-1.5 text-sm"
+          value={values.status}
+          onChange={(e) => setValues({ ...values, status: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         >
           <option value="">All Statuses</option>
           <option value="TODO">To Do</option>
@@ -92,15 +96,16 @@ export default function TaskFilterBar({
         </select>
       </div>
 
-      <div className="w-40">
+      <div className="w-full sm:w-40">
         <label htmlFor="priority" className="label text-xs">
           Priority
         </label>
         <select
           id="priority"
           name="priority"
-          defaultValue={priority}
-          className="input py-1.5 text-sm"
+          value={values.priority}
+          onChange={(e) => setValues({ ...values, priority: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         >
           <option value="">All Priorities</option>
           <option value="HIGH">High</option>
@@ -109,15 +114,16 @@ export default function TaskFilterBar({
         </select>
       </div>
 
-      <div className="w-40">
+      <div className="w-full sm:w-40">
         <label htmlFor="deadlineStatus" className="label text-xs">
           Deadline
         </label>
         <select
           id="deadlineStatus"
           name="deadlineStatus"
-          defaultValue={deadlineStatus}
-          className="input py-1.5 text-sm"
+          value={values.deadlineStatus}
+          onChange={(e) => setValues({ ...values, deadlineStatus: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         >
           <option value="">All Deadlines</option>
           <option value="UPCOMING">Upcoming</option>
@@ -125,15 +131,16 @@ export default function TaskFilterBar({
         </select>
       </div>
 
-      <div className="w-44">
+      <div className="w-full sm:w-44">
         <label htmlFor="sortBy" className="label text-xs">
           Sort By
         </label>
         <select
           id="sortBy"
           name="sortBy"
-          defaultValue={sortBy}
-          className="input py-1.5 text-sm"
+          value={values.sortBy}
+          onChange={(e) => setValues({ ...values, sortBy: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         >
           <option value="dueDate">Due Date</option>
           <option value="createdAt">Latest Created</option>
@@ -141,15 +148,16 @@ export default function TaskFilterBar({
         </select>
       </div>
 
-      <div className="w-32">
+      <div className="w-full sm:w-32">
         <label htmlFor="sortOrder" className="label text-xs">
           Order
         </label>
         <select
           id="sortOrder"
           name="sortOrder"
-          defaultValue={sortOrder}
-          className="input py-1.5 text-sm"
+          value={values.sortOrder}
+          onChange={(e) => setValues({ ...values, sortOrder: e.target.value })}
+          className="input py-1.5 text-sm mt-1"
         >
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>

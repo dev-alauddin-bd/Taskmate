@@ -116,7 +116,7 @@ export default async function AdminActivityPage() {
                   <div className="bg-[var(--surface)]/40 hover:bg-[var(--surface)]/70 transition-all p-4 rounded-xl border border-[var(--border)]">
 
                     {/* HEADER */}
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2">
                       <p className="text-sm font-semibold capitalize">
                         {log.action.replace(/_/g, " ").toLowerCase()}
                       </p>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 
@@ -9,18 +12,27 @@ interface PaginationProps {
 }
 
 export default function Pagination({ page, limit, total, basePath }: PaginationProps) {
+  const searchParams = useSearchParams();
   const totalPages = Math.ceil(total / limit);
+
+  if (totalPages <= 1) return null;
+
   const prevPage = page > 1 ? page - 1 : undefined;
   const nextPage = page < totalPages ? page + 1 : undefined;
 
-  const buildHref = (p: number) => `${basePath}?page=${p}&limit=${limit}`;
+  const buildHref = (p: number) => {
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
+    params.set("page", p.toString());
+    params.set("limit", limit.toString());
+    return `${basePath}?${params.toString()}`;
+  };
 
   return (
     <nav className="flex items-center justify-center space-x-2 py-4" aria-label="Pagination">
       {prevPage && (
         <Link
           href={buildHref(prevPage)}
-          className="px-3 py-1 rounded-md bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors"
+          className="px-3 py-1 rounded-md bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
         >
           Prev
         </Link>
@@ -32,7 +44,7 @@ export default function Pagination({ page, limit, total, basePath }: PaginationP
           <Link
             key={p}
             href={buildHref(p)}
-            className={`px-3 py-1 rounded-md ${isCurrent ? "bg-[var(--primary)] text-white" : "bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)]"} transition-colors`}
+            className={`px-3 py-1 rounded-md cursor-pointer ${isCurrent ? "bg-[var(--primary)] text-white" : "bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)]"} transition-colors`}
           >
             {p}
           </Link>
@@ -41,7 +53,7 @@ export default function Pagination({ page, limit, total, basePath }: PaginationP
       {nextPage && (
         <Link
           href={buildHref(nextPage)}
-          className="px-3 py-1 rounded-md bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors"
+          className="px-3 py-1 rounded-md bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-colors cursor-pointer"
         >
           Next
         </Link>

@@ -101,6 +101,7 @@ export default function TasksClient({
   const columns = [
     {
       header: "Task",
+      className: "min-w-[150px]",
       accessor: (t: any) => (
         <span className="font-medium text-[var(--foreground)]">
           {t.title}
@@ -110,6 +111,7 @@ export default function TasksClient({
 
     {
       header: "Project",
+      className: "min-w-[120px]",
       accessor: (t: any) => (
         <span className="text-[var(--text-muted)]">
           {t.project?.name}
@@ -119,16 +121,19 @@ export default function TasksClient({
 
     {
       header: "Status",
+      className: "whitespace-nowrap",
       accessor: (t: any) => <StatusBadge status={t.status} />,
     },
 
     {
       header: "Priority",
+      className: "whitespace-nowrap",
       accessor: (t: any) => <PriorityBadge priority={t.priority} />,
     },
 
     {
       header: "Due Date",
+      className: "whitespace-nowrap",
       accessor: (t: any) => (
         <span
           className={
@@ -148,6 +153,7 @@ export default function TasksClient({
 
     {
       header: "Assignee",
+      className: "min-w-[120px]",
       accessor: (t: any) => {
         const names = t.assignees?.map((a: any) => a.user?.name).filter(Boolean);
 
@@ -157,13 +163,13 @@ export default function TasksClient({
               names.map((name: string) => (
                 <span
                   key={name}
-                  className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] text-xs"
+                  className="px-2 py-0.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] text-xs whitespace-nowrap"
                 >
                   {name}
                 </span>
               ))
             ) : (
-              <span className="text-xs text-[var(--text-muted)] italic">
+              <span className="text-xs text-[var(--text-muted)] italic whitespace-nowrap">
                 Unassigned
               </span>
             )}
@@ -176,6 +182,7 @@ export default function TasksClient({
     {
       header: "Details",
       center: true,
+      className: "whitespace-nowrap",
       accessor: (t: any) => (
         <Link
           href={`${baseRoute}/${t.id}`}
@@ -202,12 +209,13 @@ export default function TasksClient({
           {
             header: "Actions",
             center: true,
+            className: "whitespace-nowrap",
             accessor: (t: any) => (
               <div className="flex items-center justify-center gap-2">
                 {canEdit && (
                   <button
                     onClick={() => setEditingTask(t)}
-                    className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition"
+                    className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
                   >
                     <Pencil size={18} />
                   </button>
@@ -216,7 +224,7 @@ export default function TasksClient({
                 {canDelete && (
                   <button
                     onClick={() => handleDelete(t.id)}
-                    className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition"
+                    className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
                   >
                     <Trash2 size={18} />
                   </button>

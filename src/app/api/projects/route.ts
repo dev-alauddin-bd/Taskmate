@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Role, ActivityAction } from "../../../../generated/prisma/enums";
 
-// GET handler to fetch all projects
+// ================= GET PROJECTS =================
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -13,42 +13,20 @@ export async function GET() {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // Admin can see all projects
-    // Manager can see projects they are assigned to
-    // Member can see projects they are assigned to
-    if (session.user.role === "ADMIN") {
-      const projects = await prisma.project.findMany({
-        where: {
-          isDeleted: false,
-          OR: [
-            { managerId: session.user.id },
-            { members: { some: { userId: session.user.id } } },
-          ],
-        },
-        include: {
-          members: {
-            select: {
-              user: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  role: true,
-                },
-              },
-            },
-          },
-        },
-      });
-      return NextResponse.json(projects);
-    }
+    const isAdmin =
+      session.user.role?.toUpperCase?.() === "ADMIN";
+
     const projects = await prisma.project.findMany({
       where: {
         isDeleted: false,
-        OR: [
-          { managerId: session.user.id },
-          { members: { some: { userId: session.user.id } } },
-        ],
+        ...(isAdmin
+          ? {}
+          : {
+              OR: [
+                { managerId: session.user.id },
+                { members: { some: { userId: session.user.id } } },
+              ],
+            }),
       },
       include: {
         members: {
@@ -64,14 +42,20 @@ export async function GET() {
           },
         },
       },
+      orderBy: { createdAt: "desc" },
     });
+
     return NextResponse.json(projects);
   } catch (error) {
     console.error("PROJECT FETCH ERROR:", error);
-    return NextResponse.json({ message: "Server error", error: String(error) }, { status: 500 });
+    return NextResponse.json(
+      { message: "Server error", error: String(error) },
+      { status: 500 }
+    );
   }
 }
 
+// ================= POST PROJECT =================
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -85,28 +69,48 @@ export async function POST(req: Request) {
     const name = body.name?.trim();
     const description = body.description;
     const deadline = body.deadline;
-    const status = body.status ?? "ACTIVE";
 
+    const allowedStatus = ["ACTIVE", "ON_HOLD", "COMPLETED"] as const;
+
+    const status = allowedStatus.includes(body.status)
+      ? body.status
+      : "ACTIVE";
+
+    // ================= VALIDATION =================
     if (!name) {
-      return NextResponse.json({ message: "Project name required" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Project name required" },
+        { status: 400 }
+      );
     }
 
     if (!deadline) {
-      return NextResponse.json({ message: "Deadline required" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Deadline required" },
+        { status: 400 }
+      );
     }
 
     const cleanDeadline = new Date(deadline);
+    const normalizedDeadline = new Date(
+      cleanDeadline.toDateString()
+    );
 
-    if (isNaN(cleanDeadline.getTime())) {
-      return NextResponse.json({ message: "Invalid date" }, { status: 400 });
+    if (isNaN(normalizedDeadline.getTime())) {
+      return NextResponse.json(
+        { message: "Invalid date" },
+        { status: 400 }
+      );
     }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    cleanDeadline.setHours(0, 0, 0, 0);
 
-    if (cleanDeadline < today) {
-      return NextResponse.json({ message: "Past date not allowed" }, { status: 400 });
+    if (normalizedDeadline < today) {
+      return NextResponse.json(
+        { message: "Past date not allowed" },
+        { status: 400 }
+      );
     }
 
     // ================= DUPLICATE CHECK =================
@@ -132,44 +136,46 @@ export async function POST(req: Request) {
         role: (m.role as Role) ?? Role.MEMBER,
       }));
 
-    // ================= 1. CREATE PROJECT =================
-    const project = await prisma.project.create({
-      data: {
-        name,
-        description,
-        deadline: cleanDeadline,
-        status,
-        managerId: session.user.id,
-      },
-    });
-
-    // ================= 2. ADD MEMBERS =================
-    if (members.length > 0) {
-      await prisma.projectMember.createMany({
-        data: members.map((m) => ({
-          projectId: project.id,
-          userId: m.userId,
-          role: m.role,
-        })),
-      });
-    }
-
-    // ================= 3. ACTIVITY LOG =================
-    await prisma.activityLog.create({
-      data: {
-        action: ActivityAction.PROJECT_CREATED,
-        userId: session.user.id,
-        projectId: project.id,
-        details: {
+    // ================= TRANSACTION (IMPORTANT FIX) =================
+    const project = await prisma.$transaction(async (tx) => {
+      const created = await tx.project.create({
+        data: {
           name,
           description,
-          membersCount: members.length,
+          deadline: normalizedDeadline,
           status,
+          managerId: session.user.id,
         },
-      },
+      });
+
+      if (members.length > 0) {
+        await tx.projectMember.createMany({
+          data: members.map((m) => ({
+            projectId: created.id,
+            userId: m.userId,
+            role: m.role,
+          })),
+        });
+      }
+
+      await tx.activityLog.create({
+        data: {
+          action: ActivityAction.PROJECT_CREATED,
+          userId: session.user.id,
+          projectId: created.id,
+          details: {
+            name,
+            description,
+            membersCount: members.length,
+            status,
+          },
+        },
+      });
+
+      return created;
     });
 
-    // ================= 4. NOTIFY MEMBERS =================
+    // ================= NOTIFICATIONS =================
     if (members.length > 0) {
       await prisma.notification.createMany({
         data: members.map((m) => ({
@@ -181,7 +187,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // ================= 5. NOTIFY MANAGER =================
     await prisma.notification.create({
       data: {
         userId: session.user.id,
@@ -191,7 +196,8 @@ export async function POST(req: Request) {
       },
     });
 
-    // ================= RESPONSE =================
+
+
     return NextResponse.json(project, { status: 201 });
 
   } catch (error) {

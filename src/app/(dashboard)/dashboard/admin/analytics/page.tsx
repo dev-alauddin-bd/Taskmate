@@ -124,23 +124,10 @@ export default async function AdminAnalyticsPage() {
 
       {/* CHART SECTION (CLEAN GRID LIKE PROJECT PAGE STYLE) */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-
-        <div className="bg-card rounded-xl shadow-sm p-4">
-          <TaskStatusChart data={tasksByStatus} />
-        </div>
-
-        <div className="bg-card rounded-xl shadow-sm p-4">
-          <TasksByPriorityChart data={tasksByPriority} />
-        </div>
-
-        <div className="bg-card rounded-xl shadow-sm p-4">
-          <TeamProductivityChart data={teamProductivity} />
-        </div>
-
-        <div className="bg-card rounded-xl shadow-sm p-4">
-          <ActivityChart data={activityDistribution} />
-        </div>
-
+        <TaskStatusChart data={tasksByStatus} />
+        <TasksByPriorityChart data={tasksByPriority} />
+        <TeamProductivityChart data={teamProductivity} />
+        <ActivityChart data={activityDistribution} />
       </div>
     </div>
   );

@@ -78,8 +78,8 @@ export default async function ManagerAnalyticsPage() {
     <div className="space-y-6">
 
       <DashboardHeader
-        title="Admin Analytics & Insights"
-        subtitle="System-wide analytics overview"
+        title="Manager Analytics & Insights"
+        subtitle="Project performance and team metrics insights"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

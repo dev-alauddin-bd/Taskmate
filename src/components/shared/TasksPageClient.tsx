@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import TasksClient from "@/components/dashboard/TasksClient";
 import Pagination from "@/components/dashboard/Pagination";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -17,6 +17,7 @@ export default function TasksPageClient({
   total,
 }: any) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const [openTask, setOpenTask] = useState(false);
   const [projects, setProjects] = useState<any[]>([]);
@@ -138,12 +139,14 @@ export default function TasksPageClient({
       </div>
 
       {/* PAGINATION */}
-      {/* <Pagination
-        page={page}
-        limit={limit}
-        total={total}
-        basePath="/manager/tasks"
-      /> */}
+      <Suspense fallback={null}>
+        <Pagination
+          page={page}
+          limit={limit}
+          total={total}
+          basePath={pathname}
+        />
+      </Suspense>
 
       {/* ================= CREATE TASK MODAL ================= */}
       <Modal
