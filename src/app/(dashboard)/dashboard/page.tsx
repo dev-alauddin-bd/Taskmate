@@ -50,7 +50,7 @@ export default async function DashboardPage() {
   // ================= COMMON =================
   const tasksByPriority = await prisma.task.groupBy({
     by: ["priority"],
-    where: getTaskScope(role, userId),
+    where: { isDeleted: false, project: { isDeleted: false }, ...getTaskScope(role, userId) },
     _count: { _all: true },
   });
 
@@ -65,6 +65,8 @@ export default async function DashboardPage() {
   }
   const upcomingDeadlines = await prisma.task.findMany({
     where: {
+      isDeleted: false,
+      project: { isDeleted: false },
       dueDate: { gte: now },
       status: { not: "COMPLETED" },
       ...getTaskScope(role, userId),
@@ -89,15 +91,17 @@ export default async function DashboardPage() {
   if (isAdmin || isManager) {
     const projects = await prisma.project.findMany({
       where: isManager
-        ? { managerId: userId } // 🔥 IMPORTANT FIX
-        : undefined,
+        ? { managerId: userId, isDeleted: false } // 🔥 IMPORTANT FIX
+        : { isDeleted: false },
       include: { tasks: true },
     });
 
     const tasks = await prisma.task.findMany({
-      where: isManager
-        ? { project: { managerId: userId } }
-        : undefined,
+      where: {
+        isDeleted: false,
+        project: { isDeleted: false },
+        ...(isManager ? { project: { managerId: userId } } : {}),
+      },
     });
 
     const users = await prisma.user.findMany({
@@ -164,6 +168,8 @@ export default async function DashboardPage() {
   if (isMember) {
     const memberTasks = await prisma.task.findMany({
       where: {
+        isDeleted: false,
+        project: { isDeleted: false },
         assignees: {
           some: { userId },
         },
@@ -186,7 +192,7 @@ export default async function DashboardPage() {
     ).length;
 
     totalProjects = await prisma.projectMember.count({
-      where: { userId },
+      where: { userId, isDeleted: false },
     });
   }
 

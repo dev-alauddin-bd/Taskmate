@@ -17,44 +17,52 @@ import {
   User,
 } from "lucide-react";
 
-export default async function ManagerTasksPage({
+export default async function AdminTasksPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  // Next.js provides searchParams as a Promise
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getServerSession(authOptions);
 
   if (!session) redirect("/login");
 
-  if (!["ADMIN", "PROJECT_MANAGER"].includes(session.user.role)) {
+  if (!["ADMIN"].includes(session.user.role)) {
     redirect("/dashboard");
   }
 
-  const page = Number(searchParams.page ?? 1);
-  const limit = Number(searchParams.limit ?? 10);
+  // Await the Promise of searchParams per Next.js App Router requirement
+  const params = await searchParams;
+
+  const page = Number(params.page ?? 1);
+  const limit = Number(params.limit ?? 10);
 
   const search =
-    typeof searchParams.search === "string" ? searchParams.search : "";
+    typeof params.search === "string" ? params.search : "";
   const status =
-    typeof searchParams.status === "string" ? searchParams.status : "";
+    typeof params.status === "string" ? params.status : "";
   const priority =
-    typeof searchParams.priority === "string" ? searchParams.priority : "";
+    typeof params.priority === "string" ? params.priority : "";
   const assigneeId =
-    typeof searchParams.assigneeId === "string" ? searchParams.assigneeId : "";
+    typeof params.assigneeId === "string" ? params.assigneeId : "";
   const deadlineStatus =
-    typeof searchParams.deadlineStatus === "string"
-      ? searchParams.deadlineStatus
+    typeof params.deadlineStatus === "string"
+      ? params.deadlineStatus
       : "";
   const sortBy =
-    typeof searchParams.sortBy === "string"
-      ? searchParams.sortBy
+    typeof params.sortBy === "string"
+      ? params.sortBy
       : "dueDate";
   const sortOrder =
-    typeof searchParams.sortOrder === "string"
-      ? searchParams.sortOrder
+    typeof params.sortOrder === "string"
+      ? params.sortOrder
       : "asc";
 
-  const where: any = {};
+  const where: any = {
+    isDeleted: false,
+    // Exclude tasks whose parent project is soft‑deleted
+    project: { isDeleted: false },
+  };
 
   if (search) {
     where.OR = [

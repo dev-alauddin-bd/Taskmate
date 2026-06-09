@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Modal } from "@/components/Modal";
 import { TaskForm } from "@/components/TaskForm";
+import toast from "react-hot-toast";
 
 /* ================= STATUS ================= */
 const getStatusColor = (status: string) => {
@@ -81,23 +82,29 @@ export default function TasksClient({
   const baseRoute = isAdmin
     ? "/dashboard/admin/tasks"
     : isManager
-    ? "/dashboard/manager/tasks"
-    : "/dashboard/member/tasks";
+      ? "/dashboard/manager/tasks"
+      : "/dashboard/member/tasks";
 
   const isOverdue = (t: any) =>
     new Date(t.dueDate) < new Date() && t.status !== "COMPLETED";
-
   const handleDelete = async (id: string) => {
+    console.log("DELETE CLICKED", id);
+
     if (!confirm("Delete this task permanently?")) return;
 
     const res = await fetch(`/api/tasks/${id}`, {
       method: "DELETE",
     });
 
-    if (res.ok) router.refresh();
-    else alert("Failed to delete task");
-  };
+    const data = await res.json();
 
+    if (res.ok) {
+      toast.success("Task deleted successfully");
+      router.refresh();
+    } else {
+      toast.error(data.message || "Failed to delete task");
+    }
+  };
   const columns = [
     {
       header: "Task",
@@ -206,33 +213,38 @@ export default function TasksClient({
 
     ...(canEdit || canDelete
       ? [
-          {
-            header: "Actions",
-            center: true,
-            className: "whitespace-nowrap",
-            accessor: (t: any) => (
-              <div className="flex items-center justify-center gap-2">
-                {canEdit && (
-                  <button
-                    onClick={() => setEditingTask(t)}
-                    className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                )}
+        {
+          header: "Actions",
+          center: true,
+          className: "whitespace-nowrap",
+          accessor: (t: any) => (
+            <div className="flex items-center justify-center gap-2">
+              {canEdit && (
+                <button
+                  onClick={() => setEditingTask(t)}
+                  className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                >
+                  <Pencil size={18} />
+                </button>
+              )}
 
-                {canDelete && (
-                  <button
-                    onClick={() => handleDelete(t.id)}
-                    className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                )}
-              </div>
-            ),
-          },
-        ]
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("DELETE CLICKED", t.id);
+                    handleDelete(t.id);
+                  }}
+                  className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                >
+                  <Trash2 size={18} />
+                </button>
+              )}
+            </div>
+          ),
+        },
+      ]
       : []),
   ];
 

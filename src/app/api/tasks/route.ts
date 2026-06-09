@@ -65,7 +65,7 @@ export async function GET() {
   try {
     const tasks = await prisma.task.findMany({
       where: {
-        deletedAt: null,
+        isDeleted: false,
       },
       include: {
         project: true,

@@ -28,7 +28,8 @@ export async function GET(req: Request, { params }: Props) {
     const task = await prisma.task.findFirst({
       where: {
         id,
-        deletedAt: null, // ✅ IMPORTANT FIX
+        isDeleted: false, // ✅ IMPORTANT FIX
+        project: { isDeleted: false },
       },
       include: {
         project: true,
@@ -147,7 +148,7 @@ export async function PUT(req: Request, { params }: Props) {
     if (body.dueDate) {
       const due = new Date(body.dueDate);
       const today = new Date();
-      today.setHours(0,0,0,0);
+      today.setHours(0, 0, 0, 0);
       if (due < today) {
         return NextResponse.json(
           { message: "Please select a valid deadline." },
@@ -235,12 +236,30 @@ export async function DELETE(req: Request, { params }: Props) {
       );
     }
 
+    console.log("session in delete task", session.user.role);
+
     const { id } = await params;
+
+    const task = await prisma.task.findFirst({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json(
+        { message: "Task not found" },
+        { status: 404 }
+      );
+    }
+
+    console.log("task found", task);
 
     await prisma.task.update({
       where: { id },
       data: {
-        deletedAt: new Date(), // ✅ soft delete
+        isDeleted: true
       },
     });
 

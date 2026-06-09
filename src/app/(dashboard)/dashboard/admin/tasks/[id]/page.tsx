@@ -31,7 +31,7 @@ export default async function ManagerTaskDetailPage({
   const { id } = await params;
 
   const task = await prisma.task.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, isDeleted:false },
     include: {
       project: true,
       assignees: { include: { user: true } },

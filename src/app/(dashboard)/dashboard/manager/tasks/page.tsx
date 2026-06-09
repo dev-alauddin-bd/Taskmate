@@ -10,51 +10,51 @@ import TasksPageClient from "@/components/shared/TasksPageClient";
 export default async function ManagerTasksPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  // Next.js provides searchParams as a Promise
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getServerSession(authOptions);
 
   if (!session) redirect("/login");
 
-  if (!["ADMIN", "PROJECT_MANAGER"].includes(session.user.role)) {
+  if (!["PROJECT_MANAGER"].includes(session.user.role)) {
     redirect("/dashboard");
   }
 
-  const page = Number(searchParams.page ?? 1);
-  const limit = Number(searchParams.limit ?? 10);
+  // Await the searchParams promise (Next.js app router requirement)
+  const params = await searchParams;
 
-  const search = typeof searchParams.search === "string" ? searchParams.search : "";
-  const status = typeof searchParams.status === "string" ? searchParams.status : "";
-  const priority = typeof searchParams.priority === "string" ? searchParams.priority : "";
-  const assigneeId = typeof searchParams.assigneeId === "string" ? searchParams.assigneeId : "";
-  const deadlineStatus = typeof searchParams.deadlineStatus === "string" ? searchParams.deadlineStatus : "";
-  const sortBy = typeof searchParams.sortBy === "string" ? searchParams.sortBy : "dueDate";
-  const sortOrder = typeof searchParams.sortOrder === "string" ? searchParams.sortOrder : "asc";
+  const page = Number(params.page ?? 1);
+  const limit = Number(params.limit ?? 10);
 
-  const where: any = {};
+  const search = typeof params.search === "string" ? params.search : "";
+  const status = typeof params.status === "string" ? params.status : "";
+  const priority = typeof params.priority === "string" ? params.priority : "";
+  const assigneeId = typeof params.assigneeId === "string" ? params.assigneeId : "";
+  const deadlineStatus = typeof params.deadlineStatus === "string" ? params.deadlineStatus : "";
+  const sortBy = typeof params.sortBy === "string" ? params.sortBy : "dueDate";
+  const sortOrder = typeof params.sortOrder === "string" ? params.sortOrder : "asc";
 
-  if (search) {
-    where.OR = [
-      { title: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
-    ];
-  }
-
-  if (status) where.status = status;
-  if (priority) where.priority = priority;
-
-  if (assigneeId) {
-    where.assignees = { some: { userId: assigneeId } };
-  }
-
-  if (deadlineStatus === "OVERDUE") {
-    where.status = { not: "COMPLETED" };
-    where.dueDate = { lt: new Date() };
-  }
-
-  if (deadlineStatus === "UPCOMING") {
-    where.dueDate = { gte: new Date() };
-  }
+  // ✅ SAFE WHERE (FIXED)
+  const where: any = {
+    isDeleted: false,
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(status ? { status } : {}),
+    ...(priority ? { priority } : {}),
+    ...(assigneeId ? { assignees: { some: { userId: assigneeId } } } : {}),
+    ...(deadlineStatus === "OVERDUE"
+      ? { status: { not: "COMPLETED" }, dueDate: { lt: new Date() } }
+      : {}),
+    ...(deadlineStatus === "UPCOMING" ? { dueDate: { gte: new Date() } } : {}),
+    ...{ project: { isDeleted: false } },
+  };
 
   const orderBy: any = {};
   if (sortBy === "createdAt") orderBy.createdAt = sortOrder;
@@ -66,13 +66,17 @@ export default async function ManagerTasksPage({
       where,
       include: {
         project: { select: { name: true } },
-        assignees: { select: { user: { select: { id: true, name: true } } } },
+        assignees: {
+          select: { user: { select: { id: true, name: true } } },
+        },
       },
       orderBy,
       skip: (page - 1) * limit,
       take: limit,
     }),
+
     prisma.task.count({ where }),
+
     prisma.user.findMany({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
@@ -81,9 +85,6 @@ export default async function ManagerTasksPage({
 
   return (
     <div className="space-y-6">
-    
-
-      {/* CLIENT WRAPPER (modal + button fix) */}
       <TasksPageClient
         tasks={tasks}
         users={users}
