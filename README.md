@@ -123,10 +123,18 @@ Error messages:
 ## ⚙️ Environment Variables
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/project_db"
-NEXTAUTH_SECRET="your_secret_key"
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+DATABASE_URL="postgresql://user:password@localhost:5432/project_db?schema=public"
 NODE_ENV="development"
+NEXTAUTH_SECRET=""
+NEXTAUTH_URL=""
+
+
+
+
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
+
 ````
 
 ---
