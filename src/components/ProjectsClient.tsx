@@ -59,6 +59,8 @@ export default function ProjectsClient({ projects }: any) {
         prev.filter((p) => p.id !== deleteId)
       );
 
+      
+
       toast.success("Project deleted successfully");
     } catch (err) {
       toast.error("Failed to delete project");

@@ -69,7 +69,9 @@ export default function TasksClient({
 }) {
   const router = useRouter();
   const { data: session } = useSession();
+
   const [editingTask, setEditingTask] = useState<any>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null); // ✅ modal state
 
   const role = session?.user?.role;
 
@@ -82,17 +84,17 @@ export default function TasksClient({
   const baseRoute = isAdmin
     ? "/dashboard/admin/tasks"
     : isManager
-      ? "/dashboard/manager/tasks"
-      : "/dashboard/member/tasks";
+    ? "/dashboard/manager/tasks"
+    : "/dashboard/member/tasks";
 
   const isOverdue = (t: any) =>
     new Date(t.dueDate) < new Date() && t.status !== "COMPLETED";
-  const handleDelete = async (id: string) => {
-    console.log("DELETE CLICKED", id);
 
-    if (!confirm("Delete this task permanently?")) return;
+  /* ================= DELETE API ================= */
+  const handleDelete = async () => {
+    if (!deleteId) return;
 
-    const res = await fetch(`/api/tasks/${id}`, {
+    const res = await fetch(`/api/tasks/${deleteId}`, {
       method: "DELETE",
     });
 
@@ -104,7 +106,10 @@ export default function TasksClient({
     } else {
       toast.error(data.message || "Failed to delete task");
     }
+
+    setDeleteId(null);
   };
+
   const columns = [
     {
       header: "Task",
@@ -162,7 +167,9 @@ export default function TasksClient({
       header: "Assignee",
       className: "min-w-[120px]",
       accessor: (t: any) => {
-        const names = t.assignees?.map((a: any) => a.user?.name).filter(Boolean);
+        const names = t.assignees
+          ?.map((a: any) => a.user?.name)
+          .filter(Boolean);
 
         return (
           <div className="flex flex-wrap gap-1 justify-center">
@@ -176,7 +183,7 @@ export default function TasksClient({
                 </span>
               ))
             ) : (
-              <span className="text-xs text-[var(--text-muted)] italic whitespace-nowrap">
+              <span className="text-xs text-[var(--text-muted)] italic">
                 Unassigned
               </span>
             )}
@@ -185,7 +192,6 @@ export default function TasksClient({
       },
     },
 
-    /* ================= DETAILS CTA ================= */
     {
       header: "Details",
       center: true,
@@ -193,17 +199,7 @@ export default function TasksClient({
       accessor: (t: any) => (
         <Link
           href={`${baseRoute}/${t.id}`}
-          className="
-            inline-flex items-center gap-1
-            px-3 py-1.5
-            rounded-lg text-xs font-medium
-            bg-[var(--primary)]/10
-            text-[var(--primary)]
-            border border-[var(--primary)]/20
-            hover:bg-[var(--primary)]
-            hover:text-white
-            transition
-          "
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 hover:bg-[var(--primary)] hover:text-white transition"
         >
           <Eye size={14} />
           View
@@ -213,38 +209,37 @@ export default function TasksClient({
 
     ...(canEdit || canDelete
       ? [
-        {
-          header: "Actions",
-          center: true,
-          className: "whitespace-nowrap",
-          accessor: (t: any) => (
-            <div className="flex items-center justify-center gap-2">
-              {canEdit && (
-                <button
-                  onClick={() => setEditingTask(t)}
-                  className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-                >
-                  <Pencil size={18} />
-                </button>
-              )}
+          {
+            header: "Actions",
+            center: true,
+            className: "whitespace-nowrap",
+            accessor: (t: any) => (
+              <div className="flex items-center justify-center gap-2">
+                {canEdit && (
+                  <button
+                    onClick={() => setEditingTask(t)}
+                    className="p-2 rounded-lg text-[var(--primary)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                )}
 
-              {canDelete && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log("DELETE CLICKED", t.id);
-                    handleDelete(t.id);
-                  }}
-                  className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
-                >
-                  <Trash2 size={18} />
-                </button>
-              )}
-            </div>
-          ),
-        },
-      ]
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteId(t.id); // ✅ open modal
+                    }}
+                    className="p-2 rounded-lg text-[var(--danger)] hover:bg-[var(--surface-hover)] transition cursor-pointer"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
@@ -252,6 +247,7 @@ export default function TasksClient({
     <>
       <DataTable data={tasks} columns={columns} />
 
+      {/* ================= EDIT MODAL ================= */}
       {editingTask && (
         <Modal
           isOpen={true}
@@ -264,6 +260,39 @@ export default function TasksClient({
             onCancel={() => setEditingTask(null)}
           />
         </Modal>
+      )}
+
+      {/* ================= DELETE CONFIRM MODAL ================= */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl w-[340px] shadow-lg">
+
+            <h2 className="text-lg font-semibold mb-2">
+              Delete Task?
+            </h2>
+
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this task?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="px-4 py-2 rounded-lg glass-panel cursor-pointer"
+              >
+                No
+              </button>
+
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+              >
+                Yes, Delete
+              </button>
+            </div>
+
+          </div>
+        </div>
       )}
     </>
   );
