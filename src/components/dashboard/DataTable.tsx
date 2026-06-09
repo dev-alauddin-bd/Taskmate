@@ -30,7 +30,7 @@ interface DataTableProps {
 
 export default function DataTable({ data, columns }: DataTableProps) {
   return (
-    <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-hidden">
+    <div className="w-full  border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-hidden">
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm min-w-max md:min-w-0">
